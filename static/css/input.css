@@ -1,0 +1,393 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+[x-cloak] {
+    display: none !important;
+}
+:root {
+    --primary: rgb(88, 40, 244);
+    --primary-hover: rgb(69, 29, 200);
+    --black: #1f2937;
+    --font1: 'Lobster', sans-serif;
+    --bg-heonbeob: rgb(157 23 77);
+    --bg-eoneo: rgb(30 64 175);
+    --bg-jaryo: rgb(6 95 70);
+    --bg-sanghwang: rgb(146 64 14);
+}
+h1 {
+    margin-bottom: 1rem;
+    font-size: 2.25rem;
+    line-height: 2.5rem;
+    font-weight: 700;
+}
+h2 {
+    margin-bottom: 0.75rem;
+    font-size: 1.5rem;
+    line-height: 2rem;
+    font-weight: 700;
+}
+h3 {
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+    font-weight: 700;
+}
+.font1 {
+    font-family: var(--font1);
+}
+/*.button, button, [type='submit'], [type='button'] {*/
+/*    display: inline-flex;*/
+/*    flex-wrap: wrap;*/
+/*    align-items: center;*/
+/*    justify-content: center;*/
+/*    flex-shrink: 0;*/
+/*    text-align: center;*/
+/*    border-radius: 0.5rem;*/
+/*    cursor: pointer;*/
+/*    padding: 0 1rem;*/
+/*    min-height: 3.3rem;*/
+/*    font-weight: 600;*/
+/*    box-shadow: 0 4px 3px rgba(0, 0, 0, 0.1);*/
+/*    transition-property: transform;*/
+/*    transition-duration: .2s;*/
+/*    color: white;*/
+/*    background-color: var(--primary);*/
+/*    width: fit-content;*/
+/*}*/
+/*.button:hover, button:hover, [type='submit']:hover, [type='button']:hover {*/
+/*    background-color: var(--primary-hover);*/
+/*}*/
+/*.button:active, button:active, [type='submit']:active, [type='button']:active {*/
+/*    transform: scale(0.95);*/
+/*}*/
+.secondaryAction {
+    background-color: white;
+    color: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(0, 0, 0, 0.3);
+}
+.secondaryAction:hover, .button.secondaryAction:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+.navitems>li>a {
+    @apply tw-flex tw-items-center tw-gap-2 tw-h-12 tw-px-4 hover:tw-bg-gray-700 tw-rounded-lg;
+}
+.card {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    border-radius: 1rem;
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+    background-color: white;
+    padding-bottom: 1rem;
+    width: 100%;
+}
+.hoverlist>* {
+    @apply hover:tw-bg-gray-100 tw-rounded-md tw-transition tw-duration-150;
+}
+.hoverlist>*>a {
+    @apply tw-flex tw-items-center tw-p-2;
+}
+.highlight {
+    @apply !tw-bg-indigo-100;
+}
+.titleBlip {
+    animation: 1s fadeIn;
+}
+@keyframes fadeIn {
+    0% { opacity: 0; }
+    10% { opacity: 0; }
+    100% { opacity: 1; }
+}
+html, body {
+    margin: 0;
+    min-height: 100%;
+}
+p {
+    margin-bottom: 1rem;
+}
+form p {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+label, input {
+    display: inline-block;
+}
+form p label {
+    width: 7rem;
+}
+/*label {*/
+/*    margin: 6px 0 3px;*/
+/*}*/
+input, textarea {
+    width: 100%;
+}
+input[type="file"], select {
+    background-color: white;
+    padding-left: 0;
+}
+label[for="id_remember"] {
+    width: auto;
+    margin-right: 0.5rem;
+}
+input[name="remember"] {
+    width: auto;
+}
+.btn-red {
+    @apply tw-inline-flex tw-bg-red-500;
+}
+.btn-red:hover {
+    @apply tw-bg-red-600;
+}
+.login .secondaryAction {
+    box-shadow: none;
+    display: block;
+    padding: 0;
+    border: none;
+    font-size: smaller;
+    font-weight: normal;
+    min-height: auto;
+    margin-bottom: 1.5rem;
+}
+.login .secondaryAction:hover {
+    @apply tw-text-gray-500 tw-underline tw-bg-white;
+}
+.textarea, textarea {
+    margin-bottom: 1rem;
+}
+.textarea, textarea, input {
+    border-radius: 0.5rem;
+    padding: 1rem 1.2rem;
+    background-color: rgba(232, 240, 254, 1);
+}
+.errorlist li {
+    color: rgb(253, 88, 49);
+    padding: 0.5rem 0.5rem 0.5rem 1rem;
+    border-left: 5px solid rgb(253, 88, 49);
+    margin-bottom: 1rem;
+}
+.tab {
+    cursor: pointer;
+    padding: 0.75rem 1rem;
+    color: rgb(0,0,0,0.6);
+    background-color: rgb(0,0,0,0.05);
+    border-radius: 0.75rem;
+    text-align: center;
+    display: flex;
+    align-items: center;
+}
+.tab:hover {
+    background-color: rgb(0,0,0,0.1);
+}
+.tab.selected {
+    color: white;
+    background-color: var(--black);
+}
+.replyform {
+    border-top: none;
+}
+.replyform textarea, .replyform input {
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    margin-bottom: 0;
+    height: 3.2rem;
+}
+.replyform button {
+    margin-left: 0.5rem;
+    min-height: unset;
+}
+.fade-me-in.htmx-settling{
+    opacity: 0;
+}
+.fade-me-in {
+    opacity: 1;
+    transition: opacity 1s ease-out;
+}
+#profile article figure img {
+    @apply tw-aspect-[3/2] tw-object-cover;
+}
+#profile article p {
+    @apply tw-truncate tw-leading-normal;
+}
+
+form[action="/accounts/signup/"] ul {
+    @apply tw-hidden
+}
+form[action="/accounts/signup/"] ul.errorlist {
+    @apply tw-block
+}
+
+.like_true {
+    margin: 0;
+    color: var(--bs-danger);
+    cursor: pointer;
+}
+.rate_true {
+    margin: 0;
+    color: var(--bs-warning);
+    cursor: pointer;
+}
+.answer_true {
+    margin: 0;
+    color: var(--bs-success);
+    cursor: pointer;
+}
+.memo_true {
+    margin: 0;
+    color: var(--bs-warning);
+    cursor: pointer;
+}
+.answer_false {
+    margin: 0;
+    color: var(--bs-danger);
+    cursor: pointer;
+}
+.like_false, .rate_false, .answer_none, .memo_false {
+    margin: 0;
+    color: var(--bs-gray-300);
+    cursor: pointer;
+}
+
+
+/* rate button */
+.rate_button fieldset{
+    display: inline-block; /* 하위 별점 이미지들이 있는 영역만 자리를 차지함.*/
+    direction: rtl; /* 이모지 순서 반전 */
+    border: 0; /* 필드셋 테두리 제거 */
+    cursor: pointer;
+}
+.rate_button fieldset legend{
+    text-align: left;
+}
+.rate_button input[type=radio]{
+    display: none; /* 라디오박스 감춤 */
+}
+.rate_button label{
+    color: transparent; /* 기존 이모지 컬러 제거 */
+    text-shadow: 0 0 0 #ddd; /* 새 이모지 색상 부여 */
+}
+.rate_button label:hover{
+    text-shadow: 0 0 0 var(--bs-warning) !important; /* 마우스 호버 */
+}
+/*.rate_button label:hover{*/
+/*    text-shadow: 0 0 0 #fde047 !important; !* 마우스 호버 *!*/
+/*}*/
+.rate_button label:hover ~ label{
+    text-shadow: 0 0 0 var(--bs-warning) !important; /* 마우스 호버 뒤에오는 이모지들 */
+}
+.rate_button input[type=radio]:checked ~ label{
+    text-shadow: 0 0 0 var(--bs-warning); /* 마우스 클릭 체크 */
+}
+
+
+.htmx-fade-in.htmx-added {
+    opacity: 0;
+}
+.htmx-fade-in {
+    opacity: 1;
+    transition: opacity 0.25s ease-out;
+}
+.htmx-fade-out.htmx-swapping {
+    opacity: 0;
+    transition: opacity 0.25s ease-out;
+}
+
+
+.tagify{
+    width: 100%;
+}
+
+
+.bg_heonbeob {
+    background-color: var(--bg-heonbeob);
+}
+.bg_eoneo {
+    background-color: var(--bg-eoneo);
+}
+.bg_jaryo {
+    background-color: var(--bg-jaryo);
+}
+.bg_sanghwang {
+    background-color: var(--bg-sanghwang);
+}
+
+
+.rotate-180 {
+    transform: rotate(180deg);
+    transition: transform 0.3s;
+    /*transition: transform 0.3s ease-in-out;*/
+}
+.rotate-0 {
+    transform: rotate(0deg);
+    transition: transform 0.3s;
+    /*transition: transform 0.3s ease-in-out;*/
+}
+
+
+.filter_default {
+    display: block;
+    width: 100%;
+    cursor: pointer;
+    border-radius: 0.5rem;
+    border-width: 1px;
+    background-color: var(--bs-gray-100);
+    padding: 0.625rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    color: var(--bs-gray-900);
+
+    @apply hover:tw-ring dark:tw-bg-gray-700 dark:tw-border-gray-600 dark:tw-placeholder-gray-400 dark:tw-text-white
+    dark:focus:tw-ring-blue-500 dark:focus:tw-border-blue-500;
+}
+.filter_default:focus {
+    border-width: 1px;
+    border-color: rgb(59 130 246);
+    --tw-ring-color: rgb(59 130 246);
+}
+.filter_selected, .filter_selected:focus {
+    border-color: var(--bs-primary) !important;
+}
+
+
+.sidebar-nav .nav-link .fa-chevron-down {
+    margin-right: 0;
+    transition: transform 0.2s ease-in-out;
+}
+.sidebar-nav .nav-link:not(.collapsed) .fa-chevron-down {
+    transform: rotate(180deg);
+}
+.sidebar-nav .nav-content a i {
+    font-size: 14px;
+    margin-right: 8px;
+    line-height: 0;
+    border-radius: 50%;
+}
+
+.select2-selection__rendered {
+    font-size: 14px;
+}
+
+div.django-ckeditor-widget {
+    width: 100%;
+}
+
+p.problem-question {
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+}
+p.answer-choice {
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    padding-left: 1.25rem;
+    text-indent: -1.25rem;
+}
+
+p.selection-choice {
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+    padding-right: 1rem;
+    padding-left: 2.25rem;
+    text-indent: -1.25rem;
+}

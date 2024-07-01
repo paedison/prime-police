@@ -1,0 +1,63 @@
+{% load static %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+{% load crispy_forms_field %}
+
+<section id="policeFilterSection" class="card m-0"{% if filter_hx_swap_oob %} hx-swap-oob="true"{% endif %}>
+    <card-header class="tw-hidden md:tw-block tw-bg-gray-500 tw-text-white tw-z-10 tw-text-center tw-font-bold tw-p-4">
+        문제 필터
+    </card-header>
+    <card-body class="tw-px-4 tw-pt-4">
+        <form class="tw-grid tw-grid-cols-1 tw-gap-2 tw-align-items-center tw-justify-content-center"
+              hx-trigger="change" hx-target="#content" hx-push-url="true"
+              hx-swap="outerHTML swap:0.25s"
+              hx-get="{% url 'official:problem-detail-base' %}">
+
+            <div class="tw-flex tw-items-center tw-gap-2">
+                {{ problem.icon.nav.list|safe }}
+                <select id="id_pk" name="pk" aria-label="Problem Filter"
+                        class="form-select form-select-sm">
+                    <option value="" selected disabled>{{ problem.year }}년 {{ problem.exam }} {{ problem.subject }}</option>
+                    {% for p in problem_neighbors %}
+                        <option value="{{ p.pk }}">{{ p.number }}번</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            {% if user.is_authenticated %}
+                <div class="tw-flex tw-items-center tw-gap-2">
+                    {{ problem.icon.like.True|safe }}
+                    <select id="id_like_pk" name="pk" aria-label="Like Filter"
+                            class="form-select form-select-sm">
+                        <option value="" selected disabled>즐겨찾기 추가 문제</option>
+                        {% for p in problem_likes %}
+                            <option value="{{ p.problem_id }}">{{ p.problem.full_reference }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="tw-flex tw-items-center tw-gap-2">
+                    {{ problem.icon.rate.True|safe }}
+                    <select id="id_rate_pk" name="pk" aria-label="Rate Filter"
+                            class="form-select form-select-sm">
+                        <option value="" selected disabled>난이도 선택 문제</option>
+                        {% for p in problem_rates %}
+                            <option value="{{ p.problem_id }}">{{ p.problem.full_reference }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="tw-flex tw-items-center tw-gap-2">
+                    {{ problem.icon.solve.True|safe }}
+                    <select id="id_solve_pk" name="pk" aria-label="Solve Filter"
+                            class="form-select form-select-sm">
+                        <option value="" selected disabled>정답 확인 문제</option>
+                        {% for p in problem_solves %}
+                            <option value="{{ p.problem_id }}">{{ p.problem.full_reference }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            {% endif %}
+        </form>
+    </card-body>
+</section>

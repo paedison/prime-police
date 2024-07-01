@@ -1,0 +1,114 @@
+{% load official_templatetags %}
+
+{% if show_first_page %}
+    {% include '_includes/_hero.html' %}
+
+    <content id="content"
+             class="htmx-fade-in htmx-fade-out tw-grid tw-grid-cols-3 md:tw-my-6 xl:tw-grid-cols-5">
+        <filter id="aside-group"
+                class="tw-sticky tw-top-[60px] tw-col-span-full tw-mb-6 tw-z-20 tw-order-1
+                htmx-fade-in htmx-fade-out
+                md:tw-block md:tw-col-span-1 md:tw-order-2">
+            <div id="accordionPoliceFilter" class="accordion md:tw-hidden">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#collapsePoliceFilter" aria-expanded="true"
+                                aria-controls="collapsePoliceFilter">
+                            문제 필터
+                        </button>
+                    </h2>
+                </div>
+            </div>
+            <div class="accordion tw-sticky tw-top-[84px] tw-col-span-full tw-order-1
+                 htmx-fade-in htmx-fade-out
+                 md:!tw-block md:tw-pr-6 md:tw-order-2">
+                <div class="accordion-item">
+                    <div id="collapsePoliceFilter" class="accordion-collapse collapse show"
+                         data-bs-parent="#accordionPoliceFilter">
+                        <div class="accordion-body p-0">
+                            {% include 'a_official/snippets/filter_list.html' %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </filter>
+
+        <main id="main"
+              class="tw-col-span-full tw-order-2 !tw-mt-0 !tw-pt-0 !tw-px-6
+              md:tw-pr-0 md:tw-col-span-2 md:tw-order-1
+              xl:tw-col-span-4 xl:tw-grid xl:tw-grid-cols-2 xl:tw-gap-x-6">
+            {{ info|json_script:'info' }}
+            {% for problem in problems %}{% partial problem_card %}{% endfor %}
+
+            <div hx-trigger="revealed" hx-target="this" hx-swap="outerHTML"
+                 hx-get="{{ next_path }}"></div>
+        </main>
+    </content>
+{% elif show_next_page %}
+    <fade-in class="tw-opacity-0 xl:tw-col-span-full xl:tw-grid xl:tw-grid-cols-2 xl:tw-gap-x-6"
+             _="on load transition my opacity to 1 over 0.2 seconds">
+            {% for problem in problems %}{% partial problem_card %}{% endfor %}
+
+        {% with filter_hx_swap_oob=True %}{% include 'a_official/snippets/filter_list.html' %}{% endwith %}
+
+        <div hx-trigger="revealed" hx-target="this" hx-swap="outerHTML" hx-get="{{ next_path }}"></div>
+    </fade-in>
+{% endif %}
+
+{% partialdef problem_card %}
+    <article class="card p-0 tw-place-self-start"
+             hx-target="#content" hx-swap="outerHTML swap:0.25s" hx-push-url="true">
+        {% partialdef card_header inline=True %}
+            <card-header class="tw-z-10 tw-p-4 {{ problem.bg_color }}">
+                <a class="tw-flex tw-text-white tw-font-bold tw-cursor-pointer hover:tw-text-white"
+                   hx-get="{{ problem.get_absolute_url }}">
+                    {{ problem.full_reference }}
+                </a>
+            </card-header>
+        {% endpartialdef card_header %}
+
+        <figure x-data="{ openImage: false }" class="tw-relative tw-m-0">
+                {% icons user problem %}
+
+            <div class="tw-flex tw-items-start tw-justify-center tw-cursor-pointer tw-absolute tw-left-0 tw-top-0 tw-z-10 tw-h-[100%] tw-w-10 {{ problem.bg_color }}"
+                 data-bs-toggle="collapse" data-bs-target="#fullProblemQuestion{{ problem.id }}"
+                 aria-expanded="false" aria-controls="fullProblemQuestion{{ problem.id }}"
+                 _="on click toggle .rotate-180 .rotate-0 on me.querySelector('i')"
+            >
+                <i class="fa-solid fa-caret-down tw-text-white tw-text-xl rotate-0"></i>
+            </div>
+
+            <a class="tw-cursor-pointer tw-grid tw-ml-10 text-secondary"
+               hx-get="{{ problem.get_absolute_url }}">
+                <div class="tw-row-start-1 tw-col-start-1">
+                    <p class="tw-px-4 problem-question">{{ problem.number }}. {{ problem.question }}</p>
+                </div>
+                <div id="fullProblemQuestion{{ problem.id }}"
+                     class="tw-row-start-1 tw-col-start-1 collapse tw-bg-white">
+                    <p class="tw-px-4 problem-question">{{ problem.number }}. {{ problem.question }}</p>
+                    <div class="tw-px-4">{{ problem.data|safe }}</div>
+                </div>
+            </a>
+            <div class="tw-ml-10 tw-p-4 tw-pt-0">
+                {% tag user problem %}
+            </div>
+        </figure>
+
+{#        <div class="tw-px-4 tw-pt-4">#}
+{#            <div class="tw-flex tw-items-center tw-justify-between tw-text-sm tw-px-2">#}
+{#                <a class="tw-font-bold hover:tw-underline" href="{{ problem.get_absolute_url }}">#}
+{#                    {% if problem.comment_users.count %}#}
+{#                        Comments#}
+{#                        <span id="commentsCount-{{ problem.id }}"#}
+{#                              class="tw-font-light tw-text-gray-500 tw-ml-1">#}
+{#                        {{ problem.comment_users.count }}#}
+{#                    </span>#}
+{#                    {% else %}#}
+{#                        {% if user.is_authenticated %}Add comment{% endif %}#}
+{#                    {% endif %}#}
+{#                </a>#}
+{#            </div>#}
+{#        </div>#}
+    </article>
+{% endpartialdef problem_card %}

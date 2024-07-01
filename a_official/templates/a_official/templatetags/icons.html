@@ -1,0 +1,35 @@
+<div class="tw-flex tw-items-center tw-justify-end tw-gap-2 tw-pt-4 tw-pr-4 tw-cursor-pointer"
+     hx-target="#modalContainer" hx-swap="innerHTML swap:0.25s" hx-push-url="false">
+    {% if user.is_authenticated %}
+        <a class="htmx-fade-in htmx-fade-out" hx-target="this"
+           hx-post="{{ problem.get_like_url }}">
+            {{ icon_like|safe }}
+            {{ like_counts }}
+        </a>
+        <a id="officialRate{{ problem.id }}" class="htmx-fade-in htmx-fade-out"
+           data-bs-toggle="modal" data-bs-target="#modalContainer"
+           hx-get="{% url 'official:rate-problem' problem.id %}">
+            {{ icon_rate|safe }}
+        </a>
+        <a id="officialSolve{{ problem.id }}" class="htmx-fade-in htmx-fade-out"
+           data-bs-toggle="modal" data-bs-target="#modalContainer"
+           hx-get="{% url 'official:solve-problem' problem.id %}">
+            {{ icon_solve|safe }}
+        </a>
+{#        <a class="htmx-fade-in htmx-fade-out"#}
+{#           hx-target="this" hx-swap="innerHTML swap:0.25s"#}
+{#           hx-post="{{ problem.get_like_url }}">#}
+            {{ icon_memo|safe }}
+{#        </a>#}
+    {% else %}
+        <a class="text-secondary"
+           data-bs-toggle="modal" data-bs-target="#modalContainer"
+           hx-get="{% url 'account_login_modal' %}">
+            {{ icon_like|safe }}
+            {{ like_counts }}
+            {{ icon_rate|safe }}
+            {{ icon_solve|safe }}
+            {{ icon_memo|safe }}
+        </a>
+    {% endif %}
+</div>

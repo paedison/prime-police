@@ -1,0 +1,8 @@
+{% #modal header='로그아웃 하시겠습니까?' %}
+    <form action="{% url 'account_logout' %}" method="POST">
+        {% csrf_token %}
+        {% #button class='btn btn-secondary' data-bs-dismiss="modal" %}취소{% /button %}
+        <input name="next" value="{{ next }}" aria-label="Next Url" hidden/>
+        <button class="btn btn-primary" type="submit">로그아웃</button>
+    </form>
+{% /modal %}

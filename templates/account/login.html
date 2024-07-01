@@ -1,0 +1,111 @@
+{% extends "account/base_entrance.html" %}
+{% load i18n %}
+{% load static %}
+{% load widget_tweaks %}
+{% load account socialaccount %}
+{% providers_media_js %}
+
+{#{% load allauth account %}#}
+{##}
+{#{% block head_title %}#}
+{#    {% trans "Sign In" %}#}
+{#{% endblock head_title %}#}
+{##}
+{#{% block body_content %}#}
+{#    {% element h1 %}#}
+{#        {% trans "Sign In" %}#}
+{#    {% endelement %}#}
+{#    {% if not SOCIALACCOUNT_ONLY %}#}
+{#        {% setvar link %}#}
+{#            <a href="{{ signup_url }}">#}
+{#            {% endsetvar %}#}
+{#            {% setvar end_link %}#}
+{#            </a>#}
+{#        {% endsetvar %}#}
+{#        {% element p %}#}
+{#            {% blocktranslate %}If you have not created an account yet, then please {{ link }}sign up{{ end_link }} first.{% endblocktranslate %}#}
+{#        {% endelement %}#}
+{#        {% url 'account_login' as login_url %}#}
+{#        {% element form form=form method="post" action=login_url tags="entrance,login" %}#}
+{#            {% slot body %}#}
+{#                {% csrf_token %}#}
+{#                {% element fields form=form unlabeled=True %}#}
+{#                {% endelement %}#}
+{#                {{ redirect_field }}#}
+{#            {% endslot %}#}
+{#            {% slot actions %}#}
+{#                {% element button type="submit" tags="prominent,login" %}#}
+{#                    {% trans "Sign In" %}#}
+{#                {% endelement %}#}
+{#            {% endslot %}#}
+{#        {% endelement %}#}
+{#    {% endif %}#}
+{#    {% if LOGIN_BY_CODE_ENABLED %}#}
+{#        {% element hr %}#}
+{#        {% endelement %}#}
+{#        {% element h2 %}#}
+{#            {% element button href=request_login_code_url tags="prominent,login,secondary" %}#}
+{#                {% trans "Mail me a sign-in code" %}#}
+{#            {% endelement %}#}
+{#        {% endelement %}#}
+{#    {% endif %}#}
+{#    {% if SOCIALACCOUNT_ENABLED %}#}
+{#        {% include "socialaccount/snippets/login.html" with page_layout="entrance" %}#}
+{#    {% endif %}#}
+{#{% endblock body_content %}#}
+
+{% block body_title %}{% trans "Welcome!" %}{% endblock body_title %}
+
+{% block body_content %}
+    <script id="info" type="application/json">{"menu": "account", "view_type": "login"}</script>
+    {% get_providers as socialaccount_providers %}
+    <form method="post" action="{% url 'account_login' %}" class="row g-3">
+        {% csrf_token %}
+        <div class="col-12">
+            <div class="form-floating">
+                {% render_field form.login class="form-control form-control-sm" %}
+                <label for="{{ form.login.auto_id }}">
+                    {% trans 'E-mail' %}
+                </label>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <div class="form-floating">
+               {% render_field form.password class="form-control form-control-sm" %}
+                <label for="{{ form.password.auto_id }}">
+                    {% trans 'Password' %}
+                </label>
+            </div>
+        </div>
+
+        {% if redirect_field_value %}
+            <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+        {% endif %}
+
+        <div class="col-12">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="remember"
+                       value="true" id="id_remember">
+                <label class="form-check-label" for="id_remember">
+                    {% trans 'Remember Me'%}
+                </label>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <button class="btn btn-primary w-100" type="submit">
+                {% trans 'Sign In' %}
+            </button>
+        </div>
+    </form>
+
+    <form method="post" action="{% provider_login_url 'google' %}" class="row my-3">
+        {% csrf_token %}
+        <div class="col-12">
+            <button class="btn btn-danger w-100" type="submit">
+                {% trans 'Continue with Google' %}
+            </button>
+        </div>
+    </form>
+{% endblock body_content %}

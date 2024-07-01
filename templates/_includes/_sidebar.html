@@ -1,0 +1,82 @@
+{% load static %}
+
+<aside x-show="mobileSidebarOpen" x-cloak class="md:!tw-block tw-col-span-full md:tw-col-span-1 lg:tw-mr-[20%] tw-order-1 md:tw-order-2"
+    x-transition:enter="tw-duration-300 tw-ease-out"
+    x-transition:enter-start="tw-opacity-0 -tw-mt-96"
+    x-transition:enter-end="tw-opacity-100 tw-mt-0">
+    <section class="card tw-p-4">
+        <h2>Categories</h2>
+        <ul class="hoverlist">
+            {% for category in categories %}
+            <li class="{% if category.slug == tag.slug %}highlight{% endif %}">
+                <a href="{% url 'category' category.slug %}">
+                    <img class="tw-w-8 tw-h-8 tw-object-cover tw-mr-2" src="{{ category.image.url }}"/>
+                    <span class="tw-font-bold tw-text-sm">{{ category.name }}</span>
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+    </section>
+    <section class="card tw-p-4">
+        <div class="tw-flex tw-items-center">
+            <img class="tw-w-7 tw-mr-2 -tw-mt-3" src="{% static 'images/fireheart_black.svg' %}"/>
+            <h2>Top Posts</h2>
+        </div>
+        <ul class="hoverlist">
+            {% for post in top_posts %}
+                <li>
+                    <a href="{% url 'post' post.id %}" class="tw-flex tw-items-stretch tw-justify-between">
+                        <div class="tw-flex tw-items-center tw-truncate">
+                            <img class="tw-w-10 tw-h-10 tw-rounded-lg tw-object-cover tw-mr-3 tw-shrink-0"
+                                 src="{{ post.image }}"/>
+                            {% if post.author %}
+                                <img class="tw-w-6 tw-h-6 tw-rounded-full tw-object-cover tw-mr-1" src="{{ post.author.profile.avatar }}"/>
+                                <span class="tw-font-bold tw-text-sm tw-mr-1">{{ post.author.username }}</span>
+                            {% else %}
+                                <img class="tw-w-6 tw-h-6 tw-rounded-full tw-object-cover tw-mr-1" src="{% static 'images/avatar_default.svg' %}"/>
+                                <span class="tw-text-sm tw-mr-1">No author</span>
+                            {% endif %}
+                        </div>
+                        <span class="{% if user in post.likes.all %}tw-font-bold {% else %}tw-font-light {% endif %}tw-text-sm tw-text-grey-500 tw-shrink-0">
+                            {{ post.likes.count }} Like{{ post.likes.count|pluralize:'s' }} / {{ post.comments.count }}
+                        </span>
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    </section>
+    <section class="card tw-p-4">
+        <div class="tw-flex tw-items-center">
+            <img class="tw-w-7 tw-mr-2 -tw-mt-3" src="{% static 'images/fireheart_black.svg' %}"/>
+            <h2>Top Comments</h2>
+        </div>
+        <ul class="hoverlist">
+            {% for comment in top_comments %}
+                <li>
+                    <a href="{% url 'post' comment.parent_post.id %}" class="tw-flex tw-items-stretch tw-justify-between">
+                        <div class="tw-flex tw-items-center tw-truncate">
+                            {% if comment.author %}
+                                <img class="tw-w-6 tw-h-6 tw-rounded-full tw-object-cover tw-mr-1"
+                                     src="{{ comment.author.profile.avatar }}"/>
+                            {% else %}
+                                <img class="tw-w-6 tw-h-6 tw-rounded-full tw-object-cover tw-mr-1"
+                                     src="{% static 'images/avatar_default.svg' %}"/>
+                            {% endif %}
+                                <span class="tw-font-bold tw-text-sm tw-mr-1 tw-truncate">
+                                    {% if comment.author %}
+                                        {{ comment.author.username }}
+                                    {% else %}
+                                        <span class="tw-font-light">No author</span>
+                                    {% endif %}
+                                    : {{ comment.body|truncatechars:10 }}
+                                </span>
+                        </div>
+                        <span class="{% if user in comment.likes.all %}tw-font-bold {% else %}tw-font-light {% endif %}tw-text-sm tw-text-grey-500 tw-shrink-0">
+                            {{ comment.likes.count }} Like{{ comment.likes.count|pluralize:'s' }} / {{ comment.replies.count }}
+                        </span>
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    </section>
+</aside>

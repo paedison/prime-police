@@ -1,0 +1,62 @@
+{% extends '_layouts/_d.html' %}
+
+{% block content %}
+    <div id="profile" class="tw-flex tw-flex-col tw-items-center">
+        <div class="tw-w-full md:tw-w-[36rem] lg:tw-w-[50rem]">
+            <div x-data="{ modal_open: false }" class="card tw-p-6">
+                <div class="tw-text-center tw-flex tw-flex-col tw-items-center">
+                    <img class="tw-w-36 tw-h-36 tw-rounded-full tw-object-cover tw-mb-4" src="{{ user.avatar }}"/>
+                    <div class="tw-text-center tw-max-w-md">
+                        <div class="tw-text-gray-400 tw-mb-2 -tw-mt-3">@{{ user.username }}</div>
+                        <div class="tw-flex tw-items-center tw-justify-center tw-mx-auto">
+                            {{ user.email }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tw-absolute tw-bottom-2 tw-right-2 tw-px-4 tw-py-2 tw-mb-3">
+                    <a @click="modal_open = true"
+                       class="tw-flex tw-cursor-pointer tw-items-center tw-gap-2 tw-bg-gray-200 hover:tw-bg-indigo-700 tw-text-white tw-rounded-full tw-h-14 tw-w-14 tw-justify-center">
+                        <img class="tw-h-6 tw-m-auto lg:tw-m-0"
+                             src="https://img.icons8.com/external-anggara-glyph-anggara-putra/32/ffffff/external-edit-user-interface-anggara-glyph-anggara-putra.png"/>
+                    </a>
+                </div>
+
+                <div class="tw-relative tw-z-10" aria-labelledby="modal-title" role="dialog" aria-modal="true"
+                     x-show="modal_open" x-cloak>
+                    <div class="tw-fixed tw-inset-0 tw-bg-gray-500 tw-bg-opacity-75 tw-transition-opacity"></div>
+                    <div class="tw-fixed tw-inset-0 tw-z-10 tw-w-screen tw-overflow-y-auto">
+                        <div class="tw-flex tw-min-h-full tw-items-end tw-justify-center tw-p-4 tw-text-center sm:tw-items-center sm:tw-p-0">
+                            <div class="tw-relative tw-transform tw-overflow-hidden tw-rounded-2xl tw-bg-white tw-text-left tw-shadow-xl tw-transition-all sm:tw-my-8 sm:tw-w-full sm:tw-max-w-lg">
+                                <div @click.away="modal_open = false" class="tw-bg-white tw-px-4 tw-pb-4 tw-pt-5 sm:tw-p-6 sm:tw-pb-4">
+{#                                    {% include 'a_inbox/form_new_message.html' with recipient=profile.user %}#}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tabs" class="tw-flex tw-justify-center tw-my-4 tw-gap-2"
+             _="on htmx:afterOnLoad take .selected for event.target"
+             hx-target="#tab-contents" hx-swap="innerHTML">
+{#            <a hx-get="{% url 'user-profile' profile.user.username %}" class="tab selected">Latest</a>#}
+{#            <a hx-get="{% url 'user-profile' profile.user.username %}?top-posts" class="tab">Top Posts</a>#}
+{#            <a hx-get="{% url 'user-profile' profile.user.username %}?top-comments" class="tab">Top Comments</a>#}
+{#            <a hx-get="{% url 'user-profile' profile.user.username %}?liked-posts" class="tab">Liked Posts</a>#}
+        </div>
+
+        <div id="tab-contents" class="tw-w-full tw-flex tw-flex-col tw-items-center">
+            <div class="tw-grid tw-place-items-start tw-gap-x-8 tw-max-w-xl tw-mx-auto
+                    {% if posts.count >= 2 %}lg:tw-grid-cols-2 lg:tw-max-w-5xl{% endif %}
+                    {% if posts.count >= 3 %}xl:grid-cols-3 xl:max-w-7xl{% endif %}">
+                {% for post in posts %}
+                    {% include 'a_posts/post.html' %}
+                {% empty %}
+                    <div class="tw-w-full tw-text-center tw-mt-10">No posts just yet</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endblock content %}

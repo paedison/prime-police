@@ -1,0 +1,19 @@
+<hero id="hero"
+      hx-swap-oob="true"
+      class="tw-mt-[60px] tw-grid tw-bg-gray-700 tw-text-white tw-text-center tw-bg-cover tw-z-10 tw-relative tw-bg-[url('https://live.staticflickr.com/65535/49909538937_3255dcf9e7_b.jpg')]">
+    <div class="tw-col-start-1 tw-row-start-1 tw-bg-gray-800 tw-bg-opacity-40 tw-w-full tw-h-full"></div>
+    <div class="tw-col-start-1 tw-row-start-1 tw-py-24 tw-px-10">
+        <div class="herotext-anim tw-max-w-[1170px] md:tw-px-10 tw-mx-auto"
+             style="transform: translateY(0px); opacity: 1">
+            <h1 class="font1 tw-text-6xl title-fadein">
+                Awesome Photos & Captions
+            </h1>
+            <p class="tw-text-lg tw-font-bold tw-mb-5">
+                Share your favorite Photos from Flickr and add a great caption
+            </p>
+            {% if not user.is_authenticated %}
+                <a class="button" href="{% url 'account_signup' %}">Get Started</a>
+            {% endif %}
+        </div>
+    </div>
+</hero>

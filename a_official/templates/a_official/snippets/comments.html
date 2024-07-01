@@ -1,0 +1,55 @@
+{% load static %}
+
+<comment class="card tw-p-4 !tw-mb-4">
+    <div class="tw-flex tw-justify-between tw-items-center">
+        <a class="tw-flex tw-items-center tw-gap-1 tw-mb-2" href="">
+            <img class="tw-w-8 tw-h-8 tw-object-cover tw-rounded-full" src="{{ comment.user.profile.avatar }}">
+            <span class="tw-font-bold hover:tw-underline">{{ comment.user.profile.name }}</span>
+            <span class="tw-text-sm tw-font-normal tw-text-gray-400">@{{ comment.user.username }}</span>
+        </a>
+    </div>
+    <p class="tw-text-xl tw-px-2">
+        {{ comment.comment|safe }}
+    </p>
+    <div x-data="{ repliesOpen: false }" class="tw-flex tw-items-center tw-justify-between tw-flex-wrap tw-text-sm tw-px-2">
+        <a @click="repliesOpen = !repliesOpen" class="tw-font-bold hover:tw-underline tw-cursor-pointer">
+            {% if comment.replies.count or user.is_authenticated %}
+                <div class="tw-inline-block" x-bind:class="repliesOpen && 'tw-rotate-90 tw-duration-300'">
+                    <svg transform ="rotate(90)" width="9" height="9" viewBox="0 0 25 25">
+                        <path d="M24 22h-24l12-20z"/>
+                    </svg>
+                </div>
+            {% endif %}
+            {% if comment.replies.count %}
+                Replies
+                <span id="repliesCount-{{ comment.id }}"
+                      class="tw-font-light tw-text-gray-500 tw-ml-1">{{ comment.replies.count }}</span>
+            {% else %}
+                {% if user.is_authenticated %}Add Reply{% endif %}
+            {% endif %}
+        </a>
+        <div class="tw-flex tw-items-center tw-gap-4 [&>a:hover]:tw-underline">
+            {% include 'snippets/likes_comment.html' %}
+
+            {% if user.is_authenticated and comment.author == user %}
+                <a href="">Delete</a>
+            {% endif %}
+        </div>
+
+        <div x-show="repliesOpen" x-cloak class="tw-basis-full tw-mt-3 tw-pl-8 tw-grid tw-grid-cols-1">
+            {% for reply in comment.replies.all %}
+                {% include 'a_posts/reply.html' %}
+            {% endfor %}
+
+            {% if user.is_authenticated %}
+                <form class="replyform tw-flex tw-justify-between" autocomplete="off"
+                      hx-target="this" hx-swap="outerHTML"
+                      hx-post="{% url 'reply-sent' comment.id %}">
+                    {% csrf_token %}
+                    {{ reply_form.body }}
+                    <button class="tw-block" type="submit">Submit</button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+</comment>

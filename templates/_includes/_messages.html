@@ -1,0 +1,29 @@
+{% if messages %}
+    <div x-data="{ showMessage: false }">
+        {% for message in messages %}
+            <div x-cloak
+                 class="tw-absolute tw-mx-auto tw-left-0 tw-right-0 tw-mt-2 tw-max-w-xl tw-z-50 tw-flex tw-items-center {% if message.tags == 'error' %}tw-bg-red-500{% else %}tw-bg-amber-300{% endif %} tw-text-white tw-p-3 tw-rounded-lg"
+                 role="alert"
+                 x-show="showMessage"
+                x-init="setTimeout(() => showMessage = true, 200), setTimeout(() => showMessage = false, 6000)"
+                x-transition:enter="tw-duration-700 tw-ease-out"
+                x-transition:enter-start="tw-opacity-0 -tw-translate-y-5"
+                x-transition:enter-end="tw-opacity-100 tw-translate-y-0"
+                x-transition:leave="tw-duration-200 tw-ease-in"
+                x-transition:leave-start="tw-opacity-100 tw-translate-y-0"
+                x-transition:leave-end="tw-opacity-0 -tw-translate-y-5">
+                <svg class="tw-w-8 tw-h-8 tw-mr-2" viewBox="0 0 512 512">
+                    <path d="M315.27,33,96,304H224L192.49,477.23a2.36,2.36,0,0,0,2.33,2.77h0a2.36,2.36,0,0,0,1.89-.95L416,208H288L319.66,34.75A2.45,2.45,0,0,0,317.22,32h0A2.42,2.42,0,0,0,315.27,33Z" style="fill:none;stroke:#ffffff;stroke-linecap:round;stroke-linejoin:round;stroke-width:32px;" fill="white"></path>
+                </svg>
+                <div>
+                    <div class="tw-text-lg">{{ message }}</div>
+                </div>
+                <div class="tw-ml-auto tw-cursor-pointer" @click="showMessage = false">
+                    <svg fill="white" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24" stroke="currentColor" class="w-8 h-8 ml-2">
+                        <path d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}

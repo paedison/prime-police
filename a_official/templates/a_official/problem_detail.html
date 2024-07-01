@@ -1,0 +1,8 @@
+{% extends '_base.html' %}
+{% load official_templatetags %}
+
+{% block layout %}
+    <hero id="hero" hx-swap-oob="true"></hero>
+
+    {% include 'a_official/problem_detail_content.html' %}
+{% endblock layout %}

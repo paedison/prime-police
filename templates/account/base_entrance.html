@@ -1,0 +1,83 @@
+{% extends '_layouts/_c.html' %}
+{% load i18n %}
+{% load static %}
+
+{#{% block content %}#}
+{#{% endblock content %}#}
+
+
+{% block content %}
+<main>
+    <div class="container">
+        <section class="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-4">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-md-8 col-lg-6 col-xl-5 d-flex flex-column align-items-center justify-content-center">
+                        <div class="d-flex justify-content-center py-4">
+                            <a href="/" role="banner"
+                               class="logo d-flex align-items-center w-auto">
+{#                                <img src="{% static 'favicon/favicon-32x32.png' %}" alt="Logo">#}
+                                <span>PRIME 경위공채</span>
+                            </a>
+                        </div><!-- End Logo -->
+
+                        <div class="card mb-3">
+                            <div class="card-title text-center fw-bold fs-2">
+                                {% block body_title %}{% endblock body_title %}
+                            </div>
+                            <div class="card-body">
+                                {% block body %}
+                                    {% if messages %}
+                                        <div class="row">
+                                            {% for message in messages %}
+                                                {% include 'account/snippets/alert_message.html' %}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+
+                                    {% if form.non_field_errors %}
+                                        <div class="row">
+                                            {% for error in form.non_field_errors %}
+                                                {% include 'account/snippets/alert_message.html' %}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+
+                                    {% if form.errors %}
+                                        <div class="row">
+                                            {% for field in form %}
+                                                {% for error in field.errors %}
+                                                    {% include 'account/snippets/alert_message.html' %}
+                                                {% endfor %}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+
+                                    {% block body_content %}{% endblock body_content %}
+
+                                    {% block footer %}
+                                        {% if not user.is_authenticated %}
+                                            <div class="text-center">
+                                                <a class="button secondaryAction small"
+                                                   href="{% url 'account_reset_password' %}">
+                                                    {% trans "Forgot Password?" %}
+                                                </a>
+                                            </div>
+                                            <div class="text-center">
+                                                <a class="small" href="{% url 'account_signup' %}">
+                                                    {% trans "Sign Up" %}
+                                                </a>
+                                            </div>
+                                        {% endif %}
+                                    {% endblock footer %}
+                                {% endblock body %}
+                                {% block extra_body %}{% endblock extra_body %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+      </section>
+    </div>
+</main><!-- End main -->
+{% endblock %}

@@ -1,0 +1,77 @@
+{% load i18n %}
+{% load static %}
+
+<header id="header" class="header fixed-top tw-flex tw-items-center">
+    <div class="tw-flex tw-items-center tw-justify-between">
+        <a class="logo tw-flex tw-items-center" role="banner"
+           hx-target="#main" hx-swap="innerHTML swap:0.25s"
+           hx-boost="true" data-target="#officialList"
+           href="">
+{#            <img src="{% static 'favicon/favicon-32x32.png' %}" alt="Logo">#}
+            <span class="tw-hidden sm:tw-block">PRIME 경위공채</span>
+        </a>
+        <i class="fa fa-bars toggle-sidebar-btn"></i>
+    </div><!-- Logo End -->
+
+    <nav class="header-nav ms-auto">
+        <ul class="tw-flex tw-items-center">
+
+            {% if user.is_admin %}
+                <a class="nav-link px-1" href="{% url 'admin:index' %}" target="#admin">
+                    <i class="fa-solid fa-crown fa-fw"></i>
+                </a>
+            {% endif %}
+
+            <li class="nav-item dropdown tw-pr-3">
+                <a class="nav-link nav-profile !tw-flex tw-items-center tw-pr-0"
+                   href="" data-bs-toggle="dropdown">
+                    {% if user.is_authenticated %}
+                        <img class="tw-h-8 tw-w-8 tw-rounded-full tw-object-cover" alt="Profile"
+                             src="{{ user.avatar }}"/>
+                    {% else %}
+                        <img class="tw-h-8 tw-w-8 tw-rounded-full tw-object-cover" alt="Profile"
+                             src="{% static 'image/undraw_profile.jpg' %}"/>
+                    {% endif %}
+                    <span class="tw-block dropdown-toggle tw-pl-2">{{ user.username }}</span>
+                </a><!-- Profile Image Icon End -->
+
+                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile tw-cursor-pointer"
+                    hx-push-url="true" hx-target="body" hx-swap="innerHTML swap:0.25s">
+                    {% if user.is_authenticated %}{% partial menu_authenticated %}
+                    {% else %}{% partial menu_anonymous %}{% endif %}
+                </ul><!-- Profile Dropdown Items End -->
+            </li><!-- Profile Nav End -->
+        </ul>
+    </nav><!-- Icons Navigation End -->
+</header>
+
+{% partialdef menu_authenticated %}
+    <li class="dropdown-item tw-flex tw-items-center"
+        hx-get="{% url 'profile' %}">
+        <i class="fa-solid fa-fw fa-user"></i> <span>My Profile</span>
+    </li>
+    <li><hr class="dropdown-divider"></li>
+    <li class="dropdown-item tw-flex tw-items-center"
+        hx-get="{% url 'profile-edit' %}">
+        <i class="fa-solid fa-fw fa-user"></i> <span>Edit Profile</span>
+    </li>
+    <li><hr class="dropdown-divider"></li>
+    <li class="dropdown-item tw-flex tw-items-center"
+        data-bs-toggle="modal" data-bs-target="#modalContainer"
+        hx-target="#modalContainer" hx-swap="innerHTML swap:0.25s" hx-push-url="false"
+        hx-get="{% url 'account_logout_modal' %}">
+        <i class="fa-solid fa-fw fa-sign-out-alt"></i> <span>{% trans 'Logout' %}</span>
+    </li>
+{% endpartialdef menu_authenticated %}
+
+{% partialdef menu_anonymous %}
+    <li class="dropdown-item tw-flex tw-items-center"
+        hx-get="{% url 'account_login' %}">
+        <i class="fa-solid fa-fw fa-sign-in-alt"></i> <span>{% trans 'Login' %}</span>
+    </li>
+    <li><hr class="dropdown-divider"></li>
+    <li class="dropdown-item tw-flex tw-items-center"
+        hx-get="{% url 'account_signup' %}">
+        <i class="fa-solid fa-fw fa-door-open"></i> <span>{% trans 'Signup' %}</span>
+    </li>
+{% endpartialdef menu_anonymous %}

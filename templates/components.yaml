@@ -1,0 +1,9 @@
+components:
+  modal: '_slippers/_modal_base.html'
+  button: '_slippers/_button_base.html'
+  nav_tab: '_slippers/_nav_tab_base.html'
+  nav_content: '_slippers/_nav_content_base.html'
+  content_row: '_slippers/_content_row_base.html'
+  responsive_table: '_slippers/_responsive_table_base.html'
+  pagination_nav: '_slippers/_pagination_nav_base.html'
+  list_divider: '_slippers/_list_divider.html'
