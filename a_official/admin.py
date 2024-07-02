@@ -9,6 +9,36 @@ class LikeChoiceInline(admin.TabularInline):
     extra = 3
 
 
+@admin.register(models.Unit)
+class UnitAdmin(ModelAdmin):
+    list_display = list_display_links = ['id', 'exam', 'name', 'order']
+    fieldsets = [(None, {'fields': ['exam', 'name', 'order', 'remarks']})]
+
+
+@admin.register(models.Department)
+class DepartmentAdmin(ModelAdmin):
+    list_display = list_display_links = ['id', 'exam', 'unit', 'name', 'order']
+    fieldsets = [(None, {'fields': ['exam', 'unit', 'name', 'order', 'remarks']})]
+
+
+@admin.register(models.Exam)
+class ExamAdmin(ModelAdmin):
+    list_display = list_display_links = ['id', 'year', 'exam', 'round']
+    fieldsets = [
+        (
+            None,
+            {
+                'fields': [
+                    'year', 'exam', 'round', 'answer_official',
+                    'page_opened_at', 'exam_started_at', 'exam_finished_at',
+                    'answer_predict_opened_at', 'answer_official_opened_at',
+                    'remarks',
+                ]
+            }
+        )
+    ]
+
+
 @admin.register(models.Problem)
 class ProblemAdmin(ModelAdmin):
     list_display = list_display_links = ['id', 'year', 'subject', 'number', 'answer', 'question']
@@ -21,8 +51,7 @@ class ProblemAdmin(ModelAdmin):
         (
             None,
             {
-                'fields': ['year', 'subject', 'number', 'answer', 'question', 'data'],
-                'classes': ['extrapretty']
+                'fields': ['year', 'exam', 'subject', 'number', 'answer', 'question', 'data', 'remarks'],
             }
         )
     ]
@@ -31,13 +60,61 @@ class ProblemAdmin(ModelAdmin):
         css = {'all': ['css/admin_custom.css']}
 
 
-admin.site.register(models.ProblemOpen)
-admin.site.register(models.ProblemLike)
-admin.site.register(models.ProblemRate)
-admin.site.register(models.ProblemSolve)
-admin.site.register(models.ProblemMemo)
-admin.site.register(models.ProblemComment)
-admin.site.register(models.ProblemTag)
-admin.site.register(models.ProblemTaggedItem)
-admin.site.register(models.ProblemCollect)
-admin.site.register(models.ProblemCollectedItem)
+@admin.register(models.ProblemOpen)
+class ProblemOpenAdmin(ModelAdmin):
+    list_display = list_display_links = ['id', 'created_at', 'user', 'reference', 'ip_address']
+    fieldsets = [(None, {'fields': ['user', 'reference', 'ip_address', 'remarks']})]
+
+
+@admin.register(models.ProblemLike)
+class ProblemLikeAdmin(ModelAdmin):
+    list_display = list_display_links = ['id', 'created_at', 'user', 'reference', 'is_liked']
+    fieldsets = [(None, {'fields': ['user', 'problem', 'is_liked', 'remarks']})]
+
+
+@admin.register(models.ProblemRate)
+class ProblemRateAdmin(ModelAdmin):
+    list_display = list_display_links = ['id', 'created_at', 'user', 'reference', 'rating']
+    fieldsets = [(None, {'fields': ['user', 'problem', 'rating', 'remarks']})]
+
+
+@admin.register(models.ProblemSolve)
+class ProblemSolveAdmin(ModelAdmin):
+    list_display = list_display_links = ['id', 'created_at', 'user', 'reference', 'answer', 'is_correct']
+    fieldsets = [(None, {'fields': ['user', 'problem', 'answer', 'is_correct', 'remarks']})]
+
+
+@admin.register(models.ProblemMemo)
+class ProblemMemoAdmin(ModelAdmin):
+    list_display = list_display_links = ['id', 'created_at', 'user', 'reference', 'memo']
+    fieldsets = [(None, {'fields': ['user', 'problem', 'memo', 'remarks']})]
+
+
+@admin.register(models.ProblemComment)
+class ProblemCommentAdmin(ModelAdmin):
+    list_display = list_display_links = ['id', 'created_at', 'user', 'reference', 'title']
+    fieldsets = [(None, {'fields': ['user', 'problem', 'title', 'comment', 'parent', 'hit']})]
+
+
+@admin.register(models.ProblemTag)
+class ProblemTagAdmin(ModelAdmin):
+    list_display = list_display_links = ['id', 'created_at', 'name', 'slug']
+    fieldsets = [(None, {'fields': ['tag', 'slug']})]
+
+
+@admin.register(models.ProblemTaggedItem)
+class ProblemTaggedItemAdmin(ModelAdmin):
+    list_display = list_display_links = ['id', 'created_at', 'user', 'reference', 'tag_name']
+    fieldsets = [(None, {'fields': ['user', 'content_object', 'tag', 'is_tagged', 'remarks']})]
+
+
+@admin.register(models.ProblemCollect)
+class ProblemCollectAdmin(ModelAdmin):
+    list_display = list_display_links = ['id', 'created_at', 'user', 'title', 'order']
+    fieldsets = [(None, {'fields': ['user', 'title', 'order']})]
+
+
+@admin.register(models.ProblemCollectedItem)
+class ProblemCollectedItemAdmin(ModelAdmin):
+    list_display = list_display_links = ['id', 'created_at', 'reference', 'collect_title', 'order']
+    fieldsets = [(None, {'fields': ['collect', 'problem', 'order', 'remarks']})]

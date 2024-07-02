@@ -8,20 +8,21 @@ from taggit.models import TaggedItemBase, TagBase
 from a_common.constants import icon_set
 from a_common.models import User
 from .base_settings import (
-    TimeRemarkBase, get_current_year, year_choices,
+    TimeRemarkBase, TimeRemarkPropertyBase,
+    get_current_year, year_choices,
     exam_choices, subject_choices, number_choices,
     answer_choices, rating_choices,
 )
 
 
 class Problem(TimeRemarkBase):
-    year = models.IntegerField(choices=year_choices, default=get_current_year())
-    exam = models.CharField(max_length=10, choices=exam_choices, default='경위')
-    subject = models.CharField(max_length=10, choices=subject_choices, default='형사')
-    number = models.IntegerField(choices=number_choices, default=1)
-    answer = models.IntegerField(choices=answer_choices, default=1)
-    question = models.TextField()
-    data = RichTextUploadingField(config_name='problem')
+    year = models.IntegerField(choices=year_choices, default=get_current_year()+1, verbose_name='연도')
+    exam = models.CharField(max_length=10, choices=exam_choices, default='경위', verbose_name='시험')
+    subject = models.CharField(max_length=10, choices=subject_choices, default='형사', verbose_name='과목')
+    number = models.IntegerField(choices=number_choices, default=1, verbose_name='문제 번호')
+    answer = models.IntegerField(choices=answer_choices, default=1, verbose_name='정답')
+    question = models.TextField(verbose_name='발문')
+    data = RichTextUploadingField(config_name='problem', verbose_name='문제 내용')
 
     tags = TaggableManager(through='ProblemTaggedItem', blank=True)
 
@@ -121,7 +122,7 @@ class Problem(TimeRemarkBase):
         }
 
 
-class ProblemOpen(TimeRemarkBase):
+class ProblemOpen(TimeRemarkPropertyBase):
     problem = models.ForeignKey(
         Problem, on_delete=models.CASCADE, related_name='problem_open_set')
     user = models.ForeignKey(
@@ -135,7 +136,7 @@ class ProblemOpen(TimeRemarkBase):
     def __str__(self): return f'[Official]ProblemOpen:{self.problem.reference}-{self.user.username}'
 
 
-class ProblemLike(TimeRemarkBase):
+class ProblemLike(TimeRemarkPropertyBase):
     problem = models.ForeignKey(
         Problem, on_delete=models.CASCADE, related_name='problem_like_set')
     user = models.ForeignKey(
@@ -150,12 +151,12 @@ class ProblemLike(TimeRemarkBase):
     def __str__(self): return f'[Official]ProblemLike:{self.problem.reference}-{self.user.username}'
 
 
-class ProblemRate(TimeRemarkBase):
+class ProblemRate(TimeRemarkPropertyBase):
     problem = models.ForeignKey(
         Problem, on_delete=models.CASCADE, related_name='problem_rate_set')
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='official_problem_rate_set')
-    rating = models.IntegerField(choices=rating_choices)
+    rating = models.IntegerField(choices=rating_choices, default=1)
 
     class Meta:
         verbose_name = verbose_name_plural = "기출문제 난이도"
@@ -170,13 +171,13 @@ class ProblemRate(TimeRemarkBase):
     def get_rating_choices(): return rating_choices()
 
 
-class ProblemSolve(TimeRemarkBase):
+class ProblemSolve(TimeRemarkPropertyBase):
     problem = models.ForeignKey(
         Problem, on_delete=models.CASCADE, related_name='problem_solve_set')
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='official_problem_solve_set')
-    answer = models.IntegerField(choices=answer_choices)
-    is_correct = models.BooleanField()
+    answer = models.IntegerField(choices=answer_choices, default=1)
+    is_correct = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = verbose_name_plural = "기출문제 정답확인"
@@ -192,12 +193,12 @@ class ProblemSolve(TimeRemarkBase):
     def get_answer_choices(): return answer_choices()
 
 
-class ProblemMemo(TimeRemarkBase):
+class ProblemMemo(TimeRemarkPropertyBase):
     problem = models.ForeignKey(
         Problem, on_delete=models.CASCADE, related_name='problem_memo_set')
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='official_problem_memo_set')
-    memo = RichTextField(config_name='minimal')
+    memo = RichTextField(config_name='minimal', default='')
 
     class Meta:
         verbose_name = verbose_name_plural = "기출문제 메모"
@@ -208,13 +209,13 @@ class ProblemMemo(TimeRemarkBase):
         return f'[Official]ProblemMemo:{self.problem.reference}-{self.user.username}'
 
 
-class ProblemComment(TimeRemarkBase):
+class ProblemComment(TimeRemarkPropertyBase):
     problem = models.ForeignKey(
         Problem, on_delete=models.CASCADE, related_name='problem_comment_set')
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='official_problem_comment_set')
-    title = models.TextField(max_length=100)
-    comment = RichTextField(config_name='minimal')
+    title = models.TextField(max_length=100, default='')
+    comment = RichTextField(config_name='minimal', default='')
     parent = models.ForeignKey(
         'self', on_delete=models.CASCADE, null=True, blank=True, related_name='reply_comments')
     hit = models.IntegerField(default=1, verbose_name='조회수')
@@ -239,7 +240,7 @@ class ProblemTag(TagBase):
         return f'[Official]ProblemTag:{self.name}'
 
 
-class ProblemTaggedItem(TimeRemarkBase, TaggedItemBase):
+class ProblemTaggedItem(TimeRemarkPropertyBase, TaggedItemBase):
     tag = models.ForeignKey(ProblemTag, on_delete=models.CASCADE, related_name='tagged_items')
     content_object = models.ForeignKey(
         Problem, on_delete=models.CASCADE, related_name='problem_tagged_items')
@@ -248,16 +249,19 @@ class ProblemTaggedItem(TimeRemarkBase, TaggedItemBase):
     is_tagged = models.BooleanField(default=True)
 
     class Meta:
-        verbose_name = verbose_name_plural = "태그된 기출문제"
+        verbose_name = verbose_name_plural = "기출문제 태그 문제"
         unique_together = ('tag', 'content_object', 'user')
         db_table = 'a_official_problem_tagged_item'
+
+    @property
+    def tag_name(self): return self.tag.name
 
 
 class ProblemCollect(TimeRemarkBase):
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='official_problem_collect_set')
-    title = models.CharField(max_length=20)
-    order = models.IntegerField()
+    title = models.CharField(max_length=20, default='')
+    order = models.IntegerField(default=1)
 
     class Meta:
         verbose_name = verbose_name_plural = "기출문제 컬렉션"
@@ -269,15 +273,15 @@ class ProblemCollect(TimeRemarkBase):
                 f'(id:{self.id},user_id:{self.user_id})')
 
 
-class ProblemCollectedItem(TimeRemarkBase):
+class ProblemCollectedItem(TimeRemarkPropertyBase):
     collect = models.ForeignKey(
         ProblemCollect, on_delete=models.CASCADE, related_name='collected_items')
     problem = models.ForeignKey(
         Problem, on_delete=models.CASCADE, related_name='problem_collected_items')
-    order = models.IntegerField()
+    order = models.IntegerField(default=1)
 
     class Meta:
-        verbose_name = verbose_name_plural = "컬렉션에 추가된 기출문제"
+        verbose_name = verbose_name_plural = "기출문제 컬렉션 문제"
         unique_together = ['collect', 'problem']
         db_table = 'a_official_problem_collected_item'
 
@@ -292,3 +296,6 @@ class ProblemCollectedItem(TimeRemarkBase):
     def set_inactive(self):
         self.is_active = False
         self.save()
+
+    @property
+    def collect_title(self): return self.collect.title

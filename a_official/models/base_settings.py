@@ -80,14 +80,14 @@ def get_remarks(message_type: str, remarks: str | None) -> str:
 
 
 class TimeRecordField(models.Model):
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='생성 일시')
 
     class Meta:
         abstract = True
 
 
 class RemarksField(models.Model):
-    remarks = models.TextField(null=True, blank=True)
+    remarks = models.TextField(null=True, blank=True, verbose_name='주석')
 
     class Meta:
         abstract = True
@@ -95,7 +95,8 @@ class RemarksField(models.Model):
     def save(self, *args, **kwargs):
         if self.pk is not None:
             message_type = kwargs.pop('message_type', '')
-            self.remarks = get_remarks(message_type, self.remarks)
+            if message_type:
+                self.remarks = get_remarks(message_type, self.remarks)
         super().save(*args, **kwargs)
 
 
@@ -109,6 +110,13 @@ class ChoiceMethod:
         return subject_choices()
 
 
+class ProblemProperty:
+    problem: any
+
+    @property
+    def reference(self): return self.problem.reference
+
+
 class TimeRemarkChoiceBase(TimeRecordField, RemarksField, ChoiceMethod):
     class Meta:
         abstract = True
@@ -120,5 +128,10 @@ class TimeChoiceBase(TimeRecordField, ChoiceMethod):
 
 
 class TimeRemarkBase(TimeRecordField, RemarksField):
+    class Meta:
+        abstract = True
+
+
+class TimeRemarkPropertyBase(TimeRecordField, RemarksField, ProblemProperty):
     class Meta:
         abstract = True
