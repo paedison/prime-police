@@ -86,14 +86,14 @@ class ProblemSolveAdmin(ModelAdmin):
 
 @admin.register(models.ProblemMemo)
 class ProblemMemoAdmin(ModelAdmin):
-    list_display = list_display_links = ['id', 'created_at', 'user', 'reference', 'memo']
-    fieldsets = [(None, {'fields': ['user', 'problem', 'memo', 'remarks']})]
+    list_display = list_display_links = ['id', 'created_at', 'user', 'reference', 'content']
+    fieldsets = [(None, {'fields': ['user', 'problem', 'content', 'remarks']})]
 
 
 @admin.register(models.ProblemComment)
 class ProblemCommentAdmin(ModelAdmin):
     list_display = list_display_links = ['id', 'created_at', 'user', 'reference', 'title']
-    fieldsets = [(None, {'fields': ['user', 'problem', 'title', 'comment', 'parent', 'hit']})]
+    fieldsets = [(None, {'fields': ['user', 'problem', 'title', 'content', 'parent', 'hit']})]
 
 
 @admin.register(models.ProblemTag)

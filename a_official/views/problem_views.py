@@ -1,3 +1,5 @@
+from bs4 import BeautifulSoup as bs
+
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage
 from django.http import HttpResponse
@@ -6,8 +8,9 @@ from django.views.decorators.http import require_POST
 
 from a_common.constants.icon_set import ICON_LIKE, ICON_RATE, ICON_SOLVE
 from a_common.utils import HtmxHttpRequest, update_context_data
+from a_official.forms import ProblemCommentForm
 from a_official.models import (
-    Problem, ProblemRate, ProblemSolve, ProblemTag, ProblemTaggedItem, ProblemLike
+    Problem, ProblemRate, ProblemSolve, ProblemTag, ProblemTaggedItem, ProblemLike, ProblemComment
 )
 from a_official.utils import get_filterset, get_elided_page_range, get_page_added_path, get_customized_problems
 
@@ -156,7 +159,7 @@ def tag_problem_create(request: HtmxHttpRequest, pk: int):
         tag=tag, content_object=problem, user=request.user)
     if not created:
         tagged_item.is_tagged = True
-        tagged_item.save(message_type='tagged')
+    tagged_item.save(message_type='tagged')
     return HttpResponse('')
 
 
@@ -170,3 +173,51 @@ def tag_problem_remove(request: HtmxHttpRequest, pk: int):
     tagged_item.is_tagged = False
     tagged_item.save(message_type='untagged')
     return HttpResponse('')
+
+
+@login_required
+def comment_problem_create(request: HtmxHttpRequest, pk: int):
+    problem = get_problem(pk)
+    reply_form = ProblemCommentForm()
+
+    if request.method == 'POST':
+        form = ProblemCommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+
+            content = form.cleaned_data['content']
+            soup = bs(content, 'html.parser')
+            title = soup.get_text()[:20]
+
+            comment.problem = problem
+            comment.user = request.user
+            comment.title = title
+            comment.save()
+            context = {
+                'comment': comment,
+                'problem': problem,
+                'reply_form': reply_form,
+            }
+            return render(request, 'a_official/snippets/comment.html', context)
+
+
+@login_required
+def comment_problem_update(request: HtmxHttpRequest, pk: int):
+    comment = get_object_or_404(ProblemComment, pk=pk)
+    if request.method == 'POST':
+        form = ProblemCommentForm(request.POST, instance=comment)
+        if form.is_valid():
+            form.save()
+            return redirect('problemcomment-list')
+    else:
+        form = ProblemCommentForm(instance=comment)
+    return render(request, 'problemcomment_form.html', {'form': form})
+
+
+@login_required
+def comment_problem_delete(request: HtmxHttpRequest, pk: int):
+    comment = get_object_or_404(ProblemComment, pk=pk)
+    if request.method == 'POST':
+        comment.delete()
+        return redirect('problemcomment-list')
+    return render(request, 'problemcomment_confirm_delete.html', {'comment': comment})

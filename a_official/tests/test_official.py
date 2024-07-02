@@ -2,9 +2,10 @@ import random
 
 import pytest
 from django.urls import reverse
+from pytest_django.asserts import assertTemplateUsed
 
 from a_common.constants import icon_set
-from a_official.models import ProblemLike, ProblemRate, ProblemSolve
+from a_official.models import ProblemLike, ProblemRate, ProblemSolve, ProblemTag, ProblemTaggedItem
 
 pytestmark = pytest.mark.django_db
 
@@ -17,7 +18,7 @@ def sample_user(user_factory): return user_factory()
 def sample_problem(official_problem_factory): return official_problem_factory()
 
 
-def parse_remarks_text_to_dict(remarks_text) -> dict:
+def parse_remarks_text_to_dict(remarks_text) -> list:
     items = remarks_text.split('|')
     result_list = []
     for item in items:
@@ -38,6 +39,9 @@ def get_remarks_key_list(remarks) -> list:
 def test_like_and_unlike_problem(client, sample_user, sample_problem):
     client.force_login(sample_user)
     url = reverse('official:like-problem', kwargs={'pk': sample_problem.pk})
+
+    problem_count = ProblemLike.objects.filter(problem=sample_problem, is_liked=True).count()
+    assert problem_count == 0
 
     # Like problem
     response = client.post(url)
@@ -80,6 +84,11 @@ def test_rate_problem(client, sample_user, sample_problem):
     rating = random.randint(1, 5)
     post_data = {'rating': f'{rating}'}
 
+    # Load rate modal
+    response = client.get(url)
+    assert response.context['problem'] == sample_problem
+    assertTemplateUsed(response, 'a_official/snippets/rate_modal.html')
+
     # First rate
     response = client.post(url, data=post_data)
     assert response.status_code == 200
@@ -113,6 +122,11 @@ def test_solve_problem(client, sample_user, official_problem_factory):
     client.force_login(sample_user)
     url = reverse('official:solve-problem', kwargs={'pk': sample_problem.pk})
 
+    # Load solve modal
+    response = client.get(url)
+    assert response.context['problem'] == sample_problem
+    assertTemplateUsed(response, 'a_official/snippets/solve_modal.html')
+
     # First solve
     answer = 1
     post_data = {'answer': f'{answer}'}
@@ -123,11 +137,12 @@ def test_solve_problem(client, sample_user, official_problem_factory):
     assert problem_solve.answer == answer
     assert problem_solve.is_correct is True
 
-    remarks_key = get_remarks_key_list(problem_solve.remarks)[0]
-    assert remarks_key == 'correct_at'
-
     icon_solve = icon_set.ICON_SOLVE[f'{problem_solve.is_correct}']
     assert response.context['icon_solve'] == icon_solve
+    assertTemplateUsed(response, 'a_official/snippets/solve_result.html')
+
+    remarks_key = get_remarks_key_list(problem_solve.remarks)[0]
+    assert remarks_key == 'correct_at'
 
     # Second solve
     answer = 2
@@ -141,6 +156,39 @@ def test_solve_problem(client, sample_user, official_problem_factory):
 
     icon_solve = icon_set.ICON_SOLVE[f'{problem_solve.is_correct}']
     assert response.context['icon_solve'] == icon_solve
+    assertTemplateUsed(response, 'a_official/snippets/solve_result.html')
 
     remarks_key = get_remarks_key_list(problem_solve.remarks)[1]
     assert remarks_key == 'wrong_at'
+
+
+def test_tag_problem_create_and_remove(client, sample_user, sample_problem):
+    client.force_login(sample_user)
+    url = reverse('official:tag-problem-create', kwargs={'pk': sample_problem.pk})
+
+    # Tag create
+    tag_name = 'test_tag'
+    post_data = {'tag': f'{tag_name}'}
+    response = client.post(url, data=post_data)
+    assert response.status_code == 200
+
+    tag = ProblemTag.objects.get(name=tag_name)
+    tagged_item = ProblemTaggedItem.objects.get(
+        tag=tag, content_object=sample_problem, user=sample_user)
+    assert tag.name == tag_name
+    assert tagged_item.is_tagged is True
+
+    remarks_key = get_remarks_key_list(tagged_item.remarks)[0]
+    assert remarks_key == 'tagged_at'
+
+    # Tag remove
+    url = reverse('official:tag-problem-remove', kwargs={'pk': sample_problem.pk})
+    response = client.post(url, data=post_data)
+    assert response.status_code == 200
+
+    tag.refresh_from_db()
+    tagged_item.refresh_from_db()
+    assert tagged_item.is_tagged is False
+
+    remarks_key = get_remarks_key_list(tagged_item.remarks)[1]
+    assert remarks_key == 'untagged_at'

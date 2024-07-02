@@ -53,5 +53,5 @@ def get_elided_page_range(
         yield from range(number + 1, num_pages + 1)
 
 
-def get_customized_problems(request, model: Model):
+def get_customized_problems(request, model):
     return model.objects.select_related('problem', 'user').filter(user=request.user)

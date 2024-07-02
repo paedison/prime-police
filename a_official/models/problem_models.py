@@ -198,7 +198,7 @@ class ProblemMemo(TimeRemarkPropertyBase):
         Problem, on_delete=models.CASCADE, related_name='problem_memo_set')
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='official_problem_memo_set')
-    memo = RichTextField(config_name='minimal', default='')
+    content = RichTextField(config_name='minimal', default='')
 
     class Meta:
         verbose_name = verbose_name_plural = "기출문제 메모"
@@ -215,7 +215,7 @@ class ProblemComment(TimeRemarkPropertyBase):
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='official_problem_comment_set')
     title = models.TextField(max_length=100, default='')
-    comment = RichTextField(config_name='minimal', default='')
+    content = RichTextField(config_name='minimal', default='')
     parent = models.ForeignKey(
         'self', on_delete=models.CASCADE, null=True, blank=True, related_name='reply_comments')
     hit = models.IntegerField(default=1, verbose_name='조회수')
