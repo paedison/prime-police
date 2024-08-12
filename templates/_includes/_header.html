@@ -1,12 +1,11 @@
-{% load i18n %}
 {% load static %}
 
 <header id="header" class="header fixed-top tw-flex tw-items-center">
     <div class="tw-flex tw-items-center tw-justify-between">
         <a class="logo tw-flex tw-items-center" role="banner"
-           hx-target="#main" hx-swap="innerHTML swap:0.25s"
+           hx-target="#content" hx-swap="outerHTML swap:0.25s"
            hx-boost="true" data-target="#officialList"
-           href="">
+           href="{% url 'index' %}">
 {#            <img src="{% static 'favicon/favicon-32x32.png' %}" alt="Logo">#}
             <span class="tw-hidden sm:tw-block">PRIME 경위공채</span>
         </a>
@@ -60,18 +59,18 @@
         data-bs-toggle="modal" data-bs-target="#modalContainer"
         hx-target="#modalContainer" hx-swap="innerHTML swap:0.25s" hx-push-url="false"
         hx-get="{% url 'account_logout_modal' %}">
-        <i class="fa-solid fa-fw fa-sign-out-alt"></i> <span>{% trans 'Logout' %}</span>
+        <i class="fa-solid fa-fw fa-sign-out-alt"></i> <span>로그아웃</span>
     </li>
 {% endpartialdef menu_authenticated %}
 
 {% partialdef menu_anonymous %}
     <li class="dropdown-item tw-flex tw-items-center"
         hx-get="{% url 'account_login' %}">
-        <i class="fa-solid fa-fw fa-sign-in-alt"></i> <span>{% trans 'Login' %}</span>
+        <i class="fa-solid fa-fw fa-sign-in-alt"></i> <span>로그인</span>
     </li>
     <li><hr class="dropdown-divider"></li>
     <li class="dropdown-item tw-flex tw-items-center"
         hx-get="{% url 'account_signup' %}">
-        <i class="fa-solid fa-fw fa-door-open"></i> <span>{% trans 'Signup' %}</span>
+        <i class="fa-solid fa-fw fa-door-open"></i> <span>회원가입</span>
     </li>
 {% endpartialdef menu_anonymous %}

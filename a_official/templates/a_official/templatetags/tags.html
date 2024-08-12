@@ -3,8 +3,6 @@
         <div class="tw-text-sm tw-mb-2 tw-px-2">
             <input id="problemTag{{ problem.id }}" placeholder='태그를 입력해주세요' type="hidden"
                    data-tagify data-problem-id="{{ problem.id }}"
-                   data-tag-create-url="{{ problem.get_tag_create_url }}"
-                   data-tag-remove-url="{{ problem.get_tag_remove_url }}"
                    data-tags="{{ tags|join:',' }}">
         </div>
     {% else %}

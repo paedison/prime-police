@@ -46,7 +46,7 @@
              hx-target="#content" hx-swap="outerHTML swap:0.25s">
         {% include 'a_official/problem_list_content.html#card_header' %}
 
-        {% icons user problem %}
+        {% custom_icons user problem custom_data %}
 
         <div class="tw-p-4 tw-pb-2">
             <p>{{ problem.number }}. {{ problem.question }}</p>

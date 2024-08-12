@@ -3,9 +3,9 @@
     <ul id="sidebar-nav" class="sidebar-nav">
         {% partial menu_notice %}
         {% if user.is_authenticated %}{% partial menu_dashboard %}{% endif %}
-        {% partial menu_lecture %}
+{#        {% partial menu_lecture %}#}
         {% partial menu_official %}
-        {% partial menu_prime %}
+{#        {% partial menu_prime %}#}
 {#        {% partial menu_score %}#}
     </ul>
     {% partial sidebar_toggle %}
@@ -36,7 +36,7 @@
     <li class="nav-item">
         <a id="officialList" class="nav-link collapsed"
            hx-headers='{"Open-First-Page": "true"}'
-           hx-boost="true" hx-target="#content" hx-swap="outerHTML"
+           hx-boost="true" hx-target="#content" hx-swap="outerHTML swap:0.25s"
            href="{% url 'official:problem-list' %}">
             <i class="fa-solid fa-fw fa-layer-group"></i>
             <span>기출문제</span>

@@ -17,27 +17,32 @@ $(window).on("scroll", function() {
     }
 });
 
-let csrfToken = JSON.parse($('body').attr('hx-headers'))['X-CSRFToken'];
+let csrfToken = JSON.parse(
+    document.querySelector('body').getAttribute('hx-headers')
+)['X-CSRFToken']
 
 function applyTagify() {
-    function tagifyAction(action, tagName) {
+    function tagifyAction(action, tagName, tagHeader) {
         let formData = new FormData();
         formData.append('tag', tagName);
         fetch(action, {
             method: 'POST',
             body: formData,
-            headers: {'X-CSRFToken': csrfToken},
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'View-Type': tagHeader,
+            },
         }).catch(error => console.error('Error:', error));
     }
 
-    $('[data-tagify]').each(function() {
-        const $input = $(this);
-        if ($input.data('tagifyApplied')) {return}
+    const inputs = document.querySelectorAll('[data-tagify]');
+    inputs.forEach(input => {
+        if (input.dataset.tagifyApplied) {return}
 
-        const tagCreateUrl = $input.data('tagCreateUrl');
-        const tagRemoveUrl = $input.data('tagRemoveUrl');
-        const tags = $input.data('tags').split(',').map(tag => tag.trim());
-        const tagify = new Tagify($input[0], {
+        const problemId = input.getAttribute('data-problem-id');
+        const action = `/official/problem/tag/${problemId}/`
+        const tags = input.getAttribute('data-tags').split(',').map(tag => tag.trim());
+        const tagify = new Tagify(input, {
             editTags: false,
             hooks: {
                 beforeRemoveTag : tags => {
@@ -49,12 +54,11 @@ function applyTagify() {
         });
         tagify.addTags(tags);
 
-        tagify.on('add', function(e) {tagifyAction(tagCreateUrl, e.detail.data.value)});
-        tagify.on('remove', function(e) {tagifyAction(tagRemoveUrl, e.detail.data.value)});
-        $input.data('tagifyApplied', true);
+        tagify.on('add', function(e) {tagifyAction(action, e.detail.data.value, 'add')});
+        tagify.on('remove', function(e) {tagifyAction(action, e.detail.data.value, 'remove')});
+        input.dataset.tagifyApplied = 'true';
     });
 }
-
 $(window).on('load', applyTagify);
 $(document).on('htmx:afterSettle', applyTagify);
 

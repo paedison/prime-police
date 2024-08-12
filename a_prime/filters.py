@@ -1,6 +1,6 @@
 import django_filters
 
-from .models import Problem, year_choice, subject_choice
+from a_official.models import Problem, year_choice, subject_choice
 
 CHOICES_LIKE = (
     ('true', '즐겨찾기 추가'),
@@ -58,7 +58,8 @@ class AnonymousOfficialListFilter(django_filters.FilterSet):
         keyword = self.request.GET.get('keyword', '') or self.request.POST.get('keyword', '')
         queryset = super().qs.prefetch_related(
             'like_users', 'rate_users', 'solve_users', 'memo_users', 'comment_users',
-            'likes', 'rates', 'solves', 'memos', 'comments', 'tagged_problems', 'collected_problems',
+            'likes', 'rates', 'solves', 'memos', 'comments',
+            'tagged_problems', 'collected_problems',
         )
         if keyword:
             return queryset.filter(data__icontains=keyword)

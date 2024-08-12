@@ -53,9 +53,9 @@
             <select id="id_page" name="page" aria-label="Page"
                     class="form-select form-select-sm filter_selected"
                     hx-target="#aside" hx-swap="innerHTML swap:0.25s"
-                    hx-get="{% url 'official:problem-list-filter' %}">
-                {% for p in elided_page_range %}
-                    {% if p == '…' %}
+                    hx-get="{% url 'official:problem-list' %}">
+                {% for p in page_range %}
+                    {% if p == '...' %}
                         <option value="{{ p }}" disabled>{{ p }}</option>
                     {% elif p == page %}
                         <option value="{{ p }}" selected>{{ p }}페이지</option>

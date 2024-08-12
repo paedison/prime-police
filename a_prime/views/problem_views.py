@@ -5,15 +5,15 @@ from django.shortcuts import render, get_object_or_404, redirect
 
 from a_common import utils as common_utils
 from a_common.constants import icon_set
-from a_official import utils as police_utils
+from .. import utils
 from a_official.models import Problem, ProblemRate, ProblemSolve, ProblemTag, ProblemTaggedItem
 
 
 def get_list_variables(request: common_utils.HtmxHttpRequest):
-    filterset = police_utils.get_filterset(request)
+    filterset = utils.get_filterset(request)
     paginator = Paginator(filterset.qs, per_page=10)
     page = int(request.GET.get('page', 1))
-    elided_page_range = police_utils.get_elided_page_range(
+    elided_page_range = utils.get_elided_page_range(
         request, filterset, page, paginator.num_pages)
     return filterset, paginator, page, elided_page_range
 
@@ -22,7 +22,7 @@ def problem_list_view(request: common_utils.HtmxHttpRequest, tag=None):
     filterset, paginator, page, elided_page_range = get_list_variables(request)
 
     info = {'menu': 'official'}
-    next_path = police_utils.get_page_added_path(request, page)['next_path']
+    next_path = utils.get_page_added_path(request, page)['next_path']
 
     try:
         problems = paginator.page(page)
@@ -71,9 +71,9 @@ def problem_detail_view(request: common_utils.HtmxHttpRequest, pk: int | None = 
     problem_neighbors = queryset.filter(year=problem.year, subject=problem.subject)
     # problem_likes = problem_rates = problem_solves = None
     # if request.user.is_authenticated:
-    #     problem_likes = police_utils.get_customized_problems(request, ProblemLike)
-    #     problem_rates = police_utils.get_customized_problems(request, ProblemRate)
-    #     problem_solves = police_utils.get_customized_problems(request, ProblemSolve)
+    #     problem_likes = utils.get_customized_problems(request, ProblemLike)
+    #     problem_rates = utils.get_customized_problems(request, ProblemRate)
+    #     problem_solves = utils.get_customized_problems(request, ProblemSolve)
 
     info = {'menu': 'official'}
     context = common_utils.update_context_data(

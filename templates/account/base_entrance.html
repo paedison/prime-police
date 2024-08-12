@@ -1,10 +1,5 @@
 {% extends '_layouts/_c.html' %}
-{% load i18n %}
 {% load static %}
-
-{#{% block content %}#}
-{#{% endblock content %}#}
-
 
 {% block content %}
 <main>
@@ -58,14 +53,13 @@
                                     {% block footer %}
                                         {% if not user.is_authenticated %}
                                             <div class="text-center">
-                                                <a class="button secondaryAction small"
-                                                   href="{% url 'account_reset_password' %}">
-                                                    {% trans "Forgot Password?" %}
+                                                <a class="small" href="{% url 'account_reset_password' %}">
+                                                    비밀번호를 잊으셨나요?
                                                 </a>
                                             </div>
                                             <div class="text-center">
                                                 <a class="small" href="{% url 'account_signup' %}">
-                                                    {% trans "Sign Up" %}
+                                                    회원가입
                                                 </a>
                                             </div>
                                         {% endif %}

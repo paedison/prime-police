@@ -9,34 +9,34 @@ class LikeChoiceInline(admin.TabularInline):
     extra = 3
 
 
-@admin.register(models.Unit)
-class UnitAdmin(ModelAdmin):
-    list_display = list_display_links = ['id', 'exam', 'name', 'order']
-    fieldsets = [(None, {'fields': ['exam', 'name', 'order', 'remarks']})]
-
-
-@admin.register(models.Department)
-class DepartmentAdmin(ModelAdmin):
-    list_display = list_display_links = ['id', 'exam', 'unit', 'name', 'order']
-    fieldsets = [(None, {'fields': ['exam', 'unit', 'name', 'order', 'remarks']})]
-
-
-@admin.register(models.Exam)
-class ExamAdmin(ModelAdmin):
-    list_display = list_display_links = ['id', 'year', 'exam', 'round']
-    fieldsets = [
-        (
-            None,
-            {
-                'fields': [
-                    'year', 'exam', 'round', 'answer_official',
-                    'page_opened_at', 'exam_started_at', 'exam_finished_at',
-                    'answer_predict_opened_at', 'answer_official_opened_at',
-                    'remarks',
-                ]
-            }
-        )
-    ]
+# @admin.register(models.Unit)
+# class UnitAdmin(ModelAdmin):
+#     list_display = list_display_links = ['id', 'exam', 'name', 'order']
+#     fieldsets = [(None, {'fields': ['exam', 'name', 'order', 'remarks']})]
+#
+#
+# @admin.register(models.Department)
+# class DepartmentAdmin(ModelAdmin):
+#     list_display = list_display_links = ['id', 'exam', 'unit', 'name', 'order']
+#     fieldsets = [(None, {'fields': ['exam', 'unit', 'name', 'order', 'remarks']})]
+#
+#
+# @admin.register(models.Exam)
+# class ExamAdmin(ModelAdmin):
+#     list_display = list_display_links = ['id', 'year', 'exam', 'round']
+#     fieldsets = [
+#         (
+#             None,
+#             {
+#                 'fields': [
+#                     'year', 'exam', 'round', 'answer_official',
+#                     'page_opened_at', 'exam_started_at', 'exam_finished_at',
+#                     'answer_predict_opened_at', 'answer_official_opened_at',
+#                     'remarks',
+#                 ]
+#             }
+#         )
+#     ]
 
 
 @admin.register(models.Problem)
@@ -105,16 +105,16 @@ class ProblemTagAdmin(ModelAdmin):
 @admin.register(models.ProblemTaggedItem)
 class ProblemTaggedItemAdmin(ModelAdmin):
     list_display = list_display_links = ['id', 'created_at', 'user', 'reference', 'tag_name']
-    fieldsets = [(None, {'fields': ['user', 'content_object', 'tag', 'is_tagged', 'remarks']})]
+    fieldsets = [(None, {'fields': ['user', 'content_object', 'tag', 'active', 'remarks']})]
 
 
-@admin.register(models.ProblemCollect)
+@admin.register(models.ProblemCollection)
 class ProblemCollectAdmin(ModelAdmin):
     list_display = list_display_links = ['id', 'created_at', 'user', 'title', 'order']
     fieldsets = [(None, {'fields': ['user', 'title', 'order']})]
 
 
-@admin.register(models.ProblemCollectedItem)
+@admin.register(models.ProblemCollectionItem)
 class ProblemCollectedItemAdmin(ModelAdmin):
     list_display = list_display_links = ['id', 'created_at', 'reference', 'collect_title', 'order']
     fieldsets = [(None, {'fields': ['collect', 'problem', 'order', 'remarks']})]

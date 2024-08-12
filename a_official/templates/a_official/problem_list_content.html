@@ -1,66 +1,67 @@
 {% load official_templatetags %}
 
-{% if show_first_page %}
-    {% include '_includes/_hero.html' %}
-
-    <content id="content"
-             class="htmx-fade-in htmx-fade-out tw-grid tw-grid-cols-3 md:tw-my-6 xl:tw-grid-cols-5">
-        <filter id="aside-group"
-                class="tw-sticky tw-top-[60px] tw-col-span-full tw-mb-6 tw-z-20 tw-order-1
-                htmx-fade-in htmx-fade-out
-                md:tw-block md:tw-col-span-1 md:tw-order-2">
-            <div id="accordionPoliceFilter" class="accordion md:tw-hidden">
-                <div class="accordion-item">
-                    <h2 class="accordion-header">
-                        <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                                data-bs-target="#collapsePoliceFilter" aria-expanded="true"
-                                aria-controls="collapsePoliceFilter">
-                            문제 필터
-                        </button>
-                    </h2>
-                </div>
+<content id="content"
+         class="htmx-fade-in htmx-fade-out tw-grid tw-grid-cols-3 tw-mt-24 xl:tw-grid-cols-5">
+    <filter id="aside-group"
+            class="tw-sticky tw-top-24 tw-col-span-full tw-mb-6 tw-z-20 tw-order-1
+            htmx-fade-in htmx-fade-out
+            md:tw-block md:tw-col-span-1 md:tw-order-2">
+        <div id="accordionPoliceFilter" class="accordion md:tw-hidden">
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#collapsePoliceFilter" aria-expanded="true"
+                            aria-controls="collapsePoliceFilter">
+                        문제 필터
+                    </button>
+                </h2>
             </div>
-            <div class="accordion tw-sticky tw-top-[84px] tw-col-span-full tw-order-1
-                 htmx-fade-in htmx-fade-out
-                 md:!tw-block md:tw-pr-6 md:tw-order-2">
-                <div class="accordion-item">
-                    <div id="collapsePoliceFilter" class="accordion-collapse collapse show"
-                         data-bs-parent="#accordionPoliceFilter">
-                        <div class="accordion-body p-0">
-                            {% include 'a_official/snippets/filter_list.html' %}
-                        </div>
+        </div>
+        <div class="accordion tw-sticky tw-top-[84px] tw-col-span-full tw-order-1
+             htmx-fade-in htmx-fade-out
+             md:!tw-block md:tw-pr-6 md:tw-order-2">
+            <div class="accordion-item">
+                <div id="collapsePoliceFilter" class="accordion-collapse collapse show"
+                     data-bs-parent="#accordionPoliceFilter">
+                    <div class="accordion-body p-0">
+                        {% include 'a_official/snippets/filter_list.html' %}
                     </div>
                 </div>
             </div>
-        </filter>
+        </div>
+    </filter>
 
-        <main id="main"
-              class="tw-col-span-full tw-order-2 !tw-mt-0 !tw-pt-0 !tw-px-6
-              md:tw-pr-0 md:tw-col-span-2 md:tw-order-1
-              xl:tw-col-span-4 xl:tw-grid xl:tw-grid-cols-2 xl:tw-gap-x-6">
-            {{ info|json_script:'info' }}
-            {% for problem in problems %}{% partial problem_card %}{% endfor %}
+    <main id="main"
+          class="tw-col-span-full tw-order-2 !tw-mt-0 !tw-pt-0 !tw-px-6
+          md:tw-pr-0 md:tw-col-span-2 md:tw-order-1
+          xl:tw-col-span-4 xl:tw-grid xl:tw-grid-cols-2 xl:tw-gap-x-6">
+        {{ info|json_script:'info' }}
+        {% for problem in problems %}{% partial problem_card %}{% endfor %}
 
-            <div hx-trigger="revealed" hx-target="this" hx-swap="outerHTML"
-                 hx-get="{{ next_path }}"></div>
-        </main>
-    </content>
-{% elif show_next_page %}
+        <div hx-trigger="revealed" hx-target="this" hx-swap="outerHTML"
+             hx-headers='{"View-Type":"list_next_page"}'
+             hx-get="{{ next_path }}"></div>
+    </main>
+</content>
+
+{% partialdef next_page %}
     <fade-in class="tw-opacity-0 xl:tw-col-span-full xl:tw-grid xl:tw-grid-cols-2 xl:tw-gap-x-6"
              _="on load transition my opacity to 1 over 0.2 seconds">
             {% for problem in problems %}{% partial problem_card %}{% endfor %}
 
         {% with filter_hx_swap_oob=True %}{% include 'a_official/snippets/filter_list.html' %}{% endwith %}
 
-        <div hx-trigger="revealed" hx-target="this" hx-swap="outerHTML" hx-get="{{ next_path }}"></div>
+        <div hx-trigger="revealed" hx-target="this" hx-swap="outerHTML"
+             hx-headers='{"View-Type":"list_next_page"}'
+             hx-get="{{ next_path }}"></div>
     </fade-in>
-{% endif %}
+{% endpartialdef next_page %}
 
 {% partialdef problem_card %}
     <article class="card p-0 tw-place-self-start"
              hx-target="#content" hx-swap="outerHTML swap:0.25s" hx-push-url="true">
         {% partialdef card_header inline=True %}
-            <card-header class="tw-z-10 tw-p-4 {{ problem.bg_color }}">
+            <card-header class="tw-z-10 tw-p-4 {{ problem.bg_color_style }}">
                 <a class="tw-flex tw-text-white tw-font-bold tw-cursor-pointer hover:tw-text-white"
                    hx-get="{{ problem.get_absolute_url }}">
                     {{ problem.full_reference }}
@@ -69,9 +70,9 @@
         {% endpartialdef card_header %}
 
         <figure x-data="{ openImage: false }" class="tw-relative tw-m-0">
-                {% icons user problem %}
+                {% custom_icons user problem custom_data %}
 
-            <div class="tw-flex tw-items-start tw-justify-center tw-cursor-pointer tw-absolute tw-left-0 tw-top-0 tw-z-10 tw-h-[100%] tw-w-10 {{ problem.bg_color }}"
+            <div class="tw-flex tw-items-start tw-justify-center tw-cursor-pointer tw-absolute tw-left-0 tw-top-0 tw-z-10 tw-h-[100%] tw-w-10 {{ problem.bg_color_style }}"
                  data-bs-toggle="collapse" data-bs-target="#fullProblemQuestion{{ problem.id }}"
                  aria-expanded="false" aria-controls="fullProblemQuestion{{ problem.id }}"
                  _="on click toggle .rotate-180 .rotate-0 on me.querySelector('i')"
@@ -91,7 +92,7 @@
                 </div>
             </a>
             <div class="tw-ml-10 tw-p-4 tw-pt-0">
-                {% tag user problem %}
+                {% tag user problem custom_data %}
             </div>
         </figure>
 

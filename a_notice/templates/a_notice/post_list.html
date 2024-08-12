@@ -1,0 +1,64 @@
+{% extends '_base.html' %}
+{% load static %}
+{% load slippers %}
+
+{% block main %}
+    {{ info|json_script:'info' }}
+    <div class="pagetitle">
+        <h1>{{ icon|safe }} {{ info.menu|title }}
+            <span class="fs-6 text-secondary">공지사항</span>
+        </h1>
+        <nav>
+            <ol class="breadcrumb" hx-target="#main" hx-swap="innerHTML swap:0.25s" hx-push-url="true">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'index' %}" hx-post="{% url 'index' %}">Home</a>
+                </li>
+                <li class="breadcrumb-item active">{{ info.menu|title }}</li>
+            </ol>
+        </nav>
+    </div><!-- Page Title End -->
+
+    <section class="section">
+        <div class="row">
+            <div class="col-12" aria-label="문제 목록">
+                <div id="problemCard" class="card htmx-fade-in"
+                     hx-target="#main" hx-swap="innerHTML swap:0.25s show:window:top">
+                    <div id="problemCardHeader" class="card-header htmx-fade-in htmx-fade-out">
+                        {{ sub_title|safe }}
+                        {% if keyword %}(검색어: {{ keyword }}){% endif %}
+                    </div>
+
+                    <div class="card-body">
+                        <div class="row flex-column flex-md-row-reverse">
+                            <div id="problemFilter"
+                                 class="col-12 col-md-4 accordion htmx-fade-in htmx-fade-out">
+                                {% partial problem_filter %}
+                            </div>
+
+                            <div id="problemContent" class="col-12 col-md-8 htmx-fade-in htmx-fade-out">
+                                {% include 'a_psat/problem_list_content.html' %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% partial list_buttons %}
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="row">
+            <div class="col-12" aria-label="공지사항">
+                <div id="noticeCard" class="card htmx-fade-in"
+                     hx-target="#main" hx-swap="innerHTML swap:0.25s show:window:top">
+                    <div id="noticeCardHeader" class="card-header">
+                        {{ sub_title|safe }}
+                    </div>
+                    <div id="noticeCardContent" class="card-body htmx-fade-in htmx-fade-out">
+                        {% include 'a_notice/post_list_content.html' %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
