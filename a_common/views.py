@@ -101,7 +101,6 @@ def profile_delete_view(request):
     return render(request, 'a_users/profile_delete.html')
 
 
-
 class OnlyLoggedInAllowedMixin(UserPassesTestMixin):
     request: HtmxHttpRequest
 
