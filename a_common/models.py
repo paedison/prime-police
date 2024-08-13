@@ -18,7 +18,7 @@ class UserManager(BaseUserManager):
 
     def create_superuser(self, email, username, password=None):
         user = self.create_user(email, username=username, password=password)
-        user.is_admin = True
+        user.is_superuser = True
         user.is_staff = True
         user.save(using=self._db)
         return user
@@ -46,8 +46,6 @@ class User(AbstractBaseUser, PermissionsMixin):
             "Unselect this instead of deleting accounts."
         ),
     )
-    is_superuser = None
-    is_admin = models.BooleanField(_("administrator status"), default=False)
     is_staff = models.BooleanField(
         _("staff status"), default=False,
         help_text=_("Designates whether the user can log into this admin site."))
@@ -61,12 +59,6 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
-
-    def has_perm(self, perm, obj=None):
-        return True
-
-    def has_module_perms(self, app_label):
-        return True
 
     @property
     def avatar(self):

@@ -15,9 +15,9 @@
     <nav class="header-nav ms-auto">
         <ul class="tw-flex tw-items-center">
 
-            {% if user.is_admin %}
+            {% if user.is_superuser or user.is_staff %}
                 <a class="nav-link px-1" href="{% url 'admin:index' %}" target="#admin">
-                    <i class="fa-solid fa-crown fa-fw"></i>
+                    <i class="fa-solid fa-crown fa-fw text-warning me-1"></i>
                 </a>
             {% endif %}
 

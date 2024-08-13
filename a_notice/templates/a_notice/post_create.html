@@ -49,7 +49,7 @@
                         {{ form.content }}
 
                         <div class="d-flex align-items-center justify-content-end mt-2">
-                            {% if user.is_admin %}
+                            {% if user.is_superuser %}
                             <div class="form-check">
                                 {% render_field form.is_hidden class='form-check-input' %}
                                 <label class="form-check-label small me-3" for="id_is_hidden">비밀글</label>

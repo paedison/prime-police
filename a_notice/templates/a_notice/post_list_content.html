@@ -35,7 +35,7 @@
         {% include 'a_notice/snippets/pagination.html' with header='notice_list' %}
     {% endif %}
 
-    {% if user.is_admin or user.is_staff %}
+    {% if user.is_superuser or user.is_staff %}
         <div class="p-2">
             <a class="btn btn-sm btn-outline-primary" hx-boost="true"
                hx-get="{{ post_create_url }}" href=""
