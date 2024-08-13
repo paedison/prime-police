@@ -17,13 +17,17 @@ def get_page_obj_and_range(page_number, page_data, per_page=10):
 
 
 def get_custom_data(user: User) -> dict:
+    if user.is_authenticated:
+        return {
+            'like': models.ProblemLike.objects.filter(user=user).select_related('user', 'problem'),
+            'rate': models.ProblemRate.objects.filter(user=user).select_related('user', 'problem'),
+            'solve': models.ProblemSolve.objects.filter(user=user).select_related('user', 'problem'),
+            'memo': models.ProblemMemo.objects.filter(user=user).select_related('user', 'problem'),
+            'tag': models.ProblemTaggedItem.objects.filter(
+                user=user, active=True).select_related('user', 'content_object'),
+            'collection': models.ProblemCollectionItem.objects.filter(
+                collection__user=user).select_related('collection__user', 'problem'),
+        }
     return {
-        'like': models.ProblemLike.objects.filter(user=user).select_related('user', 'problem'),
-        'rate': models.ProblemRate.objects.filter(user=user).select_related('user', 'problem'),
-        'solve': models.ProblemSolve.objects.filter(user=user).select_related('user', 'problem'),
-        'memo': models.ProblemMemo.objects.filter(user=user).select_related('user', 'problem'),
-        'tag': models.ProblemTaggedItem.objects.filter(
-            user=user, active=True).select_related('user', 'content_object'),
-        'collection': models.ProblemCollectionItem.objects.filter(
-            collection__user=user).select_related('collection__user', 'problem'),
+        'like': [], 'rate': [], 'solve': [], 'memo': [], 'tag': [], 'collection': [],
     }
