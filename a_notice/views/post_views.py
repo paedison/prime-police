@@ -1,21 +1,29 @@
-# import vanilla
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 
 from a_common.constants import icon_set
-from a_common.utils import update_context_data
-from a_notice import utils
+from a_common.utils import update_context_data, HtmxHttpRequest
+from a_notice import models, utils
 from a_notice.views import viewmixins
 
 
-def list_view(request):
+def get_queryset(request):
+    queryset = models.Post.objects.all()
+    if not request.user.is_authenticated or not request.user.is_staff:
+        queryset = queryset.filter(is_hidden=False)
+    return queryset
+
+
+def list_view(request: HtmxHttpRequest):
     info = {'menu': 'notice'}
-    page_obj, page_range = utils.get_paginator_info(request)
+    page_number = request.GET.get('page', '1')
+    queryset = get_queryset(request)
+    page_obj, page_range = utils.get_paginator_info(queryset, page_number)
     top_fixed = utils.get_filtered_queryset(request, top_fixed=True)
     context = update_context_data(
         info=info,
-        icon=icon_set.ICON_MENU['notice'],
-        board_icon=icon_set.ICON_BOARD,
+        icon_menu=icon_set.ICON_MENU['notice'],
+        icon_board=icon_set.ICON_BOARD,
         page_obj=page_obj,
         page_range=page_range,
         top_fixed=top_fixed,
@@ -23,103 +31,19 @@ def list_view(request):
     return render(request, 'a_notice/post_list.html', context)
 
 
-class PostListView(
-    viewmixins.PostViewMixin,
-    # vanilla.ListView,
-):
-    view_type = 'post_list'
-
-    def get_template_names(self):
-        htmx_template = {
-            'False': self.templates['list_template'],
-            'True': self.templates['list_main_template'],
-        }
-        return htmx_template[f'{bool(self.request.htmx)}']
-
-    def post(self, request, *args, **kwargs):
-        return self.get(request, *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-        self.get_properties()
-
-        return {
-            # base info
-            'info': self.info,
-            'view_type': self.view_type,
-            'staff_menu': self.staff_menu,
-
-            # icons
-            'icon': self.base_icon,
-            'board_icon': self.ICON_BOARD,
-
-            # category
-            'category': self.category,
-            'category_list': self.category_list,
-
-            # urls
-            'pagination_url': self.urls['post_list_content_url'],
-            'post_create_url': self.urls['post_create_url'],
-
-            # page objectives
-            'page_obj': self.page_obj,
-            'page_range': self.page_range,
-            'top_fixed': self.get_filtered_queryset(top_fixed=True),
-        }
-
-
-class PostListContentView(PostListView):
-    view_type = 'post_list_content'
-
-    def get_template_names(self) -> str:
-        return self.templates['list_content_template']
-
-
-class PostDetailView(
-    viewmixins.PostViewMixin,
-    # vanilla.DetailView,
-):
-    view_type = 'post_detail'
-
-    def get_template_names(self):
-        htmx_template = {
-            'False': self.templates['detail_template'],
-            'True': self.templates['detail_main_template'],
-        }
-        return htmx_template[f'{bool(self.request.htmx)}']
-
-    def get(self, request, *args, **kwargs):
-        response = super().get(request, *args, **kwargs)
-        self.object.update_hit()
-        return response
-
-    def get_context_data(self, **kwargs):
-        self.get_properties()
-
-        return {
-            # base info
-            'info': self.info,
-            'view_type': self.view_type,
-            'post': self.object,
-
-            # icons
-            'icon': self.base_icon,
-            'board_icon': self.ICON_BOARD,
-
-            # navigation data
-            'navigation': self.navigation,
-
-            # variables
-            'post_id': self.post_id,
-            'staff_menu': self.staff_menu,
-            'comments': self.object.post_comments.all(),
-
-            # urls
-            'post_list_url': self.urls['post_list_url'],
-            'post_detail_url': self.urls['post_detail_url'],
-            'post_update_url': self.urls['post_update_url'],
-            'post_delete_url': self.urls['post_delete_url'],
-            'comment_create_url': self.urls['comment_create_url'],
-        }
+def detail_view(request: HtmxHttpRequest, pk: int):
+    view_type = request.headers.get('View-Type', '')
+    info = {'menu': 'notice'}
+    queryset = get_queryset(request)
+    post = get_object_or_404(queryset, pk=pk)
+    prev_post, next_post = utils.get_prev_next_post(queryset, post)
+    context = update_context_data(
+        info=info,
+        icon_menu=icon_set.ICON_MENU['notice'],
+        icon_board=icon_set.ICON_BOARD,
+        post=post, prev_post=prev_post, next_post=next_post,
+    )
+    return render(request, 'a_notice/post_detail.html', context)
 
 
 class PostCreateView(
@@ -190,8 +114,6 @@ class PostDeleteView(
         return self.get_list_url()
 
 
-list_content_view = PostListContentView
 create_view = PostCreateView
-detail_view = PostDetailView
 update_view = PostUpdateView
 delete_view = PostDeleteView

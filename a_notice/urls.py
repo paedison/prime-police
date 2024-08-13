@@ -6,7 +6,7 @@ app_name = 'notice'
 
 post_urlpatterns = [
     path('create/', post_views.create_view, name='create'),
-    path('<int:post_id>/', post_views.detail_view, name='detail'),
+    path('<int:pk>/', post_views.detail_view, name='detail'),
     path('<int:post_id>/update/', post_views.update_view, name='update'),
     path('<int:post_id>/delete/', post_views.delete_view, name='delete'),
 ]
@@ -22,7 +22,6 @@ urlpatterns = [
     # Post views
     path('', post_views.list_view, name='base'),
     path('list/', post_views.list_view, name='list'),
-    path('list/<int:category>/', post_views.list_content_view, name='list_content'),
 
     path('post/', include(post_urlpatterns)),
     path('comment/', include(comment_urlpatterns)),
