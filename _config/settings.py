@@ -51,7 +51,7 @@ INTERNAL_IPS = (
     'localhost:8000',
 )
 
-ALLOWED_HOSTS = [env('ALLOWED_HOSTS', default='*')]
+ALLOWED_HOSTS = env('ALLOWED_HOSTS', default=['*'])
 
 
 # Application definition
