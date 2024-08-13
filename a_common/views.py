@@ -13,7 +13,17 @@ from django.views import generic as generic_views
 
 from . import forms as common_forms
 from .models import User
-from .utils import HtmxHttpRequest
+from .utils import HtmxHttpRequest, update_context_data
+
+
+def page_404(request):
+    return render(request, '404.html', {})
+
+
+def privacy(request):
+    info = {'menu': 'privacy'}
+    context = update_context_data(site_name='<프라임 경위공채>', info=info)
+    return render(request, 'privacy.html', context)
 
 
 def profile_view(request, username=None):

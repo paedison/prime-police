@@ -69,14 +69,13 @@
             </card-header>
         {% endpartialdef card_header %}
 
-        <figure x-data="{ openImage: false }" class="tw-relative tw-m-0">
+        <figure class="tw-relative tw-m-0">
                 {% custom_icons user problem custom_data %}
 
             <div class="tw-flex tw-items-start tw-justify-center tw-cursor-pointer tw-absolute tw-left-0 tw-top-0 tw-z-10 tw-h-[100%] tw-w-10 {{ problem.bg_color_style }}"
                  data-bs-toggle="collapse" data-bs-target="#fullProblemQuestion{{ problem.id }}"
                  aria-expanded="false" aria-controls="fullProblemQuestion{{ problem.id }}"
-                 _="on click toggle .rotate-180 .rotate-0 on me.querySelector('i')"
-            >
+                 _="on click toggle .rotate-180 .rotate-0 on me.querySelector('i')">
                 <i class="fa-solid fa-caret-down tw-text-white tw-text-xl rotate-0"></i>
             </div>
 

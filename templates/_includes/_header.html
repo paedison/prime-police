@@ -45,16 +45,16 @@
 </header>
 
 {% partialdef menu_authenticated %}
-    <li class="dropdown-item tw-flex tw-items-center"
-        hx-get="{% url 'profile' %}">
-        <i class="fa-solid fa-fw fa-user"></i> <span>My Profile</span>
-    </li>
-    <li><hr class="dropdown-divider"></li>
-    <li class="dropdown-item tw-flex tw-items-center"
-        hx-get="{% url 'profile-edit' %}">
-        <i class="fa-solid fa-fw fa-user"></i> <span>Edit Profile</span>
-    </li>
-    <li><hr class="dropdown-divider"></li>
+{#    <li class="dropdown-item tw-flex tw-items-center"#}
+{#        hx-get="{% url 'profile' %}">#}
+{#        <i class="fa-solid fa-fw fa-user"></i> <span>내 프로필</span>#}
+{#    </li>#}
+{#    <li><hr class="dropdown-divider"></li>#}
+{#    <li class="dropdown-item tw-flex tw-items-center"#}
+{#        hx-get="{% url 'profile-edit' %}">#}
+{#        <i class="fa-solid fa-fw fa-user"></i> <span>프로필 수정</span>#}
+{#    </li>#}
+{#    <li><hr class="dropdown-divider"></li>#}
     <li class="dropdown-item tw-flex tw-items-center"
         data-bs-toggle="modal" data-bs-target="#modalContainer"
         hx-target="#modalContainer" hx-swap="innerHTML swap:0.25s" hx-push-url="false"

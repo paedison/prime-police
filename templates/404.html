@@ -1,9 +1,13 @@
 {% extends '_layouts/_b.html' %}
 
+{% block head_title %}페이지를 찾을 수 없습니다.{% endblock head_title %}
+
 {% block content %}
-<div class="text-center mt-8 mb-8">
-    <h1>Page not found</h1>
-    <p class="my-6 mb-8"><b>Error 404 - This page doesn't exist or is unavailable</b></p>
-    <a class="button" href="/">Go Back to Home</a>
+<div class="container">
+    <section class="section error-404 min-vh-100 d-flex flex-column align-items-center justify-content-center">
+        <h1>404</h1>
+        <h2>페이지를 찾을 수 없습니다.</h2>
+        <a class="btn" href="/">홈으로 가기</a>
+    </section>
 </div>
 {% endblock content %}

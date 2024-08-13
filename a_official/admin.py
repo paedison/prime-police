@@ -51,7 +51,7 @@ class ProblemAdmin(ModelAdmin):
         (
             None,
             {
-                'fields': ['year', 'exam', 'subject', 'number', 'answer', 'question', 'data', 'remarks'],
+                'fields': ['year', 'subject', 'number', 'answer', 'question', 'data'],
             }
         )
     ]
