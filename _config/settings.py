@@ -3,7 +3,33 @@ from pathlib import Path
 from django.utils.translation import gettext_lazy as _
 from environ import Env
 
-env = Env()
+env = Env(
+    ALLOWED_HOSTS=(list, 'ALLOWED_HOSTS'),
+    SECRET_KEY=(str, 'SECRET_KEY'),
+
+    # Database Settings
+    DB_ENGINE=(str, 'DB_ENGINE'),
+    DB_NAME=(str, 'DB_NAME'),
+    DB_USER=(str, 'DB_USER'),
+    DB_PASSWORD=(str, 'DB_PASSWORD'),
+    DB_HOST=(str, 'DB_HOST'),
+    DB_PORT=(str, 'DB_PORT'),
+
+    # Mail Settings
+    EMAIL_HOST=(str, 'EMAIL_HOST'),
+    EMAIL_PORT=(str, 'EMAIL_PORT'),
+    EMAIL_HOST_USER=(str, 'EMAIL_HOST_USER'),
+    EMAIL_HOST_PASSWORD=(str, 'EMAIL_HOST_PASSWORD'),
+    EMAIL_USE_SSL=(bool, 'EMAIL_USE_SSL'),
+    EMAIL_USE_TLS=(bool, 'EMAIL_USE_TLS'),
+
+    # SOCIALACCOUNT_PROVIDERS
+    VERIFIED_EMAIL=(str, 'VERIFIED_EMAIL'),
+    APP_client_id=(str, 'APP_client_id'),
+    APP_secret=(str, 'APP_secret'),
+    APP_key=(str, 'APP_key'),
+    AUTH_PARAMS_access_type=(str, 'AUTH_PARAMS_access_type'),
+)
 Env.read_env()
 ENVIRONMENT = env('ENVIRONMENT', default='production')
 
