@@ -38,10 +38,9 @@
         {% compress css %}
             {% if debug %}
                 <script src="https://cdn.tailwindcss.com"></script>
-                <link rel="stylesheet" type="text/css" href="{% static 'css/output.css' %}"/>
-            {% else %}
-                <link rel="stylesheet" type="text/css" href="{% static 'css/output.min.css' %}"/>
+                <link rel="stylesheet" type="text/css" href="{% static 'css/input.css' %}"/>
             {% endif %}
+            <link rel="stylesheet" type="text/css" href="{% static 'css/output.css' %}"/>
         {% endcompress %}
 
         {% if debug %}

@@ -199,13 +199,7 @@ LOCALE_PATHS = [BASE_DIR / 'locale']
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = 'static/'
-if ENVIRONMENT == 'development':
-    STATICFILES_DIRS = [
-        BASE_DIR / 'static',
-    ]
-else:
-    STATIC_ROOT = BASE_DIR / 'static/'
-    STATICFILES_DIRS = []
+STATIC_ROOT = BASE_DIR / 'static/'
 
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',

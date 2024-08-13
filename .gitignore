@@ -9,6 +9,7 @@ node/node_modules
 bower/bower_components
 .DS_Store
 **/old/
+**/CACHE/
 
 ### Django ###
 *.log
