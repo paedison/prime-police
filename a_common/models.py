@@ -1,6 +1,6 @@
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
-from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
+from django.contrib.auth.models import BaseUserManager, AbstractBaseUser, PermissionsMixin
 from django.templatetags.static import static
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -24,7 +24,7 @@ class UserManager(BaseUserManager):
         return user
 
 
-class User(AbstractBaseUser):
+class User(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
     username_validator = UnicodeUsernameValidator()
 
@@ -33,13 +33,9 @@ class User(AbstractBaseUser):
         _("username"),
         max_length=150,
         unique=True,
-        help_text=_(
-            "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only."
-        ),
+        help_text=_("Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only."),
         validators=[username_validator],
-        error_messages={
-            "unique": _("A user with that username already exists."),
-        },
+        error_messages={"unique": _("A user with that username already exists.")},
     )
     joined_at = models.DateTimeField(_("date joined"), default=timezone.now)
     is_active = models.BooleanField(
@@ -50,15 +46,11 @@ class User(AbstractBaseUser):
             "Unselect this instead of deleting accounts."
         ),
     )
-    is_admin = models.BooleanField(
-        _("administrator status"),
-        default=False,
-    )
+    is_superuser = None
+    is_admin = models.BooleanField(_("administrator status"), default=False)
     is_staff = models.BooleanField(
-        _("staff status"),
-        default=False,
-        help_text=_("Designates whether the user can log into this admin site."),
-    )
+        _("staff status"), default=False,
+        help_text=_("Designates whether the user can log into this admin site."))
     image = ResizedImageField(size=[600, 600], quality=85, upload_to='avatars/', null=True, blank=True)
 
     USERNAME_FIELD = "email"
