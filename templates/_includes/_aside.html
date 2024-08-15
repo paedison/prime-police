@@ -37,7 +37,7 @@
         <a id="officialList" class="nav-link collapsed"
            hx-headers='{"Open-First-Page": "true"}'
            hx-boost="true" hx-target="#content" hx-swap="outerHTML swap:0.25s"
-           href="{% url 'official:problem-list' %}">
+           href="{% url 'official:base' %}">
             <i class="fa-solid fa-fw fa-layer-group"></i>
             <span>기출문제</span>
         </a>
@@ -92,9 +92,6 @@
 
 {% partialdef sidebar_toggle %}
     <div class="d-none d-md-block text-center">
-        <button id="sidebarToggle"
-                class="tw-rounded-full tw-bg-gray-200 tw-cursor-pointer tw-border-0 tw-text-center tw-w-10 tw-h-10">
-            <i class="fa-solid fa-angle-left"></i>
-        </button>
+        <button id="sidebarToggle" class="rounded-circle border-0"></button>
     </div>
 {% endpartialdef sidebar_toggle %}

@@ -1,77 +1,108 @@
-{% extends '_layouts/_c.html' %}
+{% extends '_base.html' %}
 {% load static %}
 
-{% block content %}
-<main>
-    <div class="container">
-        <section class="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-4">
-            <div class="container">
-                <div class="row justify-content-center">
-                    <div class="col-md-8 col-lg-6 col-xl-5 d-flex flex-column align-items-center justify-content-center">
-                        <div class="d-flex justify-content-center py-4">
-                            <a href="/" role="banner"
-                               class="logo d-flex align-items-center w-auto">
-{#                                <img src="{% static 'favicon/favicon-32x32.png' %}" alt="Logo">#}
-                                <span>PRIME 경위공채</span>
-                            </a>
-                        </div><!-- End Logo -->
+{% block html_body %}
+<body>
+    <main>
+        <div class="container">
+            <section class="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-4">
+                <div class="container">
+                    <div class="row justify-content-center">
+                        <div class="col-md-8 col-lg-6 col-xl-5 d-flex flex-column align-items-center justify-content-center">
+                            <div class="d-flex justify-content-center py-4">
+                                <a href="/" role="banner"
+                                   class="logo d-flex align-items-center w-auto">
+    {#                                <img src="{% static 'favicon/favicon-32x32.png' %}" alt="Logo">#}
+                                    <span>PRIME 경위공채</span>
+                                </a>
+                            </div><!-- End Logo -->
 
-                        <div class="card mb-3">
-                            <div class="card-title text-center fw-bold fs-2">
-                                {% block body_title %}{% endblock body_title %}
-                            </div>
-                            <div class="card-body">
-                                {% block body %}
-                                    {% if messages %}
-                                        <div class="row">
-                                            {% for message in messages %}
-                                                {% include 'account/snippets/alert_message.html' %}
-                                            {% endfor %}
-                                        </div>
-                                    {% endif %}
-
-                                    {% if form.non_field_errors %}
-                                        <div class="row">
-                                            {% for error in form.non_field_errors %}
-                                                {% include 'account/snippets/alert_message.html' %}
-                                            {% endfor %}
-                                        </div>
-                                    {% endif %}
-
-                                    {% if form.errors %}
-                                        <div class="row">
-                                            {% for field in form %}
-                                                {% for error in field.errors %}
+                            <div class="card mb-3">
+                                <div class="card-title text-center fw-bold fs-2">
+                                    {% block body_title %}{% endblock body_title %}
+                                </div>
+                                <div class="card-body">
+                                    {% block body %}
+                                        {% if messages %}
+                                            <div class="row">
+                                                {% for message in messages %}
                                                     {% include 'account/snippets/alert_message.html' %}
                                                 {% endfor %}
-                                            {% endfor %}
-                                        </div>
-                                    {% endif %}
-
-                                    {% block body_content %}{% endblock body_content %}
-
-                                    {% block footer %}
-                                        {% if not user.is_authenticated %}
-                                            <div class="text-center">
-                                                <a class="small" href="{% url 'account_reset_password' %}">
-                                                    비밀번호를 잊으셨나요?
-                                                </a>
-                                            </div>
-                                            <div class="text-center">
-                                                <a class="small" href="{% url 'account_signup' %}">
-                                                    회원가입
-                                                </a>
                                             </div>
                                         {% endif %}
-                                    {% endblock footer %}
-                                {% endblock body %}
-                                {% block extra_body %}{% endblock extra_body %}
+
+                                        {% if form.non_field_errors %}
+                                            <div class="row">
+                                                {% for error in form.non_field_errors %}
+                                                    {% include 'account/snippets/alert_message.html' %}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+
+                                        {% if form.errors %}
+                                            <div class="row">
+                                                {% for field in form %}
+                                                    {% for error in field.errors %}
+                                                        {% include 'account/snippets/alert_message.html' %}
+                                                    {% endfor %}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+
+                                        {% block body_content %}{% endblock body_content %}
+
+                                        {% block footer %}
+                                            {% if not user.is_authenticated %}
+                                                <div class="text-center">
+                                                    <a class="small" href="{% url 'account_reset_password' %}">
+                                                        비밀번호를 잊으셨나요?
+                                                    </a>
+                                                </div>
+                                                <div class="text-center">
+                                                    <a class="small" href="{% url 'account_signup' %}">
+                                                        회원가입
+                                                    </a>
+                                                </div>
+                                            {% endif %}
+                                        {% endblock footer %}
+                                    {% endblock body %}
+                                    {% block extra_body %}{% endblock extra_body %}
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-      </section>
-    </div>
-</main><!-- End main -->
-{% endblock %}
+          </section>
+        </div>
+    </main><!-- End main -->
+    <div id="modalContainer" class="modal fade htmx-fade-in htmx-fade-out" style="display: none"
+         aria-hidden="true" tabindex="-1" aria-labelledby="modalContainerLabel">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div class="modal-content"></div>
+        </div>
+    </div><!-- Modal Container -->
+
+    <a href="#" class="back-to-top d-flex align-items-center justify-content-center">
+        <i class="fas fa-angle-up"></i>
+    </a>
+
+    <!-- Vendor JS Files -->
+    {% if debug %}
+        <script src="{% static 'vendor/jquery/jquery@3.7.1.js' %}"></script>
+        <script src="{% static 'vendor/jquery-easing/jquery.easing.js' %}"></script>
+        <script src="{% static 'vendor/bootstrap/bootstrap.bundle@5.3.3.js' %}" defer></script>
+    {% else %}
+        <script src="{% static 'vendor/jquery/jquery@3.7.1.min.js' %}"></script>
+        <script src="{% static 'vendor/jquery-easing/jquery.easing.min.js' %}"></script>
+        <script src="{% static 'vendor/bootstrap/bootstrap.bundle@5.3.3.min.js' %}" defer></script>
+    {% endif %}
+
+    <!-- Template Main JS File -->
+    <script src="{% static 'vendor/nice-admin/js/main.js' %}"></script>
+    <script type="module" src="{% static 'js/common.js' %}"></script>
+
+    <!-- Page Javascript File -->
+    {% block page_script %}{% endblock page_script %}
+
+</body>
+{% endblock html_body %}

@@ -22,7 +22,7 @@ ICON_MENU = {
 
     'notice': '<i class="fa-solid fa-fw fa-bullhorn"></i>',
     'dashboard': '<i class="fa-solid fa-fw fa-list"></i>',
-    'psat': '<i class="fa-solid fa-fw fa-layer-group"></i>',
+    'official': '<i class="fa-solid fa-fw fa-layer-group"></i>',
     'problem': '<i class="fa-solid fa-fw fa-file-lines"></i>',
     'like': '<i class="fa-solid fa-fw fa-heart"></i>',
     'rate': '<i class="fa-solid fa-fw fa-star"></i>',
@@ -62,8 +62,8 @@ ICON_BOARD = {
 ICON_LIKE = {
     'True': '<i class="fa-solid fa-heart like_true"></i>',
     'False': '<i class="fa-solid fa-heart like_false"></i>',
-    'Filter': '<i class="fa-regular fa-heart"></i>',
-    'White': '<i class="fa-solid fa-heart text-white"></i>',
+    'filter': '<i class="fa-regular fa-heart"></i>',
+    'white': '<i class="fa-solid fa-heart text-white"></i>',
 }
 
 ICON_SOLVE = {

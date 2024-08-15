@@ -22,8 +22,8 @@ def page_404(request):
 
 def privacy(request):
     info = {'menu': 'privacy'}
-    context = update_context_data(site_name='<프라임 경위공채>', info=info)
-    return render(request, 'privacy.html', context)
+    context = update_context_data(site_name='<PRIME 경위공채>', info=info)
+    return render(request, 'a_common/privacy.html', context)
 
 
 def profile_view(request, username=None):

@@ -1,5 +1,5 @@
 {% #modal header='문제 난이도를 선택해주세요.' %}
-    <a class="tw-block tw-mb-2 tw-font-bold text-primary hover:tw-underline"
+    <a class="d-block mb-2 fw-bold text-primary"
        href="{{ problem.get_absolute_url }}">
         {{ problem.full_reference }}
     </a>
@@ -9,7 +9,6 @@
     {% csrf_token %}
         <fieldset>
             {% for i in '12345' %}
-                <input type="radio" name="rating" id="star{{ i }}"
                 <input type="radio" name="rating" id="star{{ i }}"
                        value="{{ i|subtract:6 }}" data-bs-dismiss="modal"
                        hx-post="{{ problem.get_rate_url }}">

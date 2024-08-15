@@ -1,17 +1,16 @@
 {% #modal header='문제 정답을 선택해주세요.' %}
-    <a class="tw-block tw-mb-2 tw-font-bold text-primary hover:tw-underline"
+    <a class="d-block mb-2 fw-bold text-primary"
        href="{{ problem.get_absolute_url }}">
         {{ problem.full_reference }}
     </a>
 
     <form hx-target="this" hx-swap="afterend swap:0.25s">
-        <fieldset class="tw-flex tw-gap-1 tw-justify-center">
+        <fieldset class="d-flex gap-1 justify-content-center">
             {% for i in '1234' %}
                 {% partialdef answer_button inline=True %}
-                    <label class="btn btn-outline-success !tw-rounded-full !tw-w-10 !tw-h-10"
-                           for="answer{{ i }}">
+                    <label class="btn btn-outline-success btn-circle" for="answer{{ i }}">
                         {{ i }}
-                        <input id="answer{{ i }}" class="tw-hidden"
+                        <input id="answer{{ i }}" class="d-none"
                                type="radio" name="answer" value="{{ i }}"
                                hx-post="{{ problem.get_solve_url }}">
                     </label>

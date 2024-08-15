@@ -1,4 +1,5 @@
-{% extends '_base.html' %}
+{% extends 'list.html' %}
+{% load i18n %}
 {% load crispy_forms_field %}
 
 {% block main %}
@@ -28,20 +29,23 @@
                 <div id="problemCard" class="card htmx-fade-in"
                      hx-target="#main" hx-swap="innerHTML swap:0.25s show:window:top">
                     <div id="problemCardHeader" class="card-header htmx-fade-in htmx-fade-out">
-                        {{ sub_title|safe }}
-                        {% if keyword %}(검색어: {{ keyword }}){% endif %}
+                        <i class="fa-solid fa-circle-question fa-fw"></i>
+                        질문 리스트
+                        <a class="text-decoration-none ms-2" href=""
+                           hx-indicator="#commentIndicator"
+                           hx-target="#problemCard" hx-swap="innerHTML swap:0.25s"
+                           hx-get="{% url 'psat:comment-list' %}">
+                            <span class="badge rounded-pill text-bg-warning">새로고침</span>
+                        </a>
+                        <div id="commentIndicator" role="status"
+                             class="htmx-indicator spinner-border text-warning spinner-border-sm">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
                     </div>
 
                     <div class="card-body">
-                        <div class="row flex-column flex-md-row-reverse">
-                            <div id="problemFilter"
-                                 class="col-12 col-md-4 accordion htmx-fade-in htmx-fade-out">
-                                {% partial problem_filter %}
-                            </div>
-
-                            <div id="problemContent" class="col-12 col-md-8 htmx-fade-in htmx-fade-out">
-                                {% include 'a_official/problem_list_content.html' %}
-                            </div>
+                        <div id="problemContent" class="col-12 htmx-fade-in htmx-fade-out">
+                            {% include 'a_psat/comment_list_content.html' %}
                         </div>
                     </div>
                 </div>
@@ -54,21 +58,21 @@
 {% partialdef list_buttons %}
     <div aria-label="버튼 모음">
         <a id="toggleProblemBtn" class="btn btn-success px-2"
-           data-bs-toggle="tooltip" data-bs-title="기출문제 리스트"
+           data-bs-toggle="tooltip" data-bs-title="{% trans 'Problem List' %}"
            hx-boost="true" hx-target="#main" hx-swap="innerHTML swap:0.25s show:window:top"
-           href="{% url 'official:base' %}">
+           href="{% url 'psat:base' %}">
             <i class="fa-solid fa-layer-group fa-fw"></i>
         </a>
 
         <a id="toggleCommentBtn" class="btn btn-success px-2"
-           data-bs-toggle="tooltip" data-bs-title="코멘트 리스트"
+           data-bs-toggle="tooltip" data-bs-title="{% trans 'Comment List' %}"
            hx-boost="true" hx-target="#main" hx-swap="innerHTML swap:0.25s show:window:top"
-           href="{% url 'official:comment-list' %}">
+           href="{% url 'psat:comment-list' %}">
             <i class="fa-solid fa-circle-question fa-fw"></i>
         </a>
 
         <button id="toggleCollectionBtn" class="btn btn-primary px-2"
-                data-bs-toggle="tooltip" data-bs-title="컬렉션 리스트">
+                data-bs-toggle="tooltip" data-bs-title="{% trans 'Collection List' %}">
             <i class="fa-solid fa-folder-plus fa-fw"></i>
         </button>
     </div>
@@ -79,10 +83,11 @@
             <div class="row align-items-center">
                 <div class="col-12">
                     <h5 id="floatingCollectionIndicator" class="card-title d-flex" style="cursor: pointer;">
-                        <i class="fa-solid fa-folder-plus me-2"></i> 컬렉션 리스트
-                        <span class="ms-auto">
+                        <i class="fa-solid fa-folder-plus me-2"></i>
+                        {% trans 'Collection List' %}
+                        <div class="ms-auto">
                             <i class="fa-solid fa-chevron-right"></i>
-                        </span>
+                        </div>
                     </h5>
                     {% if user.is_authenticated %}
                         <div id="collectionList" class="htmx-fade-in htmx-fade-out">
@@ -90,8 +95,8 @@
                                   class="list-group htmx-fade-out htmx-fade-in{% if collections %} sortable{% endif %}"
                                   hx-target="this" hx-swap="innerHTML swap:0.25s"
                                   hx-push-url="false" hx-trigger="end"
-                                  hx-post="{% url 'official:collection-list' %}">
-                                {% include 'a_official/collection_list.html' %}
+                                  hx-post="{% url 'psat:collection-list' %}">
+                                {% include 'a_psat/collection_list.html' %}
                             </form>
                         </div>
                     {% else %}
@@ -125,7 +130,9 @@
                 <form class="row g-2 align-items-center justify-content-center" hx-trigger="change"
                       hx-get="{{ request.path }}">
                     <input id="id_data" type="text" name="keyword"
-                           value="{{ keyword }}" hidden title="키워드">
+                           value="{{ keyword }}" hidden
+                           placeholder="{% trans 'Enter search keyword' %}"
+                           title="{% trans 'Enter search keyword' %}">
                     {% for field in form %}
                         <div class="col-6 col-md-12 col-lg-6">
                             {% if field.errors %}
@@ -147,7 +154,7 @@
                             필터 제거
                         </a>
                     </div>
-                    <div class="col-6 col-md-12 col-lg-6">
+                    <div class="col-12">
                         <a type="button" class="btn btn-success fw-bold col-12" hx-boost="true"
                            hx-push-url="{{ request.path }}"
                            href="{{ request.path }}">

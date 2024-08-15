@@ -1,114 +1,89 @@
+{% load crispy_forms_tags %}
+{% load crispy_forms_field %}
 {% load official_templatetags %}
 
-<content id="content"
-         class="htmx-fade-in htmx-fade-out tw-grid tw-grid-cols-3 tw-mt-24 xl:tw-grid-cols-5">
-    <filter id="aside-group"
-            class="tw-sticky tw-top-24 tw-col-span-full tw-mb-6 tw-z-20 tw-order-1
-            htmx-fade-in htmx-fade-out
-            md:tw-block md:tw-col-span-1 md:tw-order-2">
-        <div id="accordionPoliceFilter" class="accordion md:tw-hidden">
-            <div class="accordion-item">
-                <h2 class="accordion-header">
-                    <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                            data-bs-target="#collapsePoliceFilter" aria-expanded="true"
-                            aria-controls="collapsePoliceFilter">
-                        문제 필터
-                    </button>
-                </h2>
-            </div>
-        </div>
-        <div class="accordion tw-sticky tw-top-[84px] tw-col-span-full tw-order-1
-             htmx-fade-in htmx-fade-out
-             md:!tw-block md:tw-pr-6 md:tw-order-2">
-            <div class="accordion-item">
-                <div id="collapsePoliceFilter" class="accordion-collapse collapse show"
-                     data-bs-parent="#accordionPoliceFilter">
-                    <div class="accordion-body p-0">
-                        {% include 'a_official/snippets/filter_list.html' %}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </filter>
+<article class="table-responsive">
+    <table class="table align-middle m-0">
+        <tbody>
+            {% for problem in page_obj %}
+                {% ifchanged %}
+                    <tr class="table-warning">
+                        <td class="text-nowrap text-primary p-2">
+                            <h5 class="fw-bold m-0">{{ problem.year_subject }}</h5>
+                        </td>
+                    </tr>
+                {% endifchanged %}
+                <tr>
+                    <td class="text-nowrap py-2 px-0">
+                        {% with problem_id=problem.id %}
+                            <div class="align-middle d-inline-block pe-1">
+                                <div class="d-inline-block d-sm-none">
+                                    {% partial reference %}
+                                </div>
+                                {% custom_icons user problem custom_data %}
+                            </div>
+                            <div class="d-block d-sm-none">
+                                {% partial question %}
+                            </div>
+                            <div class="d-none align-middle d-sm-inline-block" hx-push-url="true">
+                                <div class="d-inline-block pb-1 pb-md-0 pe-md-1">
+                                    {% partial reference %}
+                                </div>
+                                <div class="d-inline-block">
+                                    {% partial question %}
+                                </div>
+                            </div>
+                        {% endwith %}
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td class="text-center text-nowrap px-2" colspan="5">자료가 없습니다.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</article>
 
-    <main id="main"
-          class="tw-col-span-full tw-order-2 !tw-mt-0 !tw-pt-0 !tw-px-6
-          md:tw-pr-0 md:tw-col-span-2 md:tw-order-1
-          xl:tw-col-span-4 xl:tw-grid xl:tw-grid-cols-2 xl:tw-gap-x-6">
-        {{ info|json_script:'info' }}
-        {% for problem in problems %}{% partial problem_card %}{% endfor %}
+{% if page_obj.has_next or page_obj.has_previous %}
+    {% include 'a_official/snippets/pagination.html' with header='problem_list' %}
+{% endif %}
 
-        <div hx-trigger="revealed" hx-target="this" hx-swap="outerHTML"
-             hx-headers='{"View-Type":"list_next_page"}'
-             hx-get="{{ next_path }}"></div>
-    </main>
-</content>
+{% partialdef reference %}
+    <a class="text-decoration-none fw-bold"
+       href="{% url 'official:problem-detail' problem_id %}"
+       hx-get="{% url 'official:problem-detail' problem_id %}?{{ url_options }}"
+       hx-push-url="{% url 'official:problem-detail' problem_id %}">
+        {{ problem.reference }}
+    </a>
+    {% if problem.images.name1 == 'Preparing Image' %}
+        {{ icon_image.False|safe }}
+    {% else %}
+        <a class="text-decoration-none" href=""
+           data-bs-toggle="modal" data-bs-target="#modalContainer"
+           hx-push-url="false"
+           hx-target="#modalContainer"
+           hx-headers='{"View-Type":"image"}'
+           hx-get="{% url 'official:problem-detail' problem_id %}">
+            {{ icon_image.True|safe }}
+        </a>
+    {% endif %}
+{% endpartialdef reference %}
 
-{% partialdef next_page %}
-    <fade-in class="tw-opacity-0 xl:tw-col-span-full xl:tw-grid xl:tw-grid-cols-2 xl:tw-gap-x-6"
-             _="on load transition my opacity to 1 over 0.2 seconds">
-            {% for problem in problems %}{% partial problem_card %}{% endfor %}
+{% partialdef question %}
+    {% with class='d-md-none' chars=30 %}{% partial link_snippet %}{% endwith %}
+    {% with class='d-none d-md-inline d-lg-none' chars=40 %}{% partial link_snippet %}{% endwith %}
+    {% with class='d-none d-lg-inline d-xl-none' chars=50 %}{% partial link_snippet %}{% endwith %}
+    {% with class='d-none d-xl-inline' chars=60 %}{% partial link_snippet %}{% endwith %}
 
-        {% with filter_hx_swap_oob=True %}{% include 'a_official/snippets/filter_list.html' %}{% endwith %}
-
-        <div hx-trigger="revealed" hx-target="this" hx-swap="outerHTML"
-             hx-headers='{"View-Type":"list_next_page"}'
-             hx-get="{{ next_path }}"></div>
-    </fade-in>
-{% endpartialdef next_page %}
-
-{% partialdef problem_card %}
-    <article class="card p-0 tw-place-self-start"
-             hx-target="#content" hx-swap="outerHTML swap:0.25s" hx-push-url="true">
-        {% partialdef card_header inline=True %}
-            <card-header class="tw-z-10 tw-p-4 {{ problem.bg_color_style }}">
-                <a class="tw-flex tw-text-white tw-font-bold tw-cursor-pointer hover:tw-text-white"
-                   hx-get="{{ problem.get_absolute_url }}">
-                    {{ problem.full_reference }}
-                </a>
-            </card-header>
-        {% endpartialdef card_header %}
-
-        <figure class="tw-relative tw-m-0">
-                {% custom_icons user problem custom_data %}
-
-            <div class="tw-flex tw-items-start tw-justify-center tw-cursor-pointer tw-absolute tw-left-0 tw-top-0 tw-z-10 tw-h-[100%] tw-w-10 {{ problem.bg_color_style }}"
-                 data-bs-toggle="collapse" data-bs-target="#fullProblemQuestion{{ problem.id }}"
-                 aria-expanded="false" aria-controls="fullProblemQuestion{{ problem.id }}"
-                 _="on click toggle .rotate-180 .rotate-0 on me.querySelector('i')">
-                <i class="fa-solid fa-caret-down tw-text-white tw-text-xl rotate-0"></i>
-            </div>
-
-            <a class="tw-cursor-pointer tw-grid tw-ml-10 text-secondary"
-               hx-get="{{ problem.get_absolute_url }}">
-                <div class="tw-row-start-1 tw-col-start-1">
-                    <p class="tw-px-4 problem-question">{{ problem.number }}. {{ problem.question }}</p>
-                </div>
-                <div id="fullProblemQuestion{{ problem.id }}"
-                     class="tw-row-start-1 tw-col-start-1 collapse tw-bg-white">
-                    <p class="tw-px-4 problem-question">{{ problem.number }}. {{ problem.question }}</p>
-                    <div class="tw-px-4">{{ problem.data|safe }}</div>
-                </div>
-            </a>
-            <div class="tw-ml-10 tw-p-4 tw-pt-0">
-                {% tag user problem custom_data %}
-            </div>
-        </figure>
-
-{#        <div class="tw-px-4 tw-pt-4">#}
-{#            <div class="tw-flex tw-items-center tw-justify-between tw-text-sm tw-px-2">#}
-{#                <a class="tw-font-bold hover:tw-underline" href="{{ problem.get_absolute_url }}">#}
-{#                    {% if problem.comment_users.count %}#}
-{#                        Comments#}
-{#                        <span id="commentsCount-{{ problem.id }}"#}
-{#                              class="tw-font-light tw-text-gray-500 tw-ml-1">#}
-{#                        {{ problem.comment_users.count }}#}
-{#                    </span>#}
-{#                    {% else %}#}
-{#                        {% if user.is_authenticated %}Add comment{% endif %}#}
-{#                    {% endif %}#}
-{#                </a>#}
-{#            </div>#}
-{#        </div>#}
-    </article>
-{% endpartialdef problem_card %}
+    {% partialdef link_snippet %}
+        <a class="text-decoration-none {{ class }}"
+           href="{% url 'official:problem-detail' problem_id %}"
+           hx-get="{% url 'official:problem-detail' problem_id %}?{{ url_options }}"
+           hx-push-url="{% url 'official:problem-detail' problem_id %}">
+            <h3 class="d-inline-block fs-6 small m-0">
+                {{ problem.question|truncatechars:chars }}
+            </h3>
+        </a>
+    {% endpartialdef link_snippet %}
+{% endpartialdef question %}

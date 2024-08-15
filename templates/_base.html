@@ -13,7 +13,7 @@
         <meta name="keywords" content="PRIME, 경위, 경위공채"/>
         <meta name="google-site-verification" content="jv9Vpec7TB34EdIig5UYbDqQ_ueu3uNlLM_FbIzwWWM"/>
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://paedison.com" />
+        <meta property="og:url" content="https://prime-eroom.com" />
         <meta property="og:title" content="PRIME 경위공채" />
         <meta property="og:description" content="PRIME 경위공채" />
         {% block page_image %}
@@ -30,21 +30,17 @@
         <link rel="manifest" href="{% static 'favicon/site.webmanifest' %}" />
 
         <!-- Google Fonts -->
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@100;200;300;400;500;600;700;800;900&family=Nunito:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;0,1000;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900;1,1000&family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400;1,500;1,600;1,700;1,800&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap">
-{#        <link rel="shortcut icon" type="image/png" href="https://img.icons8.com/small/64/000000/fire-heart.png"/>#}
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2
+?family=Black+Han+Sans
+&family=Noto+Sans+KR:wght@100;200;300;400;500;600;700;800;900
+&family=Nunito:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;0,1000;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900;1,1000
+&family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400;1,500;1,600;1,700;1,800
+&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900
+&display=swap" rel="stylesheet">
 
-        {% if debug %}
-            <script src="https://cdn.tailwindcss.com"></script>
-            <script>tailwind.config = {prefix: "tw-"}</script>
-            <link rel="stylesheet" type="text/css" href="{% static 'css/input.css' %}"/>
-        {% else %}
-            {% compress css %}
-                <link rel="stylesheet" type="text/css" href="{% static 'css/output.css' %}"/>
-            {% endcompress %}
-        {% endif %}
-
+        <!-- Vendor CSS Files -->
         {% if debug %}
             <link rel="stylesheet" type="text/css" href="{% static 'vendor/bootstrap/bootstrap@5.3.3.css' %}"/>
             <link rel="stylesheet" type="text/css" href="{% static 'vendor/fontawesome-free/css/all.css' %}"/>
@@ -57,48 +53,72 @@
         <link rel="stylesheet" type="text/css" href="{% static 'vendor/tagify/tagify.css' %}"/>
         <link rel="stylesheet" type="text/css" href="{% static 'vendor/nice-admin/css/style.css' %}"/>
 
+        <!-- Template Main CSS File -->
+        <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}"/>
+
+        <!-- Vendor JS Files -->
         {% if debug %}
             <script src="{% static 'vendor/jquery/jquery@3.7.1.js' %}"></script>
+            <script src="{% static 'vendor/jquery-easing/jquery.easing.js' %}"></script>
             <script src="{% static 'vendor/bootstrap/bootstrap.bundle@5.3.3.js' %}" defer></script>
-            <script src="{% static 'vendor/select2/select2.js' %}" defer></script>
         {% else %}
             <script src="{% static 'vendor/jquery/jquery@3.7.1.min.js' %}"></script>
+            <script src="{% static 'vendor/jquery-easing/jquery.easing.min.js' %}"></script>
             <script src="{% static 'vendor/bootstrap/bootstrap.bundle@5.3.3.min.js' %}" defer></script>
-            <script src="{% static 'vendor/select2/select2.min.js' %}" defer></script>
         {% endif %}
-        <script src="{% static 'vendor/alpine/alpine@3.14.0.min.js' %}" defer></script>
+        <script src="{% static 'vendor/sortable/Sortable.min.js' %}"></script>
+        <script src="{% static 'vendor/sortable/jquery-sortable.js' %}"></script>
         <script src="{% static 'vendor/htmx/htmx@1.9.12.min.js' %}"></script>
         <script src="{% static 'vendor/hyperscript/hyperscript@0.9.12.min.js' %}"></script>
         <script src="{% static 'vendor/tagify/tagify.js' %}"></script>
         <script src="{% static 'vendor/nice-admin/js/main.js' %}" defer></script>
-        <script src="{% static 'vendor/select2/i18n/ko.js' %}" defer></script>
+
+        <!-- Template Main JS File -->
+        <script src="{% static 'js/sidebar_menu.js' %}" defer></script>
         <script src="{% static 'js/common.js' %}" defer></script>
 
         {% block extra_head %}{% endblock extra_head %}
     </head>
-
-    <body class="tw-bg-gray-100 htmx-fade-in htmx-fade-out"
-            {#      hx-ext="debug, event-header"#}
-            {#      hx-ext="event-header"#}
-          hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
-
-        {% include '_includes/_messages.html' %}
-        {% include '_includes/_header.html' %}
-        {% include '_includes/_aside.html' %}
 {% endif %}
 
-    {% block layout %}{% endblock %}
+{% block html_body %}
+{% if not request.htmx %}
+    <body class="tw-bg-gray-100 htmx-fade-in htmx-fade-out"
+          hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+
+    {% block header %}{% include '_includes/_header.html' %}{% endblock header %}
+    {% block aside %}{% include '_includes/_aside.html' %}{% endblock aside %}
+
+    <main id="main" class="main htmx-fade-in htmx-fade-out">
+{% endif %}
+
+{% block main %}{% endblock main %}
 
 {% if not request.htmx %}
-        <modal id="modalContainer" class="modal fade htmx-fade-in htmx-fade-out" style="display: none"
-               aria-hidden="true" tabindex="-1" aria-labelledby="modalContainerLabel">
-            <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-                <div class="modal-content"></div>
-            </div>
-        </modal><!-- Modal Container -->
+    </main><!-- Main End -->
 
-        {% django_htmx_script %}
+    {% block footer %}{% include '_includes/_footer.html' %}{% endblock footer %}
+
+    <modal id="modalContainer" class="modal fade htmx-fade-in htmx-fade-out" style="display: none"
+           aria-hidden="true" tabindex="-1" aria-labelledby="modalContainerLabel">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div class="modal-content"></div>
+        </div>
+    </modal><!-- Modal Container -->
+
+    <a href="#" class="back-to-top d-flex align-items-center justify-content-center">
+        <i class="fas fa-angle-up"></i>
+    </a>
+
+    <!-- Page Javascript File -->
+    {% block page_script %}{% endblock page_script %}
+
+    {% django_htmx_script %}
 
     </body>
-</html>
+{% endif %}
+{% endblock html_body %}
+
+{% if not request.htmx %}
+    </html>
 {% endif %}

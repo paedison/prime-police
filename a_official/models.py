@@ -133,8 +133,8 @@ class Problem(models.Model):
         return f'[Official]Problem(#{self.id}):{self.reference}'
 
     @property
-    def year_ex_sub(self):
-        return f'{self.year}{self.exam}{self.subject}'
+    def year_sub(self):
+        return f'{self.year}{self.subject}'
 
     @property
     def reference(self):
@@ -145,20 +145,8 @@ class Problem(models.Model):
         return ' '.join([self.get_year_display(), self.get_subject_display()])
 
     @property
-    def exam_name(self):
-        if self.exam == '행시':
-            return '행정고시' if self.year < 2011 else '5급공채'
-        if self.exam == '외시':
-            return '외교원' if self.year == 2013 else '외무고시'
-        if self.exam == '칠급':
-            return '7급공채 모의고사' if self.year == 2020 else '7급공채'
-        if self.exam == '칠예':
-            return '7급공채 예시'
-        return self.get_exam_display()
-
-    @property
     def full_reference(self):
-        return ' '.join([self.get_year_display(), self.get_subject_display(), self.get_number_display()])
+        return ' '.join([self.year_subject, self.get_number_display()])
 
     @property
     def subject_field(self):
@@ -206,6 +194,9 @@ class Problem(models.Model):
     def get_tag_url(self):
         return reverse('official:tag-problem', args=[self.id])
 
+    def get_collect_url(self):
+        return reverse('official:collect-problem', args=[self.id])
+
     def get_comment_create_url(self):
         return reverse('official:comment-problem-create', args=[self.id])
 
@@ -249,6 +240,10 @@ class ProblemLike(models.Model):
     def reference(self):
         return self.problem.reference
 
+    @property
+    def year_subject(self):
+        return self.problem.year_subject
+
     def save(self, *args, **kwargs):
         message_type = kwargs.pop('message_type', 'liked')
         self.remarks = get_remarks(message_type, self.remarks)
@@ -274,6 +269,10 @@ class ProblemRate(models.Model):
     @property
     def reference(self):
         return self.problem.reference
+
+    @property
+    def year_subject(self):
+        return self.problem.year_subject
 
     def save(self, *args, **kwargs):
         message_type = f'rated({self.rating})'
@@ -303,6 +302,10 @@ class ProblemSolve(models.Model):
     def reference(self):
         return self.problem.reference
 
+    @property
+    def year_subject(self):
+        return self.problem.year_subject
+
     def save(self, *args, **kwargs):
         message_type = 'correct' if self.is_correct else 'wrong'
         message_type = f'{message_type}({self.answer})'
@@ -330,6 +333,10 @@ class ProblemMemo(models.Model):
     def reference(self):
         return self.problem.reference
 
+    @property
+    def year_subject(self):
+        return self.problem.year_subject
+
 
 class ProblemComment(models.Model):
     problem = models.ForeignKey(Problem, on_delete=models.CASCADE, related_name='comments')
@@ -356,6 +363,10 @@ class ProblemComment(models.Model):
     def reference(self):
         return self.problem.reference
 
+    @property
+    def year_subject(self):
+        return self.problem.year_subject
+
 
 class ProblemCommentLike(models.Model):
     comment = models.ForeignKey(ProblemComment, on_delete=models.CASCADE, related_name='likes')
@@ -372,7 +383,11 @@ class ProblemCommentLike(models.Model):
 
     @property
     def reference(self):
-        return self.problem.reference
+        return self.comment.problem.reference
+
+    @property
+    def year_subject(self):
+        return self.comment.problem.year_subject
 
     def save(self, *args, **kwargs):
         message_type = kwargs.pop('message_type', 'liked')
@@ -419,10 +434,6 @@ class ProblemCollectionItem(models.Model):
     def reference(self):
         return self.problem.reference
 
-    def set_active(self):
-        self.is_active = True
-        self.save()
-
-    def set_inactive(self):
-        self.is_active = False
-        self.save()
+    @property
+    def year_subject(self):
+        return self.problem.year_subject

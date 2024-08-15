@@ -1,32 +1,41 @@
-<div class="tw-flex tw-items-center tw-justify-end tw-gap-2 tw-pt-4 tw-pr-4 tw-cursor-pointer"
+<div class="d-inline-block d-md-flex align-items-center justify-content-end gap-1 cursor-pointer"
      hx-target="#modalContainer" hx-swap="innerHTML swap:0.25s" hx-push-url="false">
     {% if user.is_authenticated %}
-        <a class="htmx-fade-in htmx-fade-out" hx-target="this"
-           hx-post="{{ problem.get_like_url }}">
-            {{ icon_like|safe }}
-            {{ like_counts }}
-        </a>
         <a id="officialRate{{ problem.id }}" class="htmx-fade-in htmx-fade-out"
            data-bs-toggle="modal" data-bs-target="#modalContainer"
-           hx-get="{% url 'official:rate-problem' problem.id %}">
+           hx-get="{{ problem.get_rate_url }}">
             {{ icon_rate|safe }}
         </a>
+
+        <a id="officialLike{{ problem.id }}" class="htmx-fade-in htmx-fade-out" hx-target="this"
+           hx-post="{{ problem.get_like_url }}">
+            {{ icon_like|safe }}
+        </a>
+
         <a id="officialSolve{{ problem.id }}" class="htmx-fade-in htmx-fade-out"
            data-bs-toggle="modal" data-bs-target="#modalContainer"
-           hx-get="{% url 'official:solve-problem' problem.id %}">
+           hx-get="{{ problem.get_solve_url }}">
             {{ icon_solve|safe }}
         </a>
-{#        <a class="htmx-fade-in htmx-fade-out"#}
-{#           hx-target="this" hx-swap="innerHTML swap:0.25s"#}
-{#           hx-post="{{ problem.get_like_url }}">#}
+
+        <span id="officialMemo{{ problem.id }}" class="htmx-fade-in htmx-fade-out">
             {{ icon_memo|safe }}
-{#        </a>#}
+        </span>
+
+        <span id="officialTag{{ problem.id }}" class="htmx-fade-in htmx-fade-out">
+            {{ icon_tag|safe }}
+        </span>
+
+        <a id="officialCollection{{ problem.id }}" class="htmx-fade-in htmx-fade-out"
+           data-bs-toggle="modal" data-bs-target="#modalContainer"
+           hx-get="{{ problem.get_collect_url }}">
+            {{ icon_collection|safe }}
+        </a>
     {% else %}
         <a class="text-secondary"
            data-bs-toggle="modal" data-bs-target="#modalContainer"
            hx-get="{% url 'account_login_modal' %}">
             {{ icon_like|safe }}
-            {{ like_counts }}
             {{ icon_rate|safe }}
             {{ icon_solve|safe }}
             {{ icon_memo|safe }}
