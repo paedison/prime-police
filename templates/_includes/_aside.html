@@ -5,7 +5,7 @@
         {% if user.is_authenticated %}{% partial menu_dashboard %}{% endif %}
 {#        {% partial menu_lecture %}#}
         {% partial menu_official %}
-{#        {% partial menu_prime %}#}
+        {% partial menu_daily %}
 {#        {% partial menu_score %}#}
     </ul>
     {% partial sidebar_toggle %}
@@ -17,69 +17,40 @@
 {% partialdef menu_notice %}
     <li class="nav-item">
         <a id="noticeList" class="nav-link collapsed" hx-boost="true" href="">
-            <i class="fa-solid fa-fw fa-bullhorn"></i>
-            <span>Notice</span>
+            <i class="fa-solid fa-fw fa-bullhorn"></i> 공지사항
         </a>
-    </li><!-- Notice Nav End -->
+    </li>
 {% endpartialdef menu_notice %}
 
 {% partialdef menu_dashboard %}
     <li class="nav-item">
         <a id="dashboardList" class="nav-link collapsed" hx-boost="true" href="">
-            <i class="fa-solid fa-fw fa-list"></i>
-            <span>Dashboard</span>
+            <i class="fa-solid fa-fw fa-list"></i> 대시보드
         </a>
-    </li><!-- Dashboard Nav End -->
+    </li>
 {% endpartialdef menu_dashboard %}
 
 {% partialdef menu_official %}
     <li class="nav-item">
         <a id="officialList" class="nav-link collapsed"
            hx-headers='{"Open-First-Page": "true"}'
-           hx-boost="true" hx-target="#content" hx-swap="outerHTML swap:0.25s"
+           hx-boost="true" hx-target="#main" hx-swap="innerHTML swap:0.25s"
            href="{% url 'official:base' %}">
-            <i class="fa-solid fa-fw fa-layer-group"></i>
-            <span>기출문제</span>
+            <i class="fa-solid fa-fw fa-layer-group"></i> 기출문제
         </a>
-    </li><!-- Official Nav End -->
+    </li>
 {% endpartialdef menu_official %}
 
-{% partialdef menu_prime %}
+{% partialdef menu_daily %}
     <li class="nav-item">
-        <a id="officialList" class="nav-link collapsed"
+        <a id="dailyList" class="nav-link collapsed"
            hx-headers='{"Open-First-Page": "true"}'
-           hx-boost="true" hx-target="#content" hx-swap="outerHTML"
-           href="{% url 'prime:problem-list' %}">
-            <i class="fa-solid fa-fw fa-layer-group"></i>
-            <span>PRIME</span>
+           hx-boost="true" hx-target="#main" hx-swap="innerHTML swap:0.25s"
+           href="{% url 'daily:base' %}">
+            <i class="fa-solid fa-fw fa-inbox"></i> 데일리테스트
         </a>
-    </li><!-- Official Nav End -->
-{% endpartialdef menu_prime %}
-
-{#{% partialdef menu_score %}#}
-{#    <li class="nav-item" role="menuitem" aria-label="Score Menu">#}
-{#        <a class="nav-link collapsed" href="" aria-expanded="false"#}
-{#           data-bs-target="#score-nav" data-bs-toggle="collapse">#}
-{#            <i class="fa-solid fa-fw fa-chart-simple"></i>#}
-{#            <span>Score</span>#}
-{#            <i class="fa-solid fa-fw fa-chevron-down ms-auto"></i>#}
-{#        </a>#}
-{#        <ul id="score-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">#}
-{#            <li>#}
-{#                {% if user.is_superuser %}#}
-{#                    <a id="psatScoreList" class="aside-nav-icon" hx-boost="true" href="">#}
-{#                        <i class="fa-regular fa-fw fa-file-lines"></i>#}
-{#                        <span>경위공채 기출문제</span>#}
-{#                    </a>#}
-{#                {% endif %}#}
-{#                <a id="primeScoreList" class="aside-nav-icon" hx-boost="true" href="">#}
-{#                    <i class="fa-regular fa-fw fa-file"></i>#}
-{#                    <span>프라임 모의고사</span>#}
-{#                </a>#}
-{#            </li>#}
-{#        </ul>#}
-{#    </li><!-- Score Nav End -->#}
-{#{% endpartialdef menu_score %}#}
+    </li>
+{% endpartialdef menu_daily %}
 
 {% partialdef menu_lecture %}
     <li class="nav-item">

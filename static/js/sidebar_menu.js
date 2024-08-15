@@ -64,7 +64,7 @@ $('.logo').click(function() {
 });
 
 // When clicked the main menu
-$('#noticeList, #dashboardList, #officialList, #predictList, #scheduleList, #lectureList').click(
+$('#noticeList, #dashboardList, #officialList, #dailyList, #predictList, #scheduleList, #lectureList').click(
     function() {
         initialMenu();
         $(this).removeClass('collapsed').attr('aria-expanded', 'true');

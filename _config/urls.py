@@ -14,6 +14,6 @@ urlpatterns = [
     path('ckeditor/', include('ckeditor_uploader.urls')),  # CKEditor URLs
 
     path('official/', include('a_official.urls')),
-    path('prime/', include('a_prime.urls')),
+    path('daily/', include('a_daily.urls')),
     path('notice/', include('a_notice.urls')),
 ]

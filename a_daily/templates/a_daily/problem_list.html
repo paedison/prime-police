@@ -4,14 +4,15 @@
 {% block main %}
     {{ info|json_script:'info' }}
     <div class="pagetitle">
-        <h1>{{ icon_menu|safe }} {{ title }}</h1>
+        <h1>{{ icon_menu|safe }} {{ title }}
+        </h1>
         <nav>
             <ol class="breadcrumb" hx-target="#main" hx-swap="innerHTML swap:0.25s" hx-boost="true">
                 <li class="breadcrumb-item">
                     <a href="{% url 'index' %}">Home</a>
                 </li>
                 <li class="breadcrumb-item">
-                    <a class="active" href="{% url 'official:base' %}">Official</a>
+                    <a class="active" href="{% url 'daily:base' %}">Daily</a>
                 </li>
             </ol>
         </nav>
@@ -35,7 +36,7 @@
                             </div>
 
                             <div id="problemContent" class="col-12 col-md-8 htmx-fade-in htmx-fade-out">
-                                {% include 'a_official/problem_list_content.html' %}
+                                {% include 'a_daily/problem_list_content.html' %}
                             </div>
                         </div>
                     </div>
@@ -51,14 +52,14 @@
         <a id="toggleProblemBtn" class="btn btn-success px-2"
            data-bs-toggle="tooltip" data-bs-title="기출문제 리스트"
            hx-boost="true" hx-target="#main" hx-swap="innerHTML swap:0.25s show:window:top"
-           href="{% url 'official:base' %}">
+           href="{% url 'daily:base' %}">
             <i class="fa-solid fa-layer-group fa-fw"></i>
         </a>
 
         <a id="toggleCommentBtn" class="btn btn-success px-2"
            data-bs-toggle="tooltip" data-bs-title="코멘트 리스트"
            hx-boost="true" hx-target="#main" hx-swap="innerHTML swap:0.25s show:window:top"
-           href="{% url 'official:comment-list' %}">
+           href="{% url 'daily:comment-list' %}">
             <i class="fa-solid fa-circle-question fa-fw"></i>
         </a>
 
@@ -85,8 +86,8 @@
                                   class="list-group htmx-fade-out htmx-fade-in{% if collections %} sortable{% endif %}"
                                   hx-target="this" hx-swap="innerHTML swap:0.25s"
                                   hx-push-url="false" hx-trigger="end"
-                                  hx-post="{% url 'official:collection-list' %}">
-                                {% include 'a_official/collection_list.html' %}
+                                  hx-post="{% url 'daily:collection-list' %}">
+                                {% include 'a_daily/collection_list.html' %}
                             </form>
                         </div>
                     {% else %}

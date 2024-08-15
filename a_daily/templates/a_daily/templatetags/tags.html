@@ -1,0 +1,17 @@
+<tag-problem>
+    {% if user.is_authenticated %}
+        <div class="tw-text-sm tw-mb-2 tw-px-2">
+            <input id="problemTag{{ problem.id }}" placeholder='태그를 입력해주세요' type="hidden"
+                   data-tagify data-problem-id="{{ problem.id }}"
+                   data-tags="{{ tags|join:',' }}">
+        </div>
+    {% else %}
+        <div class="tw-text-sm tw-mb-2 tw-px-2">
+            <tags class="tagify tw-justify-center" tabindex="-1">
+                <tag class="tagify__tag">
+                    <div><a class="tagify__tag-text" href="{% url 'account_login' %}">태그를 입력하시려면 로그인해주세요.</a></div>
+                </tag>
+            </tags>
+        </div>
+    {% endif %}
+</tag-problem>

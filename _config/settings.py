@@ -95,7 +95,7 @@ INSTALLED_APPS = [
     # My Apps
     'a_common',
     'a_official',
-    # 'a_prime',
+    'a_daily',
     'a_notice',
 
     'django_cleanup.apps.CleanupConfig',

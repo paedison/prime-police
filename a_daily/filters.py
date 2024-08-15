@@ -1,10 +1,12 @@
 import django_filters
 
-from a_official.models import Problem, year_choice, subject_choice
+from . import models
 
 CHOICES_LIKE = (
+    ('all', '즐겨찾기 지정'),
     ('true', '즐겨찾기 추가'),
-    ('none', '즐겨찾기 미추가'),
+    ('false', '즐겨찾기 제거'),
+    ('none', '즐겨찾기 미지정'),
 )
 CHOICES_RATE = (
     ('all', '난이도 지정'),
@@ -35,38 +37,43 @@ CHOICES_COMMENT = (
 )
 
 
-class AnonymousOfficialListFilter(django_filters.FilterSet):
-    year = django_filters.ChoiceFilter(
-        field_name='year',
+class AnonymousDailyFilter(django_filters.FilterSet):
+    circle = django_filters.ChoiceFilter(
+        field_name='circle',
         label='',
-        empty_label='[전체 연도]',
-        choices=year_choice,
+        empty_label='[전체 순환]',
+        choices=models.circle_choice,
+    )
+    round = django_filters.ChoiceFilter(
+        field_name='round',
+        label='',
+        empty_label='[전체 회차]',
+        choices=models.round_choice,
     )
     subject = django_filters.ChoiceFilter(
         field_name='subject',
         label='',
         empty_label='[전체 과목]',
-        choices=subject_choice,
+        choices=models.subject_choice,
     )
 
     class Meta:
-        model = Problem
-        fields = ['year', 'subject']
+        model = models.Problem
+        fields = ['circle', 'round', 'subject']
 
     @property
     def qs(self):
         keyword = self.request.GET.get('keyword', '') or self.request.POST.get('keyword', '')
-        queryset = super().qs.prefetch_related(
+        queryset = super().qs.filter(year=models.year_default()).prefetch_related(
             'like_users', 'rate_users', 'solve_users', 'memo_users', 'comment_users',
-            'likes', 'rates', 'solves', 'memos', 'comments',
-            'tagged_problems', 'collected_problems',
+            'likes', 'rates', 'solves', 'memos', 'comments', 'tagged_problems', 'collected_problems',
         )
         if keyword:
             return queryset.filter(data__icontains=keyword)
         return queryset
 
 
-class OfficialListFilter(AnonymousOfficialListFilter):
+class DailyFilter(AnonymousDailyFilter):
     likes = django_filters.ChoiceFilter(
         label='',
         empty_label='[즐겨찾기]',
@@ -105,17 +112,19 @@ class OfficialListFilter(AnonymousOfficialListFilter):
     )
 
     class Meta:
-        model = Problem
-        fields = ['year', 'subject', 'likes', 'rates', 'solves', 'memos', 'comments', 'tags']
+        model = models.Problem
+        fields = ['circle', 'round', 'subject', 'likes', 'rates', 'solves', 'memos', 'comments', 'tags']
 
-    def filter_likes(self, queryset, name, value):
+    def filter_likes(self, queryset, _, value):
         filter_dict = {
-            'true': queryset.filter(like_users=self.request.user),
+            'all': queryset.filter(like_users=self.request.user),
+            'true': queryset.filter(likes__is_liked=True, like_users=self.request.user),
+            'false': queryset.filter(likes__is_liked=False, like_users=self.request.user),
             'none': queryset.exclude(like_users=self.request.user),
         }
         return filter_dict[value]
 
-    def filter_rates(self, queryset, name, value):
+    def filter_rates(self, queryset, _, value):
         filter_dict = {
             'all': queryset.filter(problemrate__isnull=False, rate_users=self.request.user),
             '1': queryset.filter(problemrate__rating=1, rate_users=self.request.user),
@@ -127,7 +136,7 @@ class OfficialListFilter(AnonymousOfficialListFilter):
         }
         return filter_dict[value]
 
-    def filter_solves(self, queryset, name, value):
+    def filter_solves(self, queryset, _, value):
         filter_dict = {
             'all': queryset.filter(problemsolve__isnull=False, solve_users=self.request.user),
             'true': queryset.filter(problemsolve__is_correct=True, solve_users=self.request.user),
@@ -136,42 +145,23 @@ class OfficialListFilter(AnonymousOfficialListFilter):
         }
         return filter_dict[value]
 
-    def filter_memos(self, queryset, name, value):
+    def filter_memos(self, queryset, _, value):
         filter_dict = {
             'true': queryset.filter(memo_users=self.request.user),
             'none': queryset.exclude(memo_users=self.request.user),
         }
         return filter_dict[value]
 
-    def filter_tags(self, queryset, name, value):
+    def filter_tags(self, queryset, _, value):
         filter_dict = {
             'true': queryset.filter(tag_users=self.request.user),
             'none': queryset.exclude(tag_users=self.request.user),
         }
         return filter_dict[value]
 
-    def filter_comments(self, queryset, name, value):
+    def filter_comments(self, queryset, _, value):
         filter_dict = {
             'true': queryset.filter(comment_users__isnull=False),
             'none': queryset.exclude(comment_users__isnull=True),
         }
         return filter_dict[value]
-
-
-class AnonymousOfficialDetailFilter(django_filters.FilterSet):
-    problem = django_filters.ChoiceFilter(
-        field_name='problem',
-        label='',
-        choices=year_choice,
-    )
-
-    class Meta:
-        model = Problem
-        fields = ['problem']
-
-    @property
-    def qs(self):
-        year = self.request.GET.get('year', '')
-        sub = self.request.GET.get('sub', '')
-        queryset = super().qs.filter(year=year, subject=sub)
-        return queryset
