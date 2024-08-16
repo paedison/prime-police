@@ -2,49 +2,17 @@
 
 <!-- ======= Main Header ======= -->
 <header id="header" class="header fixed-top d-flex align-items-center">
-    {% partial logo %}
-    {% partial search_bar %}
-
-    <nav class="header-nav ms-auto">
-        <ul class="d-flex align-items-center">
-            <li class="nav-item d-xl-none">
-                <a class="nav-link search-bar-toggle px-1" href="#">
-                    <i class="fa-solid fa-fw fa-magnifying-glass"></i>
-                </a>
-            </li>
-
-            {% if user.is_admin %}{% partial menu_admin %}{% endif %}
-            {% if user.is_authenticated %}
-                {% partial menu_view_type %}
-                <div class="topbar-divider"></div>
-            {% endif %}
-
-            <li class="nav-item dropdown pe-3">
-                {% partial profile_image_icon %}
-                {% if user.is_authenticated %}{% partial menu_authenticated %}{% endif %}
-                {% if not user.is_authenticated %}{% partial menu_anonymous %}{% endif %}
-            </li><!-- Profile Nav End -->
-        </ul>
-    </nav><!-- Icons Navigation End -->
-</header><!-- Main Header End -->
-
-
-{######## partials ########}
-
-{% partialdef logo %}
     <div class="d-flex align-items-center justify-content-between">
         <a class="logo d-flex align-items-center" role="banner"
            hx-target="#main" hx-swap="innerHTML swap:0.25s"
            hx-boost="true" data-target="#predictList"
            href="{% url 'index' %}">
             <img src="{% static 'favicon/favicon-32x32.png' %}" alt="Logo">
-            <span class="d-none d-sm-block">Paedison</span>
+            <span class="d-none d-sm-block">PRIME 경위공채</span>
         </a>
         <i class="fa fa-bars toggle-sidebar-btn"></i>
-    </div><!-- Logo End -->
-{% endpartialdef logo %}
+    </div>
 
-{% partialdef search_bar %}
     <div class="search-bar">
         <form class="search-form d-flex align-items-center"
               hx-target="#main" hx-swap="innerHtml swap:0.25s"
@@ -56,71 +24,81 @@
             </button>
         </form>
     </div>
-{% endpartialdef search_bar %}
 
-{% partialdef menu_admin %}
-    <a class="nav-link px-1" href="{% url 'admin:index' %}" target="#admin">
-        <i class="fa-solid fa-crown fa-fw text-warning"></i>
-    </a>
-{% endpartialdef menu_admin %}
+    <nav class="header-nav ms-auto">
+        <ul class="d-flex align-items-center">
+            <li class="nav-item d-xl-none">
+                <a class="nav-link search-bar-toggle px-1" href="#">
+                    <i class="fa-solid fa-fw fa-magnifying-glass"></i>
+                </a>
+            </li>
 
-{% partialdef menu_view_type %}
-    <div class="d-flex" hx-boost="true" hx-push-url="{% url 'official:base' %}"
-         hx-target="#main" hx-swap="innerHTML swap:0.25s">
-        {% for i in '1234' %}
-            {% cycle '' 'likes=true' 'rates=all' 'solves=all' as view_type_option silent %}
-            {% cycle 'fa-file-lines text-primary' 'fa-heart like_true' 'fa-star rate_true' 'fa-circle-check answer_true' as view_type_icon silent %}
+            {% if user.is_superuser or user.is_staff %}
+                <a class="nav-link px-1" href="{% url 'admin:index' %}" target="#admin">
+                    <i class="fa-solid fa-crown fa-fw text-warning"></i>
+                </a>
+            {% endif %}
 
-            <a class="nav-link px-1" href="{% url 'official:base' %}?{{ view_type_option }}">
-                <i class="fa-solid fa-fw {{ view_type_icon }}"></i>
-            </a>
-        {% endfor %}
-    </div>
-{% endpartialdef menu_view_type %}
+            {% if user.is_authenticated %}
+                <div class="d-flex" hx-boost="true" hx-push-url="{% url 'official:base' %}"
+                     hx-target="#main" hx-swap="innerHTML swap:0.25s">
+                    {% for i in '1234' %}
+                        {% cycle '' 'likes=true' 'rates=all' 'solves=all' as view_type_option silent %}
+                        {% cycle 'fa-file-lines text-primary' 'fa-heart like_true' 'fa-star rate_true' 'fa-circle-check answer_true' as view_type_icon silent %}
 
-{% partialdef profile_image_icon %}
-    <a class="nav-link nav-profile d-flex align-items-center pe-0"
-       href="" data-bs-toggle="dropdown">
-        <img src="{% static 'image/undraw_profile.jpg' %}"
-             alt="Profile" class="img-profile rounded-circle">
-        <span class="d-none d-md-block dropdown-toggle ps-2">{{ user.username }}</span>
-    </a><!-- Profile Image Icon End -->
-{% endpartialdef profile_image_icon %}
+                        <a class="nav-link px-1" href="{% url 'official:base' %}?{{ view_type_option }}">
+                            <i class="fa-solid fa-fw {{ view_type_icon }}"></i>
+                        </a>
+                    {% endfor %}
+                </div>
+                <div class="topbar-divider"></div>
+            {% endif %}
 
-{% partialdef menu_authenticated %}
-    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile"
-        hx-push-url="true" hx-target="#main" hx-swap="innerHTML swap:0.25s">
-{#        <li class="dropdown-item d-flex align-items-center cursor-pointer"#}
-{#            hx-get="{% url 'account_profile' %}">#}
-{#            <i class="fa-solid fa-fw fa-user"></i> <span>Profile</span>#}
-{#        </li>#}
-        <li><hr class="dropdown-divider"></li>
-        <li class="dropdown-item d-flex align-items-center cursor-pointer"
-            hx-get="">
-{#            hx-get="{% url 'dashboard:base' %}">#}
-            <i class="fa-solid fa-fw fa-list"></i> <span>Dashboard</span>
-        </li>
-        <li><hr class="dropdown-divider"></li>
-        <li class="dropdown-item d-flex align-items-center cursor-pointer"
-            data-bs-toggle="modal" data-bs-target="#modalContainer"
-            hx-push-url="false" hx-target="#modalContainer" hx-swap="innerHTML"
-            hx-get="{% url 'account_logout_modal' %}">
-            <i class="fa-solid fa-fw fa-sign-out-alt"></i> 로그아웃
-        </li>
-    </ul><!-- Profile Dropdown Items End -->
-{% endpartialdef menu_authenticated %}
+            <li class="nav-item dropdown pe-3">
+                <a class="nav-link nav-profile d-flex align-items-center pe-0"
+                   href="" data-bs-toggle="dropdown">
+                    <img src="{% static 'image/undraw_profile.jpg' %}"
+                         alt="Profile" class="img-profile rounded-circle">
+                    <span class="d-none d-md-block dropdown-toggle ps-2">{{ user.username }}</span>
+                </a>
 
-{% partialdef menu_anonymous %}
-    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile"
-        hx-push-url="true" hx-target="body" hx-swap="innerHTML swap:0.25s">
-        <li class="dropdown-item d-flex align-items-center cursor-pointer"
-            hx-get="{% url 'account_login' %}">
-            <i class="fa-solid fa-fw fa-sign-in-alt"></i> 로그인
-        </li>
-        <li><hr class="dropdown-divider"></li>
-        <li class="dropdown-item d-flex align-items-center cursor-pointer"
-            hx-get="{% url 'account_signup' %}">
-            <i class="fa-solid fa-fw fa-door-open"></i> 회원가입
-        </li>
-    </ul><!-- Profile Dropdown Items End -->
-{% endpartialdef menu_anonymous %}
+                {% if user.is_authenticated %}
+                    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile"
+                        hx-push-url="true" hx-target="#main" hx-swap="innerHTML swap:0.25s">
+{#                        <li class="dropdown-item d-flex align-items-center cursor-pointer"#}
+{#                            hx-get="{% url 'account_profile' %}">#}
+{#                            <i class="fa-solid fa-fw fa-user"></i> <span>Profile</span>#}
+{#                        </li>#}
+{#                        <li><hr class="dropdown-divider"></li>#}
+{#                        <li class="dropdown-item d-flex align-items-center cursor-pointer"#}
+{#                            hx-get="{% url 'dashboard:base' %}">#}
+{#                            <i class="fa-solid fa-fw fa-list"></i> <span>Dashboard</span>#}
+{#                        </li>#}
+{#                        <li><hr class="dropdown-divider"></li>#}
+                        <li class="dropdown-item d-flex align-items-center cursor-pointer"
+                            data-bs-toggle="modal" data-bs-target="#modalContainer"
+                            hx-push-url="false" hx-target="#modalContainer" hx-swap="innerHTML"
+                            hx-get="{% url 'account_logout_modal' %}">
+                            <i class="fa-solid fa-fw fa-sign-out-alt"></i> 로그아웃
+                        </li>
+                    </ul>
+                {% endif %}
+
+                {% if not user.is_authenticated %}
+                    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile"
+                        hx-push-url="true" hx-target="body" hx-swap="innerHTML swap:0.25s">
+                        <li class="dropdown-item d-flex align-items-center cursor-pointer"
+                            hx-get="{% url 'account_login' %}">
+                            <i class="fa-solid fa-fw fa-sign-in-alt"></i> 로그인
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li class="dropdown-item d-flex align-items-center cursor-pointer"
+                            hx-get="{% url 'account_signup' %}">
+                            <i class="fa-solid fa-fw fa-door-open"></i> 회원가입
+                        </li>
+                    </ul>
+                {% endif %}
+            </li>
+        </ul>
+    </nav>
+</header><!-- Main Header End -->
