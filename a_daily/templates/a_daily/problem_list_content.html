@@ -50,24 +50,10 @@
 {% endif %}
 
 {% partialdef reference %}
-    <a class="text-decoration-none fw-bold"
-       href="{% url 'daily:problem-detail' problem_id %}"
-       hx-get="{% url 'daily:problem-detail' problem_id %}?{{ url_options }}"
-       hx-push-url="{% url 'daily:problem-detail' problem_id %}">
+    <a class="text-decoration-none fw-bold cursor-pointer"
+       hx-get="{% url 'daily:problem-detail' problem_id %}{% querystring %}">
         {{ problem.reference }}
     </a>
-    {% if problem.images.name1 == 'Preparing Image' %}
-        {{ icon_image.False|safe }}
-    {% else %}
-        <a class="text-decoration-none" href=""
-           data-bs-toggle="modal" data-bs-target="#modalContainer"
-           hx-push-url="false"
-           hx-target="#modalContainer"
-           hx-headers='{"View-Type":"image"}'
-           hx-get="{% url 'daily:problem-detail' problem_id %}">
-            {{ icon_image.True|safe }}
-        </a>
-    {% endif %}
 {% endpartialdef reference %}
 
 {% partialdef question %}
@@ -77,10 +63,8 @@
     {% with class='d-none d-xl-inline' chars=60 %}{% partial link_snippet %}{% endwith %}
 
     {% partialdef link_snippet %}
-        <a class="text-decoration-none {{ class }}"
-           href="{% url 'daily:problem-detail' problem_id %}"
-           hx-get="{% url 'daily:problem-detail' problem_id %}?{{ url_options }}"
-           hx-push-url="{% url 'daily:problem-detail' problem_id %}">
+        <a class="text-decoration-none {{ class }} cursor-pointer"
+           hx-get="{% url 'daily:problem-detail' problem_id %}{% querystring %}">
             <h3 class="d-inline-block fs-6 small m-0">
                 {{ problem.question|truncatechars:chars }}
             </h3>

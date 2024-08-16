@@ -91,16 +91,17 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     # Installed Additionally
     'debug_toolbar.middleware.DebugToolbarMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django_htmx.middleware.HtmxMiddleware',
     'allauth.account.middleware.AccountMiddleware',
 
     # Default Django Apps
     'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.auth.middleware.LoginRequiredMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -226,7 +227,7 @@ AUTHENTICATION_BACKENDS = [
 
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_EMAIL_VERIFICATION = 'None'
+ACCOUNT_EMAIL_VERIFICATION = 'none'
 ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 1
 ACCOUNT_EMAIL_SUBJECT_PREFIX = '이메일 인증'
 ACCOUNT_CONFIRM_EMAIL_ON_GET = True

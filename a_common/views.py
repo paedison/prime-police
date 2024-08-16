@@ -1,11 +1,12 @@
 from allauth.account import views as allauth_views
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, login_not_required
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.core.handlers.wsgi import WSGIRequest
 from django.http import Http404
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
+from django.utils.decorators import method_decorator
 from django.views import generic as generic_views
 
 from . import forms as common_forms
@@ -21,6 +22,11 @@ def privacy(request):
     info = {'menu': 'privacy'}
     context = update_context_data(site_name='<PRIME 경위공채>', info=info)
     return render(request, 'a_common/privacy.html', context)
+
+
+@method_decorator(login_not_required, name='dispatch')
+class LoginView(allauth_views.LoginView):
+    pass
 
 
 def profile_view(request, username=None):

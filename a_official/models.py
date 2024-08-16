@@ -179,6 +179,10 @@ class Problem(models.Model):
             'question': icon_set.ICON_QUESTION,
         }
 
+    @staticmethod
+    def get_list_url():
+        return reverse('official:base')
+
     def get_absolute_url(self):
         return reverse('official:problem-detail', args=[self.id])
 

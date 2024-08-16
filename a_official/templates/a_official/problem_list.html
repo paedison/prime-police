@@ -4,7 +4,15 @@
 {% block main %}
     {{ info|json_script:'info' }}
     <div class="pagetitle">
-        <h1>{{ icon_menu|safe }} {{ title }}</h1>
+        <h1>
+            {{ icon_menu|safe }} {{ title }}
+            {% if user.is_staff %}
+                <a class="btn btn-sm btn-outline-primary ms-1"
+                   href="{% url 'admin:a_official_problem_changelist' %}" target="admin">
+                    관리자 페이지
+                </a>
+            {% endif %}
+        </h1>
         <nav>
             <ol class="breadcrumb" hx-target="#main" hx-swap="innerHTML swap:0.25s" hx-boost="true">
                 <li class="breadcrumb-item">
@@ -63,7 +71,7 @@
                 </button>
             </div>
 
-            <div id="floatingCollection" class="card htmx-fade-in htmx-fade-out"
+            <collection id="floatingCollection" class="card htmx-fade-in htmx-fade-out"
                  hx-swap="innerHTML swap:0.25s show:window:top">
                 <div class="card-body">
                     <div class="row align-items-center">
@@ -96,7 +104,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </collection>
         </div>
     </section>
 {% endblock main %}

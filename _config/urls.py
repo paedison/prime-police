@@ -10,7 +10,7 @@ urlpatterns = [
 
     path('admin/', include('admin_honeypot.urls', namespace='admin_honeypot')),
     path('check_in_as_admin/', admin.site.urls),
-    path('accounts/', include('allauth.urls')),
+    path('account/', include('allauth.urls')),
     path('ckeditor/', include('ckeditor_uploader.urls')),  # CKEditor URLs
 
     path('official/', include('a_official.urls')),
