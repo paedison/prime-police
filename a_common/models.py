@@ -3,7 +3,6 @@ from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser, PermissionsMixin
 from django.templatetags.static import static
 from django.utils import timezone
-from django.utils.translation import gettext_lazy as _
 from django_resized import ResizedImageField
 
 
@@ -28,27 +27,19 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
     username_validator = UnicodeUsernameValidator()
 
-    email = models.EmailField(_("email address"), max_length=255, unique=True)
+    email = models.EmailField('이메일', max_length=255, unique=True)
     username = models.CharField(
-        _("username"),
-        max_length=150,
-        unique=True,
-        help_text=_("Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only."),
+        '아이디', max_length=150, unique=True,
+        help_text='150자 이하 문자, 숫자 그리고 @/./+/-/_만 가능합니다.',
         validators=[username_validator],
-        error_messages={"unique": _("A user with that username already exists.")},
-    )
-    joined_at = models.DateTimeField(_("date joined"), default=timezone.now)
+        error_messages={"unique": '해당 아이디는 이미 존재합니다.'})
+    joined_at = models.DateTimeField('가입일', default=timezone.now)
     is_active = models.BooleanField(
-        _("active"),
-        default=True,
-        help_text=_(
-            "Designates whether this user should be treated as active. "
-            "Unselect this instead of deleting accounts."
-        ),
-    )
+        '활성', default=False,
+        help_text="이 사용자가 활성화되어 있는지를 나타냅니다. 계정을 삭제하는 대신 이것을 선택 해제하세요.")
     is_staff = models.BooleanField(
-        _("staff status"), default=False,
-        help_text=_("Designates whether the user can log into this admin site."))
+        '스탭 권한', default=False,
+        help_text='사용자가 관리사이트에 로그인이 가능한지를 나타냅니다.')
     image = ResizedImageField(size=[600, 600], quality=85, upload_to='avatars/', null=True, blank=True)
 
     USERNAME_FIELD = "email"

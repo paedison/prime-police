@@ -203,12 +203,15 @@ def rate_problem(request: HtmxHttpRequest, pk: int):
     return render(request, 'a_official/snippets/rate_modal.html', context)
 
 
+@require_POST
 @login_required
 def solve_problem(request: HtmxHttpRequest, pk: int):
+    answer = request.POST.get('answer')
     problem = get_object_or_404(models.Problem, pk=pk)
 
-    if request.method == 'POST':
-        answer = int(request.POST.get('answer'))
+    is_correct = None
+    if answer:
+        answer = int(answer)
         is_correct = answer == problem.answer
         problem_solve = models.ProblemSolve.objects.filter(problem=problem, user=request.user)
         if problem_solve:
@@ -219,13 +222,11 @@ def solve_problem(request: HtmxHttpRequest, pk: int):
         else:
             models.ProblemSolve.objects.create(
                 problem=problem, user=request.user, answer=answer, is_correct=is_correct)
-        context = update_context_data(
-            problem=problem, is_correct=is_correct,
-            icon_solve=icon_set.ICON_SOLVE[f'{is_correct}'])
-        return render(request, 'a_official/snippets/solve_result.html', context)
+    context = update_context_data(
+        problem=problem, answer=answer, is_correct=is_correct,
+        icon_solve=icon_set.ICON_SOLVE[f'{is_correct}'])
 
-    context = update_context_data(problem=problem)
-    return render(request, 'a_official/snippets/solve_modal.html', context)
+    return render(request, 'a_official/snippets/solve_container.html#answer_modal', context)
 
 
 @login_required

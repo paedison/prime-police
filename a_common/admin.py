@@ -3,8 +3,8 @@ from django.contrib.auth.admin import UserAdmin as AuthUserAdmin
 from . import models
 
 
+@admin.register(models.User)
 class UserAdmin(AuthUserAdmin):
-    model = models.User
     list_display = ('id', 'email', 'username', 'joined_at', 'is_active', 'is_staff')
     list_filter = ('is_active', 'is_staff')
     fieldsets = (
@@ -20,6 +20,4 @@ class UserAdmin(AuthUserAdmin):
          ),
     )
     search_fields = ('email',)
-
-
-admin.site.register(models.User, UserAdmin)
+    ordering = ('id',)

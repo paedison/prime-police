@@ -1,66 +1,36 @@
 {% extends "account/base_entrance.html" %}
-{% load static %}
-{% load widget_tweaks %}
-{% load account socialaccount %}
-{% providers_media_js %}
 
 {% block body_title %}회원가입{% endblock body_title %}
 
 {% block body_content %}
     <form method="post" action="{% url 'account_signup' %}" class="row g-3">
         {% csrf_token %}
-        <div class="col-12">
-            <div class="form-floating">
-                {% render_field form.email class="form-control form-control-sm" %}
-                <label for="id_email">이메일</label>
-            </div>
-        </div>
-
-        <div class="col-12">
-            <div class="form-floating">
-                {% render_field form.username class="form-control form-control-sm" %}
-                <label for="id_username">아이디</label>
-            </div>
-        </div>
-
-        <div class="col-12">
-            <div class="form-floating">
-                {% render_field form.password1 class="form-control form-control-sm" %}
-                <label for="id_password1">비밀번호</label>
-            </div>
-        </div>
-
-        <div class="col-12">
-            <div class="form-floating">
-                {% render_field form.password2 class="form-control form-control-sm" %}
-                <label for="id_password2">비밀번호(확인)</label>
-            </div>
-        </div>
-
         {% if redirect_field_value %}
             <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
         {% endif %}
+
+        {% for _ in '0123' %}
+            {% cycle form.email form.username form.password1 form.password2 as field silent %}
+            <div class="col-12">
+                <div class="form-floating">
+                    {{ field }}
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                </div>
+            </div>
+        {% endfor %}
 
         <div class="col-12">
             <button class="btn btn-primary w-100" type="submit">회원가입</button>
         </div>
     </form>
 
-    <form method="post" action="{% provider_login_url 'google' %}" class="row my-3">
-        {% csrf_token %}
-        <div class="col-12">
-            <button class="btn btn-danger w-100" type="submit">구글 계정으로 로그인</button>
+    <div class="col-12">
+        <div class="alert alert-danger text-center fw-bold small alert-dismissible fade show mt-3"
+             role="alert">
+            이미 계정이 있으신가요? 바로 <a href="{{ login_url }}">로그인</a> 하세요.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-    </form>
-
-        <div class="col-12">
-            <div class="alert alert-danger text-center fw-bold small alert-dismissible fade show"
-                 role="alert">
-                이미 계정이 있으신가요? 바로 <a href="{{ login_url }}">로그인</a> 하세요.
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        </div>
-
+    </div>
 {% endblock body_content %}
 
 {% block footer %}{% endblock footer %}

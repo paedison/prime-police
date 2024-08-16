@@ -12,11 +12,9 @@
             {{ icon_like|safe }}
         </a>
 
-        <a id="officialSolve{{ problem.id }}" class="htmx-fade-in htmx-fade-out"
-           data-bs-toggle="modal" data-bs-target="#modalContainer"
-           hx-get="{{ problem.get_solve_url }}">
+        <span id="officialSolve{{ problem.id }}" class="htmx-fade-in htmx-fade-out">
             {{ icon_solve|safe }}
-        </a>
+        </span>
 
         <span id="officialMemo{{ problem.id }}" class="htmx-fade-in htmx-fade-out">
             {{ icon_memo|safe }}

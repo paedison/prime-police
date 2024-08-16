@@ -1,14 +1,11 @@
 from allauth.account import views as allauth_views
-from allauth.account.views import logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import UserPassesTestMixin
+from django.core.handlers.wsgi import WSGIRequest
 from django.http import Http404
-from django.shortcuts import redirect
-from django.shortcuts import render, get_object_or_404
-from django.urls import reverse
+from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
-from django.utils.translation import gettext_lazy as _
 from django.views import generic as generic_views
 
 from . import forms as common_forms
@@ -76,7 +73,7 @@ def profile_edit_view(request):
     #         form.save()
     #         return redirect('profile')
 
-    if request.path == reverse('profile-onboarding'):
+    if request.path == reverse_lazy('profile-onboarding'):
         template_name = 'a_users/profile_onboarding.html'
     else:
         template_name = 'a_users/profile_edit.html'
@@ -93,7 +90,7 @@ def profile_delete_view(request):
     user = request.user
 
     if request.method == 'POST':
-        logout(request)
+        allauth_views.logout(request)
         user.delete()
         messages.success(request, 'Account deleted, what a pity')
         return redirect('index')
@@ -113,7 +110,7 @@ class OnlyLoggedInAllowedMixin(UserPassesTestMixin):
 
 def add_current_url_to_context(
         context: dict,
-        request: HtmxHttpRequest,
+        request: HtmxHttpRequest | WSGIRequest,
         redirect_field_value='redirect_field_value'
 ):
     if request.htmx:
@@ -144,18 +141,6 @@ class LogoutModalView(generic_views.TemplateView):
         return context
 
 
-class LoginView(allauth_views.LoginView):
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return add_current_url_to_context(context, self.request)
-
-
-class SignupView(allauth_views.SignupView):
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return add_current_url_to_context(context, self.request)
-
-
 class UsernameChangeView(
     OnlyLoggedInAllowedMixin,
     generic_views.UpdateView
@@ -172,12 +157,12 @@ class UsernameChangeView(
         username = self.request.POST.get('username')
         password = self.request.POST.get('password')
         if not user.check_password(password):
-            messages.error(self.request, _('Incorrect password.'))
+            messages.error(self.request, '비밀번호를 확인해주세요.')
             return self.form_invalid(form)
         if username == user.username:
-            messages.error(self.request, _('Same as current username.'))
+            messages.error(self.request, '현재 ID와 동일합니다.')
             return self.form_invalid(form)
-        messages.success(self.request, _('Username successfully updated.'))
+        messages.success(self.request, 'ID가 변경되었습니다.')
         return super().form_valid(form)
 
 

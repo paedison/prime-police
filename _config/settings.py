@@ -252,11 +252,12 @@ ACCOUNT_EMAIL_VERIFICATION = 'None'
 ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 1
 ACCOUNT_EMAIL_SUBJECT_PREFIX = '이메일 인증'
 ACCOUNT_CONFIRM_EMAIL_ON_GET = True
-# ACCOUNT_FORMS = {
-#     'login': 'common.forms.LoginForm',
-#     'change_password': 'common.forms.ChangePasswordForm'
-# }
-ACCOUNT_SESSION_REMEMBER = True
+ACCOUNT_FORMS = {
+    'login': 'a_common.forms.LoginForm',
+    'signup': 'a_common.forms.SignupForm',
+    # 'change_password': 'common.forms.ChangePasswordForm'
+}
+SESSION_COOKIE_AGE = 1209600
 
 EMAIL_HOST = env('EMAIL_HOST')
 EMAIL_PORT = env('EMAIL_PORT')
