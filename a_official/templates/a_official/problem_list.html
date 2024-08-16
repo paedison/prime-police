@@ -41,68 +41,65 @@
                     </div>
                 </div>
             </div>
-            {% partial list_buttons %}
-        </div>
-    </section>
-{% endblock main %}
 
-{% partialdef list_buttons %}
-    <div aria-label="버튼 모음">
-        <a id="toggleProblemBtn" class="btn btn-success px-2"
-           data-bs-toggle="tooltip" data-bs-title="기출문제 리스트"
-           hx-boost="true" hx-target="#main" hx-swap="innerHTML swap:0.25s show:window:top"
-           href="{% url 'official:base' %}">
-            <i class="fa-solid fa-layer-group fa-fw"></i>
-        </a>
+            <div aria-label="버튼 모음">
+                <a id="toggleProblemBtn" class="btn btn-success px-2"
+                   data-bs-toggle="tooltip" data-bs-title="기출문제 리스트"
+                   hx-boost="true" hx-target="#main" hx-swap="innerHTML swap:0.25s show:window:top"
+                   href="{% url 'official:base' %}">
+                    <i class="fa-solid fa-layer-group fa-fw"></i>
+                </a>
 
-        <a id="toggleCommentBtn" class="btn btn-success px-2"
-           data-bs-toggle="tooltip" data-bs-title="코멘트 리스트"
-           hx-boost="true" hx-target="#main" hx-swap="innerHTML swap:0.25s show:window:top"
-           href="{% url 'official:comment-list' %}">
-            <i class="fa-solid fa-circle-question fa-fw"></i>
-        </a>
+                <a id="toggleCommentBtn" class="btn btn-success px-2"
+                   data-bs-toggle="tooltip" data-bs-title="코멘트 리스트"
+                   hx-boost="true" hx-target="#main" hx-swap="innerHTML swap:0.25s show:window:top"
+                   href="{% url 'official:comment-list' %}">
+                    <i class="fa-solid fa-circle-question fa-fw"></i>
+                </a>
 
-        <button id="toggleCollectionBtn" class="btn btn-primary px-2"
-                data-bs-toggle="tooltip" data-bs-title="컬렉션 리스트">
-            <i class="fa-solid fa-folder-plus fa-fw"></i>
-        </button>
-    </div>
+                <button id="toggleCollectionBtn" class="btn btn-primary px-2"
+                        data-bs-toggle="tooltip" data-bs-title="컬렉션 리스트">
+                    <i class="fa-solid fa-folder-plus fa-fw"></i>
+                </button>
+            </div>
 
-    <div id="floatingCollection" class="card htmx-fade-in htmx-fade-out"
-         hx-swap="innerHTML swap:0.25s show:window:top">
-        <div class="card-body">
-            <div class="row align-items-center">
-                <div class="col-12">
-                    <h5 id="floatingCollectionIndicator" class="card-title d-flex" style="cursor: pointer;">
-                        <i class="fa-solid fa-folder-plus me-2"></i> 컬렉션 리스트
-                        <span class="ms-auto">
-                            <i class="fa-solid fa-chevron-right"></i>
-                        </span>
-                    </h5>
-                    {% if user.is_authenticated %}
-                        <div id="collectionList" class="htmx-fade-in htmx-fade-out">
-                            <form id="collectionListForm"
-                                  class="list-group htmx-fade-out htmx-fade-in{% if collections %} sortable{% endif %}"
-                                  hx-target="this" hx-swap="innerHTML swap:0.25s"
-                                  hx-push-url="false" hx-trigger="end"
-                                  hx-post="{% url 'official:collection-list' %}">
-                                {% include 'a_official/collection_list.html' %}
-                            </form>
+            <div id="floatingCollection" class="card htmx-fade-in htmx-fade-out"
+                 hx-swap="innerHTML swap:0.25s show:window:top">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-12">
+                            <h5 id="floatingCollectionIndicator" class="card-title d-flex" style="cursor: pointer;">
+                                <i class="fa-solid fa-folder-plus me-2"></i> 컬렉션 리스트
+                                <span class="ms-auto">
+                                    <i class="fa-solid fa-chevron-right"></i>
+                                </span>
+                            </h5>
+                            {% if user.is_authenticated %}
+                                <div id="collectionList" class="htmx-fade-in htmx-fade-out">
+                                    <form id="collectionListForm"
+                                          class="list-group htmx-fade-out htmx-fade-in{% if collections %} sortable{% endif %}"
+                                          hx-target="this" hx-swap="innerHTML swap:0.25s"
+                                          hx-push-url="false" hx-trigger="end"
+                                          hx-post="{% url 'official:collection-list' %}">
+                                        {% include 'a_official/collection_list.html' %}
+                                    </form>
+                                </div>
+                            {% else %}
+                                <div class="text-center">
+                                    <a class="btn btn-outline-secondary"
+                                       hx-target="body" hx-swap="innerHTML swap:0.25s"
+                                       hx-get="{% url 'account_login' %}">
+                                        로그인이 필요합니다.
+                                    </a>
+                                </div>
+                            {% endif %}
                         </div>
-                    {% else %}
-                        <div class="text-center">
-                            <a class="btn btn-outline-secondary"
-                               hx-target="body" hx-swap="innerHTML swap:0.25s"
-                               hx-get="{% url 'account_login' %}">
-                                로그인이 필요합니다.
-                            </a>
-                        </div>
-                    {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-{% endpartialdef list_buttons %}
+    </section>
+{% endblock main %}
 
 {% partialdef problem_filter %}
     <div class="accordion-item">

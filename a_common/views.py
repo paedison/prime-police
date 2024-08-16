@@ -14,7 +14,7 @@ from .utils import HtmxHttpRequest, update_context_data
 
 
 def page_404(request):
-    return render(request, '404.html', {})
+    return render(request, 'a_common/404.html', {})
 
 
 def privacy(request):

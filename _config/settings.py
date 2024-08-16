@@ -22,13 +22,6 @@ env = Env(
     EMAIL_HOST_PASSWORD=(str, 'EMAIL_HOST_PASSWORD'),
     EMAIL_USE_SSL=(bool, 'EMAIL_USE_SSL'),
     EMAIL_USE_TLS=(bool, 'EMAIL_USE_TLS'),
-
-    # SOCIALACCOUNT_PROVIDERS
-    VERIFIED_EMAIL=(str, 'VERIFIED_EMAIL'),
-    APP_client_id=(str, 'APP_client_id'),
-    APP_secret=(str, 'APP_secret'),
-    APP_key=(str, 'APP_key'),
-    AUTH_PARAMS_access_type=(str, 'AUTH_PARAMS_access_type'),
 )
 Env.read_env()
 ENVIRONMENT = env('ENVIRONMENT', default='production')
@@ -74,14 +67,9 @@ INSTALLED_APPS = [
     # Third Party Apps
     'allauth',
     'allauth.account',
-    'allauth.socialaccount',
-    'allauth.socialaccount.providers.google',
     'admin_honeypot',
     'ckeditor',
     'ckeditor_uploader',
-    'cloudinary_storage',
-    'cloudinary',
-    'compressor',
     'crispy_forms',
     'django_filters',
     'django_htmx',
@@ -89,7 +77,6 @@ INSTALLED_APPS = [
     'template_partials',
     'slippers',
     'widget_tweaks',
-    'easyaudit',
     'django_extensions',
 
     # My Apps
@@ -102,18 +89,20 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    # Installed Additionally
     'debug_toolbar.middleware.DebugToolbarMiddleware',
-    'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'django_htmx.middleware.HtmxMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
+
+    # Default Django Apps
+    'django.middleware.security.SecurityMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'allauth.account.middleware.AccountMiddleware',
-    'django_htmx.middleware.HtmxMiddleware',
-    'easyaudit.middleware.easyaudit.EasyAuditMiddleware',
 ]
 
 ROOT_URLCONF = '_config.urls'
@@ -199,14 +188,17 @@ LOCALE_PATHS = [BASE_DIR / 'locale']
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = 'static/'
-STATIC_ROOT = BASE_DIR / 'static/'
+if ENVIRONMENT == 'development':
+    STATICFILES_DIRS = [
+        BASE_DIR / 'static',
+    ]
+else:
+    STATIC_ROOT = BASE_DIR / 'static/'
 
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    'compressor.finders.CompressorFinder',
 )
-COMPRESS_ENABLED = True
 
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
@@ -232,20 +224,6 @@ AUTHENTICATION_BACKENDS = [
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
-SOCIALACCOUNT_PROVIDERS = {
-    'google': {
-        # 'VERIFIED_EMAIL': env('VERIFIED_EMAIL'),
-        'APP': {
-            'client_id': env('APP_client_id'),
-            'secret': env('APP_secret'),
-            'key': env('APP_key'),
-        },
-        'AUTH_PARAMS': {
-            'access_type': env('AUTH_PARAMS_access_type'),
-        }
-    }
-}
-
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_EMAIL_VERIFICATION = 'None'
@@ -257,7 +235,7 @@ ACCOUNT_FORMS = {
     'signup': 'a_common.forms.SignupForm',
     # 'change_password': 'common.forms.ChangePasswordForm'
 }
-SESSION_COOKIE_AGE = 1209600
+ACCOUNT_SESSION_COOKIE_AGE = 1209600
 
 EMAIL_HOST = env('EMAIL_HOST')
 EMAIL_PORT = env('EMAIL_PORT')
@@ -275,7 +253,9 @@ LOGOUT_REDIRECT_URL = '/'
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 ACCOUNT_USERNAME_BLACKLIST = [
-    'admin', 'accounts', 'profile', 'category', 'post', 'inbox', 'check_in_as_boss',
+    'admin', 'administrator', 'account', 'accounts',
+    'category', 'post', 'inbox', 'check_in_as_boss',
+    'dashboard', 'profile', 'official', 'daily', 'common', 'notice', 'police',
 ]
 
 
@@ -418,10 +398,3 @@ LOGGING = {
 DEBUG_TOOLBAR_CONFIG = {
     "ROOT_TAG_EXTRA_ATTRS": "hx-preserve"
 }
-
-
-# django-easy-audit settings
-DJANGO_EASY_AUDIT_UNREGISTERED_URLS_EXTRA = [
-    r'^/check_in_as_boss/',
-    r'^/__debug__/',
-]

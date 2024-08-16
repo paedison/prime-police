@@ -1,11 +1,11 @@
 from django.contrib.auth.models import User
-from django.template import Library
+from django import template
 
 from a_common.utils import update_context_data
 from a_common.constants import icon_set
 from .. import models
 
-register = Library()
+register = template.Library()
 
 
 @register.inclusion_tag('a_official/templatetags/icons.html')
@@ -23,11 +23,10 @@ def custom_icons(user: User, problem: models.Problem, custom_data: dict):
     is_memoed = get_status('memo')
     is_tagged = get_status('tag')
     is_collected = get_status('collection')
-    like_counts = models.ProblemLike.objects.filter(problem=problem, is_liked=True).count()
 
     return update_context_data(
         user=user, problem=problem,
-        icon_like=icon_set.ICON_LIKE[f'{is_liked}'], like_counts=like_counts,
+        icon_like=icon_set.ICON_LIKE[f'{is_liked}'],
         icon_rate=icon_set.ICON_RATE[f'star{rating}'],
         icon_solve=icon_set.ICON_SOLVE[f'{is_correct}'],
         icon_memo=icon_set.ICON_MEMO[f'{is_memoed}'],

@@ -5,12 +5,6 @@ h1, h2, h3, h4, h5, h6, .breadcrumb, .logo span {
 body {
     font-family: "Open Sans", "Noto Sans KR", sans-serif;
 }
-:root {
-    --bg-heonbeob: rgb(157 23 77);
-    --bg-eoneo: rgb(30 64 175);
-    --bg-jaryo: rgb(6 95 70);
-    --bg-sanghwang: rgb(146 64 14);
-}
 
 .rotate-180 {
     transform: rotate(180deg);
@@ -449,20 +443,6 @@ ul.errorlist>li {
     color: rgba(var(--bs-danger-rgb), 1) !important;
     text-align: left !important;
     font-weight: 700 !important;
-}
-
-
-.bg_heonbeob {
-    background-color: var(--bg-heonbeob);
-}
-.bg_eoneo {
-    background-color: var(--bg-eoneo);
-}
-.bg_jaryo {
-    background-color: var(--bg-jaryo);
-}
-.bg_sanghwang {
-    background-color: var(--bg-sanghwang);
 }
 
 

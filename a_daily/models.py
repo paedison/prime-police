@@ -17,7 +17,7 @@ def year_default():
 
 
 def year_choice() -> list:
-    choice = [(year, f'{year}년') for year in range(2026, datetime.now().year + 2)]
+    choice = [(year, f'{year}년') for year in range(2026, datetime.now().year + 3)]
     choice.reverse()
     return choice
 
