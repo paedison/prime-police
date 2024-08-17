@@ -1,92 +1,34 @@
-{% extends '_layouts/_e.html' %}
-{% load static %}
+{% extends '_base.html' %}
 
-{% block content %}
-    <main id="main" class="tw-col-span-full">
-        {{ info|json_script:'info' }}
+{% block main %}
+    {{ info|json_script:'info' }}
+    <div class="pagetitle">
+        <h1>{{ icon_menu|safe }} 공지사항</h1>
+        <nav>
+            <ol class="breadcrumb" hx-target="#main" hx-swap="innerHTML swap:0.25s" hx-boost="true">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'index' %}">Home</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'notice:base' %}" class="active">Notice</a>
+                </li>
+            </ol>
+        </nav>
+    </div><!-- Page Title End -->
 
-        <section class="section">
-            <div class="row">
-                <div class="col-12" aria-label="공지사항">
-                    <div id="noticeCard" class="card htmx-fade-in"
-                         hx-target="#main" hx-swap="innerHTML swap:0.25s show:window:top">
-                        <div id="noticeCardHeader" class="card-header bg-warning-subtle text-black fw-bold">
-                            공지사항
-                        </div>
-                        <div id="noticeCardContent" class="card-body htmx-fade-in htmx-fade-out">
-                            {% partial list_content %}
-                        </div>
+    <section class="section">
+        <div class="row">
+            <div class="col-12" aria-label="공지사항">
+                <div id="noticeCard" class="card htmx-fade-in"
+                     hx-target="#main" hx-swap="innerHTML swap:0.25s show:window:top">
+                    <div id="noticeCardHeader" class="card-header bg-warning-subtle text-black fw-bold">
+                        공지사항
+                    </div>
+                    <div id="noticeCardContent" class="card-body htmx-fade-in htmx-fade-out">
+                        {% include 'a_notice/post_list_content.html' %}
                     </div>
                 </div>
             </div>
-        </section>
-    </main>
-{% endblock content %}
-
-{% partialdef list_content %}
-    <article class="table-responsive">
-        <table class="table align-middle m-0">
-            <thead>
-                <tr>
-                    <th class="text-center text-nowrap px-2">제목</th>
-                    <th class="text-center text-nowrap px-2 col-1">글쓴이</th>
-                    <th class="text-center text-nowrap px-2 col-1">작성일</th>
-                    <th class="text-center text-nowrap px-2 col-1">조회</th>
-                    <th class="text-center text-nowrap px-2 col-1">댓글</th>
-                </tr>
-            </thead>
-            <tbody hx-push-url="true" hx-target="#content">
-                {% if top_fixed %}
-                    {% for post in top_fixed %}{% partial tbody %}{% endfor %}
-                {% endif %}
-                {% for post in page_obj %}
-                    {% if not post.top_fixed %}{% partial tbody %}{% endif %}
-                {% empty %}
-                    <tr>
-                        <td class="text-center text-nowrap px-2" colspan="5">
-                            추가된 자료가 없습니다.
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </article>
-
-    <section class="d-flex flex-wrap">
-        {% if page_obj.has_next or page_obj.has_previous %}
-            {% include 'a_notice/snippets/pagination.html' with header='notice_list' %}
-        {% endif %}
-
-        {% if user.is_superuser or user.is_staff %}
-            <div class="ms-auto p-2">
-                <a class="btn btn-sm btn-outline-primary" hx-boost="true"
-                   hx-get="{{ post_create_url }}" href=""
-                   hx-push-url="true" title="Create">
-                    글쓰기
-                </a>
-            </div>
-        {% endif %}
+        </div>
     </section>
-{% endpartialdef list_content %}
-
-{% partialdef tbody %}
-    <tr class="tw-cursor-pointer{% if post.top_fixed %} table-warning{% endif %}"
-        hx-get="{{ post.get_absolute_url }}">
-        <td class="text-start text-nowrap fw-bold px-2">
-            <span class="badge rounded-pill bg-secondary">{{ post.get_category_display }}</span>
-            {% if post.top_fixed %}
-                <span class="text-danger">{{ icon_board.top_fixed|safe }}</span>
-            {% endif %}
-            {% if post.is_hidden %}
-                <span class="text-danger">{{ icon_board.is_hidden|safe }}</span>
-            {% endif %}
-            <span class="d-md-none">{{ post.title|truncatechars:30 }}</span>
-            <span class="d-none d-md-inline d-lg-none">{{ post.title|truncatechars:40 }}</span>
-            <span class="d-none d-lg-inline">{{ post.title|truncatechars:50 }}</span>
-        </td>
-        <td class="text-center text-nowrap px-2 col-1">{{ post.user.username }}</td>
-        <td class="text-center text-nowrap px-2 col-1">{{ post.created_at|date:'n/j' }}</td>
-        <td class="text-center text-nowrap px-2 col-1">{{ post.hit }}</td>
-        <td class="text-center text-nowrap px-2 col-1">{{ post.comment_count }}</td>
-    </tr>
-{% endpartialdef tbody %}
+{% endblock main %}

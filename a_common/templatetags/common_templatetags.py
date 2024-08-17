@@ -1,6 +1,6 @@
-from django.template import Library
+from django import template
 
-register = Library()
+register = template.Library()
 
 
 @register.filter
@@ -43,3 +43,9 @@ def percentageby(content, arg: int) -> float | str:
     if content:
         return content * 100 / arg
     return '-'
+
+
+@register.filter()
+def to_kor_day(value: str):
+    days = ['일', '월', '화', '수', '목', '금', '토']
+    return days[int(value)]

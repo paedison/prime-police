@@ -1,79 +1,79 @@
-{% extends 'list.html' %}
-{% load i18n %}
-{% load static %}
-{% load widget_tweaks %}
+{% extends '_base.html' %}
 
 {% block google_adsense %}{% endblock %}
 
 {% block main %}
-{% partialdef create_main inline=True %} {# create_main partial #}
-{{ info|json_script:'info' }}
-<div class="pagetitle">
-    <h1>{{ icon|safe }} {{ info.menu|title }}
-        <span class="fs-6 text-secondary">공지사항</span>
-    </h1>
-    <nav>
-        <ol class="breadcrumb" hx-target="#main" hx-swap="innerHTML swap:0.25s" hx-push-url="true">
-            <li class="breadcrumb-item">
-                <a href="{% url 'index' %}" hx-post="{% url 'index' %}">Home</a>
-            </li>
-            <li class="breadcrumb-item active">{{ info.menu|title }}</li>
-        </ol>
-    </nav>
-</div><!-- Page Title End -->
+    {{ info|json_script:'info' }}
+    <div class="pagetitle">
+        <h1>{{ icon_menu|safe }} 공지사항</h1>
+        <nav>
+            <ol class="breadcrumb" hx-target="#main" hx-swap="innerHTML swap:0.25s" hx-boost="true">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'index' %}">Home</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'notice:base' %}" class="active">Notice</a>
+                </li>
+            </ol>
+        </nav>
+    </div><!-- Page Title End -->
 
-<section class="section" hx-target="#main" hx-swap="innerHTML swap:0.25s">
-    {% #content_row class3='p-4' %}
-        {% if info.view_type == 'post_create' %}
-            {% with message='Create' %}
-                {% partialdef form inline=True %} {# form partial #}
-                    <form method="post" class="user">
-                        {% csrf_token %}
-                        {% if form.errors.content %}
-                            <div class="alert alert-danger fade show small py-2 fw-bold" role="alert">
-                                내용을 입력해주세요.
-                            </div>
-                        {% endif %}
-
-                        <input id="id_user" type="text" name="user" value="{{ user.id }}" aria-label="User" hidden/>
-                        <div class="d-flex">
-                            <div class="col-2">
-                                {% render_field form.category class='form-select form-select-sm' %}
-                            </div>
-                            <div class="col-10">
-                                {% render_field form.title placeholder="제목을 입력해주세요" class='form-control form-control-sm' %}
-                            </div>
-                        </div>
-
-                        {{ form.media }}
-                        {{ form.content }}
-
-                        <div class="d-flex align-items-center justify-content-end mt-2">
-                            {% if user.is_superuser %}
-                            <div class="form-check">
-                                {% render_field form.is_hidden class='form-check-input' %}
-                                <label class="form-check-label small me-3" for="id_is_hidden">비밀글</label>
-                            </div>
-                            {% endif %}
-
-                            <div class="form-check">
-                                {% render_field form.top_fixed class='form-check-input' %}
-                                <label class="form-check-label small me-3" for="id_top_fixed">상단 고정</label>
-                            </div>
-                            <button type="submit" class="btn btn-sm btn-outline-primary ms-2"
-                                    title="{% trans message %}">
-                                {% trans message %}
-                            </button>
-                        </div>
-                    </form>
-                {% endpartialdef %}
-            {% endwith %}
-        {% else %}
-            {% with message='Update' %}
-                {% partial form %}
-            {% endwith %}
-        {% endif %}
-    {% /content_row %}
-</section>
-{% endpartialdef create_main %}
+    <section class="section" hx-target="#main" hx-swap="innerHTML swap:0.25s">
+        <div class="row">
+            <div class="col-12" aria-label="공지사항">
+                <div id="noticeCard" class="card htmx-fade-in"
+                     hx-target="#main" hx-swap="innerHTML swap:0.25s show:window:top">
+                    <div id="noticeCardHeader" class="card-header bg-warning-subtle text-black fw-bold">
+                        {{ sub_title }}
+                    </div>
+                    <div id="noticeCardContent" class="card-body htmx-fade-in htmx-fade-out">
+                        {% partial form %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 {% endblock %}
+
+{% partialdef form %}
+    <form hx-post="{{ post_url }}">
+        {% csrf_token %}
+    {{ form.errors }}
+        {% if form.errors.content %}
+            <div class="alert alert-danger fade show small py-2 fw-bold" role="alert">
+                내용을 입력해주세요.
+            </div>
+        {% endif %}
+
+        <div class="form-floating mb-3">
+            {{ form.title }}
+            <label for="{{ form.title.id_for_label }}">{{ form.title.label }}</label>
+        </div>
+
+        {{ form.media }}
+        {{ form.content }}
+        <textarea id="post_content" name="content" class="ckeditor-content" aria-label="내용" hidden></textarea>
+
+        <div class="d-flex align-items-center justify-content-end mt-2">
+            {% if user.is_superuser %}
+            <div class="form-check">
+                {{ form.is_hidden }}
+                <label class="form-check-label small me-3" for="{{ form.is_hidden.id_for_label }}">
+                    {{ form.is_hidden.label }}
+                </label>
+            </div>
+            {% endif %}
+
+            <div class="form-check">
+                {{ form.top_fixed }}
+                <label class="form-check-label small me-3" for="{{ form.top_fixed.id_for_label }}">
+                    {{ form.top_fixed.label }}
+                </label>
+            </div>
+
+            <button type="submit" class="ckeditor-submit btn btn-sm btn-outline-primary ms-2" title="{{ message }}">
+                {{ message }}
+            </button>
+        </div>
+    </form>
+{% endpartialdef %}

@@ -16,32 +16,34 @@ class Post(models.Model):
     is_hidden = models.BooleanField("비밀글", default=False)
 
     class Meta:
+        verbose_name = verbose_name_plural = "공지사항"
         ordering = ["-id"]
 
     def __str__(self):
-        return self.title
-
-    app_name = 'notice'
-    def get_absolute_url(self): return reverse(f'{self.app_name}:detail', args=[self.id])
-    @property
-    def post_detail_url(self): return reverse(f'{self.app_name}:detail', args=[self.id])
-    @property
-    def post_detail_content_url(self): return reverse(f'{self.app_name}:detail_content', args=[self.id])
-    @property
-    def post_list_url(self): return reverse(f'{self.app_name}:list')
-    @property
-    def post_list_navigation_url(self): return reverse(f'{self.app_name}:list_navigation')
-    @property
-    def post_update_url(self): return reverse(f'{self.app_name}:update', args=[self.id])
-    @property
-    def post_update_content_url(self): return reverse(f'{self.app_name}:update_content', args=[self.id])
-    @property
-    def post_delete_url(self): return reverse(f'{self.app_name}:delete', args=[self.id])
-    @property
-    def comment_create_url(self): return reverse(f'{self.app_name}:comment_create', args=[self.id])
+        return f'[Notice]Post(#{self.id}):{self.title}'
 
     @property
-    def comment_count(self): return self.post_comments.count()
+    def comment_count(self):
+        return self.post_comments.count()
+
+    def get_absolute_url(self):
+        return reverse(f'notice:detail', args=[self.id])
+
+    @staticmethod
+    def get_list_url():
+        return reverse(f'notice:base')
+
+    def get_create_url(self):
+        return reverse(f'notice:create', args=[self.id])
+
+    def get_update_url(self):
+        return reverse(f'notice:update', args=[self.id])
+
+    def get_delete_url(self):
+        return reverse(f'notice:delete', args=[self.id])
+
+    def get_comment_create_url(self):
+        return reverse(f'notice:comment_create', args=[self.id])
 
     def update_hit(self):
         hit = self.hit
@@ -61,20 +63,17 @@ class Comment(models.Model):
     modified_at = models.DateTimeField("수정일", auto_now=True)
 
     class Meta:
+        verbose_name = verbose_name_plural = "댓글"
         ordering = ["-id"]
 
-    app_name = 'notice'
+    def __str__(self):
+        return f'[Notice]Comment(#{self.id}):{self.user.username}-{self.post.title}'
 
-    @property
-    def comment_update_url(self):
-        return reverse(
-            f'{self.app_name}:comment_update', kwargs={'post_id': self.post.id, 'comment_id': self.id})
+    def get_update_url(self):
+        return reverse(f'notice:comment_update', args=[self.id])
 
-    @property
-    def comment_delete_url(self):
-        return reverse(
-            f'{self.app_name}:comment_delete', kwargs={'post_id': self.post.id, 'comment_id': self.id})
+    def get_delete_url(self):
+        return reverse(f'notice:comment_delete', args=[self.id])
 
-    @property
-    def post_detail_url(self):
-        return reverse(f'{self.app_name}:detail', args=[self.post.id])
+    def get_post_detail_url(self):
+        return reverse(f'notice:detail', args=[self.post.id])

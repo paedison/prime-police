@@ -1,5 +1,5 @@
-<!-- ======= Sidebar ======= -->
-<aside id="sidebar" class="sidebar" hx-target="#main" hx-swap="innerHTML swap:0.25s">
+<aside id="sidebar" class="sidebar" hx-target="#main"
+       hx-swap="innerHTML swap:0.25s" hx-boost="true">
     <ul id="sidebar-nav" class="sidebar-nav">
         {% partial menu_notice %}
         {% if user.is_authenticated %}{% partial menu_dashboard %}{% endif %}
@@ -9,14 +9,11 @@
 {#        {% partial menu_score %}#}
     </ul>
     {% partial sidebar_toggle %}
-</aside><!-- Sidebar End -->
-
-
-{######## partials ########}
+</aside>
 
 {% partialdef menu_notice %}
     <li class="nav-item">
-        <a id="noticeList" class="nav-link collapsed" hx-boost="true" href="">
+        <a id="noticeList" class="nav-link collapsed" href="{% url 'notice:base' %}">
             <i class="fa-solid fa-fw fa-bullhorn"></i> 공지사항
         </a>
     </li>
@@ -24,7 +21,7 @@
 
 {% partialdef menu_dashboard %}
     <li class="nav-item">
-        <a id="dashboardList" class="nav-link collapsed" hx-boost="true" href="">
+        <a id="dashboardList" class="nav-link collapsed" href="">
             <i class="fa-solid fa-fw fa-list"></i> 대시보드
         </a>
     </li>
@@ -32,10 +29,7 @@
 
 {% partialdef menu_official %}
     <li class="nav-item">
-        <a id="officialList" class="nav-link collapsed"
-           hx-headers='{"Open-First-Page": "true"}'
-           hx-boost="true" hx-target="#main" hx-swap="innerHTML swap:0.25s"
-           href="{% url 'official:base' %}">
+        <a id="officialList" class="nav-link collapsed" href="{% url 'official:base' %}">
             <i class="fa-solid fa-fw fa-layer-group"></i> 기출문제
         </a>
     </li>
@@ -43,10 +37,7 @@
 
 {% partialdef menu_daily %}
     <li class="nav-item">
-        <a id="dailyList" class="nav-link collapsed"
-           hx-headers='{"Open-First-Page": "true"}'
-           hx-boost="true" hx-target="#main" hx-swap="innerHTML swap:0.25s"
-           href="{% url 'daily:base' %}">
+        <a id="dailyList" class="nav-link collapsed" href="{% url 'daily:base' %}">
             <i class="fa-solid fa-fw fa-inbox"></i> 데일리테스트
         </a>
     </li>
@@ -54,11 +45,10 @@
 
 {% partialdef menu_lecture %}
     <li class="nav-item">
-        <a id="lectureList" class="nav-link collapsed" hx-boost="true" href="">
-            <i class="fa-solid fa-fw fa-pen-to-square"></i>
-            <span>Lecture</span>
+        <a id="lectureList" class="nav-link collapsed" href="">
+            <i class="fa-solid fa-fw fa-pen-to-square"></i> 온라인강의
         </a>
-    </li><!-- Schedule Nav End -->
+    </li>
 {% endpartialdef menu_lecture %}
 
 {% partialdef sidebar_toggle %}

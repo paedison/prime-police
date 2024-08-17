@@ -1,8 +1,8 @@
 from django.core.paginator import Paginator
 from django.urls import reverse_lazy
 
-from common.constants.icon_set import ConstantIconSet
-from notice import forms, models  # should change when copied
+from a_common.constants.icon_set import ConstantIconSet
+from a_notice import forms, models  # should change when copied
 
 
 class BaseMixin(ConstantIconSet):
