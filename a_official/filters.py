@@ -1,6 +1,6 @@
 import django_filters
 
-from .models import Problem, year_choice, subject_choice
+from . import models
 
 CHOICES_LIKE = (
     ('all', '즐겨찾기 지정'),
@@ -42,17 +42,17 @@ class AnonymousOfficialFilter(django_filters.FilterSet):
         field_name='year',
         label='',
         empty_label='[전체 연도]',
-        choices=year_choice,
+        choices=models.year_choice,
     )
     subject = django_filters.ChoiceFilter(
         field_name='subject',
         label='',
         empty_label='[전체 과목]',
-        choices=subject_choice,
+        choices=models.subject_choice,
     )
 
     class Meta:
-        model = Problem
+        model = models.Problem
         fields = ['year', 'subject']
 
     @property
@@ -106,7 +106,7 @@ class OfficialFilter(AnonymousOfficialFilter):
     )
 
     class Meta:
-        model = Problem
+        model = models.Problem
         fields = ['year', 'subject', 'likes', 'rates', 'solves', 'memos', 'comments', 'tags']
 
     def filter_likes(self, queryset, _, value):
@@ -120,21 +120,21 @@ class OfficialFilter(AnonymousOfficialFilter):
 
     def filter_rates(self, queryset, _, value):
         filter_dict = {
-            'all': queryset.filter(problemrate__isnull=False, rate_users=self.request.user),
-            '1': queryset.filter(problemrate__rating=1, rate_users=self.request.user),
-            '2': queryset.filter(problemrate__rating=2, rate_users=self.request.user),
-            '3': queryset.filter(problemrate__rating=3, rate_users=self.request.user),
-            '4': queryset.filter(problemrate__rating=4, rate_users=self.request.user),
-            '5': queryset.filter(problemrate__rating=5, rate_users=self.request.user),
+            'all': queryset.filter(rates__isnull=False, rate_users=self.request.user),
+            '1': queryset.filter(rates__rating=1, rate_users=self.request.user),
+            '2': queryset.filter(rates__rating=2, rate_users=self.request.user),
+            '3': queryset.filter(rates__rating=3, rate_users=self.request.user),
+            '4': queryset.filter(rates__rating=4, rate_users=self.request.user),
+            '5': queryset.filter(rates__rating=5, rate_users=self.request.user),
             'none': queryset.exclude(rate_users=self.request.user),
         }
         return filter_dict[value]
 
     def filter_solves(self, queryset, _, value):
         filter_dict = {
-            'all': queryset.filter(problemsolve__isnull=False, solve_users=self.request.user),
-            'true': queryset.filter(problemsolve__is_correct=True, solve_users=self.request.user),
-            'false': queryset.filter(problemsolve__is_correct=False, solve_users=self.request.user),
+            'all': queryset.filter(solves__isnull=False, solve_users=self.request.user),
+            'true': queryset.filter(solves__is_correct=True, solve_users=self.request.user),
+            'false': queryset.filter(solves__is_correct=False, solve_users=self.request.user),
             'none': queryset.exclude(solve_users=self.request.user),
         }
         return filter_dict[value]
@@ -147,9 +147,11 @@ class OfficialFilter(AnonymousOfficialFilter):
         return filter_dict[value]
 
     def filter_tags(self, queryset, _, value):
+        id_list = models.ProblemTaggedItem.objects.filter(
+            user=self.request.user, active=True).values_list('content_object_id', flat=True)
         filter_dict = {
-            'true': queryset.filter(tag_users=self.request.user),
-            'none': queryset.exclude(tag_users=self.request.user),
+            'true': queryset.filter(id__in=id_list),
+            'none': queryset.exclude(id__in=id_list),
         }
         return filter_dict[value]
 

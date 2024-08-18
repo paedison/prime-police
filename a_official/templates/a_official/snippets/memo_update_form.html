@@ -1,0 +1,16 @@
+<form hx-headers='{"View-Type":"update"}' hx-post="{{ problem.get_memo_url }}">
+    {{ memo_form.media }}
+    {{ memo_form.content }}
+    <textarea id="content_memo" name="content" class="ckeditor-content" aria-label="메모" hidden></textarea>
+    <div class="d-flex justify-content-end mt-2">
+        <div class="btn-group">
+            <button type="submit" class="btn btn-sm btn-outline-primary ckeditor-submit">
+                수정
+            </button>
+            <button class="btn btn-sm btn-danger" hx-headers='{"View-Type":""}'
+                    hx-get="{{ problem.get_memo_url }}">
+                취소
+            </button>
+        </div>
+    </div>
+</form>

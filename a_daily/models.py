@@ -1,10 +1,10 @@
-from datetime import datetime
+from datetime import datetime, date
 
 import pytz
 from ckeditor.fields import RichTextField
 from ckeditor_uploader.fields import RichTextUploadingField
 from django.db import models
-from django.urls import reverse
+from django.urls import reverse_lazy
 from taggit.managers import TaggableManager
 from taggit.models import TaggedItemBase, TagBase
 
@@ -113,6 +113,7 @@ class Problem(models.Model):
     answer = models.IntegerField(choices=answer_choice, default=1, verbose_name='정답')
     question = models.TextField(verbose_name='발문')
     data = RichTextUploadingField(config_name='problem', verbose_name='문제 내용')
+    opened_at = models.DateField(default=date.today, verbose_name='공개일')
 
     tags = TaggableManager(through=ProblemTaggedItem, blank=True)
 
@@ -169,25 +170,28 @@ class Problem(models.Model):
         }
 
     def get_absolute_url(self):
-        return reverse('daily:problem-detail', args=[self.id])
+        return reverse_lazy('daily:problem-detail', args=[self.id])
 
     def get_like_url(self):
-        return reverse('daily:like-problem', args=[self.id])
+        return reverse_lazy('daily:like-problem', args=[self.id])
 
     def get_rate_url(self):
-        return reverse('daily:rate-problem', args=[self.id])
+        return reverse_lazy('daily:rate-problem', args=[self.id])
 
     def get_solve_url(self):
-        return reverse('daily:solve-problem', args=[self.id])
+        return reverse_lazy('daily:solve-problem', args=[self.id])
+
+    def get_memo_url(self):
+        return reverse_lazy('daily:memo-problem', args=[self.id])
 
     def get_tag_url(self):
-        return reverse('daily:tag-problem', args=[self.id])
+        return reverse_lazy('daily:tag-problem', args=[self.id])
 
     def get_collect_url(self):
-        return reverse('daily:collect-problem', args=[self.id])
+        return reverse_lazy('daily:collect-problem', args=[self.id])
 
     def get_comment_create_url(self):
-        return reverse('daily:comment-problem-create', args=[self.id])
+        return reverse_lazy('daily:comment-problem-create', args=[self.id])
 
 
 class ProblemOpen(models.Model):
@@ -398,6 +402,9 @@ class ProblemCollection(models.Model):
 
     def __str__(self):
         return f'[Daily]ProblemCollection(#{self.id}):{self.title}-{self.user.username}'
+
+    def get_detail_url(self):
+        return reverse_lazy('daily:collection-detail', args=[self.id])
 
 
 class ProblemCollectionItem(models.Model):

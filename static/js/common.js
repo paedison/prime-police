@@ -1,29 +1,27 @@
 // Initialize tooltips, Sortables, toggleButtons
-(function initializeTooltips() {$('[data-bs-toggle="tooltip"]').tooltip();})();
+function initializeTooltips() {
+    $('[data-bs-toggle="tooltip"]').tooltip();
+}
 
-(
-    function initializeSortables() {
-        $('.sortable').each(function() {
-            new Sortable(this, {
-                animation: 150,
-                ghostClass: 'blue-background-class'
-            });
+function initializeSortables() {
+    $('.sortable').each(function() {
+        new Sortable(this, {
+            animation: 150,
+            ghostClass: 'blue-background-class'
         });
-    }
-)();
+    });
+}
 
-(
-    function initializeToggleButtons() {
-        $('#toggleProblemBtn, #toggleCommentBtn, #floatingCollectionIndicator').click(function () {
-            $('#floatingCollection').removeClass('show-menu');
-            $('#toggleCollectionBtn').show().animate({right: '20'}, 300);
-        });
-        $('#toggleCollectionBtn').click(function() {
-            $('#floatingCollection').addClass('show-menu');
-            $(this).hide();
-        });
-    }
-)();
+function initializeToggleButtons() {
+    $('#toggleProblemBtn, #toggleCommentBtn, #floatingCollectionIndicator').click(function () {
+        $('#floatingCollection').removeClass('show-menu');
+        $('#toggleCollectionBtn').show().animate({right: '20'}, 300);
+    });
+    $('#toggleCollectionBtn').click(function() {
+        $('#floatingCollection').addClass('show-menu');
+        $(this).hide();
+    });
+}
 
 
 let csrfToken = JSON.parse(
@@ -49,7 +47,8 @@ function applyTagify() {
         if (input.dataset.tagifyApplied) {return}
 
         const problemId = input.getAttribute('data-problem-id');
-        const action = `/official/problem/tag/${problemId}/`
+        const tagType = input.getAttribute('data-tag-type');
+        const action = `/${tagType}/tag/${problemId}/`
         const tags = input.getAttribute('data-tags').split(',').map(tag => tag.trim());
         const tagify = new Tagify(input, {
             editTags: false,
@@ -68,5 +67,23 @@ function applyTagify() {
         input.dataset.tagifyApplied = 'true';
     });
 }
-$(window).on('load', applyTagify);
-$(document).on('htmx:afterSettle', applyTagify);
+
+// Attach the content of ckeditor to the form
+function attachContentCkeditor() {
+    $('.ckeditor-submit').click( function() {
+        let button = $(this);
+        let ckeditorId = button.closest('form').find('div.django-ckeditor-widget').attr('data-field-id');
+        let content = CKEDITOR.instances[ckeditorId].getData();
+        button.closest('form').find('textarea.ckeditor-content').text(content);
+    });
+}
+
+function initializeAll() {
+    initializeTooltips();
+    initializeSortables();
+    initializeToggleButtons();
+    applyTagify();
+    attachContentCkeditor();
+}
+$(window).on('load', initializeAll);
+$(document).on('htmx:afterSettle', initializeAll);

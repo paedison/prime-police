@@ -2,39 +2,26 @@
     <div id="collectionList{{ collection.id }}" class="list-group-item list-group-item-action p-0">
         <input type="hidden" name="collection" value="{{ collection.id }}"/>
         <div class="container">
-            <div class="row">
+            <div class="row cursor-pointer">
                 <div class="col-2 p-0">
-                    <div class="d-flex h-100 align-items-center justify-content-center bg-warning-subtle cursor-pointer"
-                         hx-target="#problemCard" hx-swap="innerHTML swap:0.25s"
-                         hx-get="{% url 'official:collection-detail' collection.id %}">
+                    <div class="d-flex h-100 align-items-center justify-content-center bg-warning-subtle"
+                         hx-target="#problemCard" hx-get="{{ collection.get_detail_url }}">
                         <div class="fw-bold py-2">{{ collection.order }}</div>
                     </div>
                 </div>
                 <div class="col-10 px-1 d-flex justify-content-between">
-                    <div class="d-flex h-100 align-items-center cursor-pointer"
-                         hx-target="#problemCard" hx-swap="innerHTML swap:0.25s"
-                         hx-get="{% url 'official:collection-detail' collection.id %}">
+                    <div class="d-flex flex-fill h-100 align-items-center"
+                         hx-target="#problemCard" hx-get="{{ collection.get_detail_url }}">
                         {{ collection.title }}
                     </div>
                     <span class="d-flex h-100 align-items-center text-nowrap">
-                        <span class="me-2 htmx-fade-in htmx-fade-out cursor-pointer"
-                              hx-target="closest div" hx-swap="innerHTML swap:0.25s"
-                              hx-headers='{"View-Type":"update"}'
-                              hx-get="{% url 'official:collection-detail' collection.id %}">
+                        <span class="me-2 htmx-fade-in htmx-fade-out" hx-target="closest div"
+                              hx-headers='{"View-Type":"update"}' hx-get="{{ collection.get_detail_url }}">
                             <i class="fa-solid fa-pen text-success"></i>
                         </span>
-{#                                <span class="me-2 htmx-fade-in htmx-fade-out cursor-pointer"#}
-{#                                      data-bs-toggle="modal" data-bs-target="#modalContainer"#}
-{#                                      hx-target="#modalContainer" hx-swap="innerHTML swap:0.25s"#}
-{#                                  hx-get="">#}
-{#                                      hx-get="{% url 'official:collection-update' collection.id %}">#}
-{#                                    <i class="fa-solid fa-pen text-success"></i>#}
-{#                                </span>#}
-                        <span class="htmx-fade-in htmx-fade-out cursor-pointer"
-                              hx-target="#collectionListForm" hx-swap="innerHTML swap:0.25s"
-                              hx-confirm="컬렉션을 삭제하시겠습니까?"
-                              hx-headers='{"View-Type":"delete"}'
-                              hx-post="{% url 'official:collection-detail' collection.id %}">
+                        <span class="htmx-fade-in htmx-fade-out" hx-target="#collectionListForm"
+                              hx-confirm="컬렉션을 삭제하시겠습니까?" hx-headers='{"View-Type":"delete"}'
+                              hx-post="{{ collection.get_detail_url }}">
                             <i class="fa-solid fa-square-xmark text-danger fs-5"></i>
                         </span>
                     </span>
@@ -45,9 +32,8 @@
 {% empty %}
     <div class="list-group-item list-group-item-action">컬렉션 자료가 없습니다.</div>
 {% endfor %}
-<div class="list-group-item list-group-item-action p-2 htmx-fade-in htmx-fade-out cursor-pointer text-secondary">
-    <span hx-target="closest div" hx-swap="innerHTML swap:0.25s"
-          hx-headers='{"View-Type":"create"}'
+<div class="list-group-item list-group-item-action p-2 htmx-fade-in htmx-fade-out text-secondary">
+    <span hx-target="closest div" hx-headers='{"View-Type":"create"}'
           hx-get="{% url 'official:collection-create' %}">
         <i class="fa-solid fa-plus"></i> 컬렉션 추가
     </span>

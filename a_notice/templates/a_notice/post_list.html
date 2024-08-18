@@ -3,7 +3,15 @@
 {% block main %}
     {{ info|json_script:'info' }}
     <div class="pagetitle">
-        <h1>{{ icon_menu|safe }} 공지사항</h1>
+        <h1>
+            {{ icon_menu|safe }} 공지사항
+            {% if user.is_staff %}
+                <a class="btn btn-sm btn-outline-primary ms-1"
+                   href="{% url 'admin:a_notice_post_changelist' %}" target="admin">
+                    관리자 페이지
+                </a>
+            {% endif %}
+        </h1>
         <nav>
             <ol class="breadcrumb" hx-target="#main" hx-swap="innerHTML swap:0.25s" hx-boost="true">
                 <li class="breadcrumb-item">

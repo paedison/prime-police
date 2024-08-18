@@ -127,8 +127,9 @@
                                                 {% if user.is_authenticated %}
                                                     <div class="tw-text-sm tw-mb-2 tw-px-2">
                                                         <input id="problemTag{{ problem.id }}"
-                                                               placeholder='태그를 입력해주세요' type="hidden"
+                                                               placeholder="태그를 입력해주세요" type="hidden"
                                                                data-tagify data-problem-id="{{ problem.id }}"
+                                                               data-tag-type="official"
                                                                data-tags="{{ tags|join:',' }}">
                                                     </div>
                                                 {% else %}

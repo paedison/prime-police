@@ -17,11 +17,7 @@ def get_sub_title(exam_year, exam_subject, end_string='기출문제') -> str:
         title_parts.append(f'{exam_year}년')
 
     if exam_subject:
-        subject_dict = {
-            '형사': '형사법', '헌법': '헌법', '경찰': '경찰학', '범죄': '범죄학',
-            '민법': '민법총칙', '행법': '행정법', '행학': '행정학',
-        }
-        title_parts.append(subject_dict[exam_subject])
+        title_parts.append(models.subject_choice()[exam_subject])
 
     if not exam_year and not exam_subject:
         title_parts.append('전체')

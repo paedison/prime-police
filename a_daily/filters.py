@@ -153,9 +153,11 @@ class DailyFilter(AnonymousDailyFilter):
         return filter_dict[value]
 
     def filter_tags(self, queryset, _, value):
+        id_list = models.ProblemTaggedItem.objects.filter(
+            user=self.request.user, active=True).values_list('content_object_id', flat=True)
         filter_dict = {
-            'true': queryset.filter(tag_users=self.request.user),
-            'none': queryset.exclude(tag_users=self.request.user),
+            'true': queryset.filter(id__in=id_list),
+            'none': queryset.exclude(id__in=id_list),
         }
         return filter_dict[value]
 

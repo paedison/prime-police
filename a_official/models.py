@@ -4,7 +4,7 @@ import pytz
 from ckeditor.fields import RichTextField
 from ckeditor_uploader.fields import RichTextUploadingField
 from django.db import models
-from django.urls import reverse
+from django.urls import reverse_lazy
 from taggit.managers import TaggableManager
 from taggit.models import TaggedItemBase, TagBase
 
@@ -153,20 +153,6 @@ class Problem(models.Model):
         return subject_fields()[self.subject]
 
     @property
-    def bg_color_style(self):
-        return f'bg_{self.subject_field}'
-
-    @property
-    def bg_color(self):
-        bg_color_dict = {
-            '헌법': 'bg_heonbeob',
-            '언어': 'bg_eoneo',
-            '자료': 'bg_jaryo',
-            '상황': 'bg_sanghwang',
-        }
-        return bg_color_dict[self.subject]
-
-    @property
     def icon(self):
         return {
             'nav': icon_set.ICON_NAV,
@@ -181,28 +167,31 @@ class Problem(models.Model):
 
     @staticmethod
     def get_list_url():
-        return reverse('official:base')
+        return reverse_lazy('official:base')
 
     def get_absolute_url(self):
-        return reverse('official:problem-detail', args=[self.id])
+        return reverse_lazy('official:problem-detail', args=[self.id])
 
     def get_like_url(self):
-        return reverse('official:like-problem', args=[self.id])
+        return reverse_lazy('official:like-problem', args=[self.id])
 
     def get_rate_url(self):
-        return reverse('official:rate-problem', args=[self.id])
+        return reverse_lazy('official:rate-problem', args=[self.id])
 
     def get_solve_url(self):
-        return reverse('official:solve-problem', args=[self.id])
+        return reverse_lazy('official:solve-problem', args=[self.id])
+
+    def get_memo_url(self):
+        return reverse_lazy('official:memo-problem', args=[self.id])
 
     def get_tag_url(self):
-        return reverse('official:tag-problem', args=[self.id])
+        return reverse_lazy('official:tag-problem', args=[self.id])
 
     def get_collect_url(self):
-        return reverse('official:collect-problem', args=[self.id])
+        return reverse_lazy('official:collect-problem', args=[self.id])
 
     def get_comment_create_url(self):
-        return reverse('official:comment-problem-create', args=[self.id])
+        return reverse_lazy('official:comment-problem-create', args=[self.id])
 
 
 class ProblemOpen(models.Model):
@@ -413,6 +402,9 @@ class ProblemCollection(models.Model):
 
     def __str__(self):
         return f'[Official]ProblemCollection(#{self.id}):{self.title}-{self.user.username}'
+
+    def get_detail_url(self):
+        return reverse_lazy('official:collection-detail', args=[self.id])
 
 
 class ProblemCollectionItem(models.Model):
