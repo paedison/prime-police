@@ -1,11 +1,11 @@
 from django.contrib import admin
 from django.urls import path, include
 
-from a_official.views import problem_list_view
+from a_common.views import index_view
 
 urlpatterns = [
     path("__debug__/", include("debug_toolbar.urls")),
-    path('', problem_list_view, name='index'),
+    path('', index_view, name='index'),
     path('', include('a_common.urls')),
 
     path('admin/', include('admin_honeypot.urls', namespace='admin_honeypot')),

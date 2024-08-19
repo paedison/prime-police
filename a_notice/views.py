@@ -1,4 +1,3 @@
-from django.contrib.auth.decorators import login_not_required
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views.decorators.http import require_POST
@@ -15,7 +14,6 @@ def get_queryset(request):
     return queryset
 
 
-@login_not_required
 def list_view(request: HtmxHttpRequest):
     info = {'menu': 'notice'}
     view_type = request.headers.get('View-Type', '')
@@ -34,7 +32,6 @@ def list_view(request: HtmxHttpRequest):
     return render(request, 'a_notice/post_list.html', context)
 
 
-@login_not_required
 def detail_view(request: HtmxHttpRequest, pk: int):
     view_type = request.headers.get('View-Type', '')
     info = {'menu': 'notice'}

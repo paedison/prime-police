@@ -82,8 +82,7 @@
 
 {% block html_body %}
 {% if not request.htmx %}
-    <body class="tw-bg-gray-100 htmx-fade-in htmx-fade-out"
-          hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+    <body class="htmx-fade-in htmx-fade-out" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
 
     {% block header %}{% include '_includes/_header.html' %}{% endblock header %}
     {% block aside %}{% include '_includes/_aside.html' %}{% endblock aside %}

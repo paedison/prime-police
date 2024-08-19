@@ -10,11 +10,14 @@
         {% endif %}
 
         {% for field in form %}
-            <div class="col-12">
+            <div class="col-12 form-field-container">
                 <div class="form-floating">
                     {{ field }}
                     <label for="{{ field.id_for_label }}">{{ field.label }}</label>
                 </div>
+                {% if field.help_text %}
+                    {{ field.help_text }}
+                {% endif %}
             </div>
         {% endfor %}
 

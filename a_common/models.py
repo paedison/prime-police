@@ -33,6 +33,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         help_text='150자 이하 문자, 숫자 그리고 @/./+/-/_만 가능합니다.',
         validators=[username_validator],
         error_messages={"unique": '해당 아이디는 이미 존재합니다.'})
+    name = models.CharField('이름', max_length=10, default='')
+    prime_id = models.CharField('프라임법학원 아이디', max_length=20, default='')
     joined_at = models.DateTimeField('가입일', default=timezone.now)
     is_active = models.BooleanField(
         '활성', default=False,
@@ -47,6 +49,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     class Meta:
         ordering = ['id']
+        verbose_name = verbose_name_plural = "사용자"
 
     def __str__(self):
         return self.email

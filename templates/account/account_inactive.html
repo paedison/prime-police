@@ -1,14 +1,16 @@
-{% extends "allauth/layouts/entrance.html" %}
-{% load i18n %}
-{% load allauth %}
-{% block head_title %}
-    {% translate "Account Inactive" %}
-{% endblock head_title %}
-{% block content %}
-    {% element h1 %}
-        {% translate "Account Inactive" %}
-    {% endelement %}
-    {% element p %}
-        {% translate "This account is inactive." %}
-    {% endelement %}
-{% endblock content %}
+{% extends "account/base_entrance.html" %}
+
+{% block body_title %}<div class="px-5">비활성 계정입니다.</div>{% endblock body_title %}
+
+{% block body_content %}
+    <script id="info" type="application/json">{"menu": "account"}</script>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <div style="margin-left: 0.5rem; text-indent: -1.25rem; padding-left: 1.25rem">
+            <i class="fa-solid fa-triangle-exclamation fa-fw"></i>가입 정보 확인 중입니다.<br/>
+            관리자에게 문의해주세요.
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+{% endblock body_content %}
+
+{% block footer %}{% endblock footer %}

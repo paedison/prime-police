@@ -2,8 +2,8 @@
 {% load static %}
 
 {% block html_body %}
-<body>
-    <main>
+<body class="htmx-fade-in htmx-fade-out" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+    <main id="main" class="main htmx-fade-in htmx-fade-out">
         <div class="container">
             <section class="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-4">
                 <div class="container">

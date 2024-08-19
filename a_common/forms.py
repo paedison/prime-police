@@ -1,8 +1,6 @@
 from allauth.account import forms as allauth_forms
 from django import forms
 
-from . import models
-
 
 class LoginForm(allauth_forms.LoginForm):
     def __init__(self, *args, **kwargs):
@@ -14,38 +12,24 @@ class LoginForm(allauth_forms.LoginForm):
 
 
 class SignupForm(allauth_forms.SignupForm):
+    name = forms.CharField(
+        label='이름', min_length=10, required=True,
+        widget=forms.TextInput(attrs={'placeholder': '이름', 'class': 'form-control'}))
+    prime_id = forms.CharField(
+        label='프라임법학원 아이디', min_length=20, required=True,
+        widget=forms.TextInput(attrs={'placeholder': '프라임법학원 아이디', 'class': 'form-control'}))
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # self.fields['email'].label = '이메일'
         self.fields['email'].widget.attrs.update({'class': 'form-control'})
-        # self.fields['username'].label = '아이디'
         self.fields['username'].widget.attrs.update({'class': 'form-control'})
-        self.fields['password1'].label = '비밀번호'
         self.fields['password1'].widget.attrs.update({'class': 'form-control'})
-        self.fields['password2'].label = '비밀번호(확인)'
         self.fields['password2'].widget.attrs.update({'class': 'form-control'})
 
 
-
-class ProfileForm(forms.ModelForm):
-    class Meta:
-        model = models.User
-        fields = ['image']
-        widgets = {
-            'image': forms.FileInput(),
-        }
-
-
-class ChangeUsernameForm(forms.ModelForm):
-    username = forms.CharField(
-        label='아이디',
-        widget=forms.TextInput(
-            attrs={
-                "placeholder": '새로운 아이디를 입력해주세요.',
-            }
-        )
-    )
-
-    class Meta:
-        model = models.User
-        fields = ('username',)
+class ChangePasswordForm(allauth_forms.ChangePasswordForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['oldpassword'].widget.attrs.update({'class': 'form-control'})
+        self.fields['password1'].widget.attrs.update({'class': 'form-control'})
+        self.fields['password2'].widget.attrs.update({'class': 'form-control'})

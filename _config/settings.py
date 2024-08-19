@@ -234,7 +234,7 @@ ACCOUNT_CONFIRM_EMAIL_ON_GET = True
 ACCOUNT_FORMS = {
     'login': 'a_common.forms.LoginForm',
     'signup': 'a_common.forms.SignupForm',
-    # 'change_password': 'common.forms.ChangePasswordForm'
+    'change_password': 'a_common.forms.ChangePasswordForm'
 }
 ACCOUNT_SESSION_COOKIE_AGE = 1209600
 

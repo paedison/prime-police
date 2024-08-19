@@ -78,12 +78,18 @@ function attachContentCkeditor() {
     });
 }
 
+function attachFormHelpTextClass() {
+    $('.form-field-container > ul').addClass('list-group list-group-flush mt-1');
+    $('.form-field-container > ul > li').addClass('list-group-item small text-danger');
+}
+
 function initializeAll() {
     initializeTooltips();
     initializeSortables();
     initializeToggleButtons();
     applyTagify();
     attachContentCkeditor();
+    attachFormHelpTextClass();
 }
 $(window).on('load', initializeAll);
 $(document).on('htmx:afterSettle', initializeAll);
