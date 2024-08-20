@@ -104,9 +104,6 @@ def problem_detail_view(request: HtmxHttpRequest, pk: int):
         return render(request, template_nav_other_list, context)
 
     memo_form = forms.ProblemMemoForm()
-    comment_form = forms.ProblemCommentForm()
-    reply_form = forms.ProblemCommentForm()
-
     custom_data = utils.get_custom_data(request.user)
 
     my_memo = None
@@ -122,21 +119,6 @@ def problem_detail_view(request: HtmxHttpRequest, pk: int):
                 tagged_items__content_object=problem,
                 tagged_items__active=True,
             ).values_list('name', flat=True)
-
-    page = request.GET.get('page', '1')
-    comment_qs = (
-        models.ProblemComment.objects.select_related('user', 'problem')
-        .annotate(
-            username=F('user__username'),
-            year=F('problem__year'),
-            exam=F('problem__exam'),
-            subject=F('problem__subject'),
-            number=F('problem__number'),
-        )
-    )
-    all_comments = utils.get_all_comments(comment_qs, pk)
-    # page_obj, page_range = utils.get_page_obj_and_range(page, all_comments)
-    # pagination_url = reverse_lazy('daily:comment-problem')
 
     context = update_context_data(
         context,
@@ -157,7 +139,7 @@ def problem_detail_view(request: HtmxHttpRequest, pk: int):
         prob_prev=prob_prev, prob_next=prob_next,
 
         # forms
-        memo_form=memo_form, comment_form=comment_form, reply_form=reply_form,
+        memo_form=memo_form,
     )
     return render(request, 'a_daily/problem_detail.html', context)
 
@@ -416,155 +398,3 @@ def collect_problem(request: HtmxHttpRequest, pk: int):
             user_id=request.user.id).annotate(item_exists=item_exists_case)
         context = update_context_data(problem_id=pk, collections=collections)
         return render(request, 'a_daily/snippets/collection_modal.html', context)
-
-
-def comment_list_view(request: HtmxHttpRequest):
-    page = request.GET.get('page', '1')
-    comment_qs = (
-        models.ProblemComment.objects.select_related('user', 'problem')
-        .annotate(
-            username=F('user__username'),
-            year=F('problem__year'),
-            exam=F('problem__exam'),
-            subject=F('problem__subject'),
-            number=F('problem__number'),
-        )
-    )
-    all_comments = utils.get_all_comments(comment_qs)
-    page_obj, page_range = utils.get_page_obj_and_range(page, all_comments)
-    pagination_url = reverse_lazy('daily:comment-list')
-    context = update_context_data(
-        page_obj=page_obj, page_range=page_range, pagination_url=pagination_url,
-        form=forms.ProblemCommentForm(),
-        icon_board=icon_set.ICON_BOARD,
-        icon_question=icon_set.ICON_QUESTION,
-    )
-    return render(request, 'a_daily/comment_list.html', context)
-
-
-def comment_create(request: HtmxHttpRequest):
-    view_type = request.headers.get('View-Type', 'main')
-
-    if view_type == 'create':
-        if request.method == 'POST':
-            form = forms.ProblemCollectionForm(request.POST)
-            if form.is_valid():
-                my_collection = form.save(commit=False)
-                existing_collections = models.ProblemCollection.objects.filter(user=request.user)
-                max_order = 1
-                if existing_collections:
-                    max_order = existing_collections.aggregate(max_order=Max('order'))['max_order'] + 1
-                my_collection.user = request.user
-                my_collection.order = max_order
-                my_collection.save()
-                return redirect('daily:collection-list')
-        else:
-            form = forms.ProblemCollectionForm()
-            context = update_context_data(form=form, url=reverse_lazy('daily:collection-create'), header='create')
-            return render(request, 'a_daily/snippets/collection_create.html', context)
-
-    if view_type == 'create_in_modal':
-        if request.method == 'POST':
-            problem_id = request.POST.get('problem_id')
-            form = forms.ProblemCollectionForm(request.POST)
-            if form.is_valid():
-                my_collection = form.save(commit=False)
-                existing_collections = models.ProblemCollection.objects.filter(user=request.user)
-                max_order = 1
-                if existing_collections:
-                    max_order = existing_collections.aggregate(max_order=Max('order'))['max_order'] + 1
-                my_collection.user = request.user
-                my_collection.order = max_order
-                my_collection.save()
-                return redirect('daily:collect-problem', pk=problem_id)
-        else:
-            problem_id = request.GET.get('problem_id')
-            form = forms.ProblemCollectionForm()
-            context = update_context_data(
-                form=form, url=reverse_lazy('daily:collection-create'),
-                header='create_in_modal', problem_id=problem_id,
-                target='#modalContainer'
-            )
-            return render(request, 'a_daily/snippets/collection_create.html', context)
-
-
-def comment_detail_view(request: HtmxHttpRequest, pk: int):
-    view_type = request.headers.get('View-Type', '')
-    collection = get_object_or_404(models.ProblemCollection, pk=pk)
-
-    if view_type == 'update':
-        if request.method == 'POST':
-            form = forms.ProblemCollectionForm(request.POST, instance=collection)
-            if form.is_valid():
-                form.save()
-                return redirect('daily:collection-list')
-        else:
-            form = forms.ProblemCollectionForm(instance=collection)
-            context = update_context_data(
-                form=form, url=reverse_lazy('daily:collection-detail', args=[pk]), header='update')
-            return render(request, 'a_daily/snippets/collection_create.html', context)
-
-    if view_type == 'delete':
-        collection.delete()
-        collections = models.ProblemCollection.objects.filter(user_id=request.user.id)
-        if collections:
-            for idx, col in enumerate(collections, start=1):
-                col.order = idx
-                col.save()
-        return redirect('daily:collection-list')
-
-    item_ids = request.POST.getlist('item')
-    if item_ids:
-        for idx, item_pk in enumerate(item_ids, start=1):
-            item = models.ProblemCollectionItem.objects.select_related('problem').get(pk=item_pk)
-            item.order = idx
-            item.save()
-    items = models.ProblemCollectionItem.objects.filter(collection=collection)
-    custom_data = utils.get_custom_data(request.user)
-    context = update_context_data(collection=collection, items=items, custom_data=custom_data)
-    return render(request, 'a_daily/snippets/collection_item_card.html', context)
-
-
-def comment_problem_create(request: HtmxHttpRequest, pk: int):
-    problem = get_object_or_404(models.Problem, pk=pk)
-    reply_form = forms.ProblemCommentForm()
-
-    if request.method == 'POST':
-        form = forms.ProblemCommentForm(request.POST)
-        if form.is_valid():
-            comment = form.save(commit=False)
-
-            content = form.cleaned_data['content']
-            soup = bs(content, 'html.parser')
-            title = soup.get_text()[:20]
-
-            comment.problem = problem
-            comment.user = request.user
-            comment.title = title
-            comment.save()
-            context = update_context_data(comment=comment, problem=problem, reply_form=reply_form)
-            return render(request, 'a_daily/snippets/comment.html', context)
-
-
-def comment_problem_update(request: HtmxHttpRequest, pk: int):
-    comment = get_object_or_404(models.ProblemComment, pk=pk)
-    if request.method == 'POST':
-        form = forms.ProblemCommentForm(request.POST, instance=comment)
-        if form.is_valid():
-            form.save()
-            return redirect('problemcomment-list')
-    else:
-        form = forms.ProblemCommentForm(instance=comment)
-    return render(request, 'problemcomment_form.html', {'form': form})
-
-
-def comment_problem_delete(request: HtmxHttpRequest, pk: int):
-    comment = get_object_or_404(models.ProblemComment, pk=pk)
-    if request.method == 'POST':
-        comment.delete()
-        return redirect('problemcomment-list')
-    return render(request, 'problemcomment_confirm_delete.html', {'comment': comment})
-
-
-def comment_problem(request: HtmxHttpRequest, pk: int):
-    pass

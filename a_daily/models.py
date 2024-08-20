@@ -1,10 +1,11 @@
-from datetime import datetime, date
+from datetime import datetime
 
 import pytz
 from ckeditor.fields import RichTextField
 from ckeditor_uploader.fields import RichTextUploadingField
 from django.db import models
 from django.urls import reverse_lazy
+from django.utils import timezone
 from taggit.managers import TaggableManager
 from taggit.models import TaggedItemBase, TagBase
 
@@ -12,12 +13,12 @@ from a_common.constants import icon_set
 from a_common.models import User
 
 
-def year_default():
-    return 2026
+def semester_default():
+    return 75
 
 
-def year_choice() -> list:
-    choice = [(year, f'{year}년') for year in range(2026, datetime.now().year + 3)]
+def semester_choice() -> list:
+    choice = [(semester, f'{semester}기') for semester in range(75, semester_default() + 1)]
     choice.reverse()
     return choice
 
@@ -27,7 +28,7 @@ def circle_choice() -> list:
 
 
 def round_choice() -> list:
-    return [(_round, f'{_round}회차') for _round in range(1, 30)]
+    return [(_round, f'{_round}회') for _round in range(1, 31)]
 
 
 def subject_choice() -> dict:
@@ -66,11 +67,47 @@ def get_remarks(message_type: str, remarks: str | None) -> str:
     return remarks
 
 
+class Exam(models.Model):
+    semester = models.IntegerField(choices=semester_choice, default=semester_default, verbose_name='기수')
+    circle = models.IntegerField(choices=circle_choice, default=1, verbose_name='순환')
+    subject = models.CharField(max_length=2, choices=subject_choice, default='형사', verbose_name='과목')
+    round = models.IntegerField(choices=round_choice, default=1, verbose_name='회차')
+    opened_at = models.DateField(default=timezone.now, verbose_name='공개일')
+    answer_official = models.JSONField(default=list, verbose_name='정답')
+    participants = models.IntegerField(default=0, verbose_name='응시생수')
+    statistics = models.JSONField(default=dict, verbose_name='성적 통계')
+
+    class Meta:
+        verbose_name = verbose_name_plural = "00_시험"
+        unique_together = ['semester', 'circle', 'subject', 'round']
+        ordering = ['-semester', '-circle', 'subject', 'round']
+
+    def __str__(self):
+        return f'[Daily]Exam:{self.full_reference}'
+
+    @property
+    def full_reference(self):
+        return ' '.join([
+            self.get_semester_display(),
+            self.get_circle_display(),
+            self.get_subject_display(),
+            self.get_round_display(),
+        ])
+
+    @property
+    def sem_cir_sub_rnd(self):
+        return f'{self.semester}-{self.circle}-{self.subject}-{self.round}'
+
+    @property
+    def is_not_opened(self):
+        return timezone.now() <= self.opened_at
+
+
 class ProblemTag(TagBase):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name = verbose_name_plural = "데일리테스트 태그"
+        verbose_name = verbose_name_plural = "07_태그"
         db_table = 'a_daily_problem_tag'
 
     def __str__(self):
@@ -86,7 +123,7 @@ class ProblemTaggedItem(TaggedItemBase):
     remarks = models.TextField(null=True, blank=True)
 
     class Meta:
-        verbose_name = verbose_name_plural = "데일리테스트 태그 문제"
+        verbose_name = verbose_name_plural = "08_태그 문제"
         unique_together = ['tag', 'content_object', 'user']
         db_table = 'a_daily_problem_tagged_item'
 
@@ -105,15 +142,15 @@ class ProblemTaggedItem(TaggedItemBase):
 
 
 class Problem(models.Model):
-    year = models.IntegerField(choices=year_choice, default=year_default(), verbose_name='연도')
+    semester = models.IntegerField(choices=semester_choice, default=semester_default(), verbose_name='기수')
     circle = models.IntegerField(choices=circle_choice, default=1, verbose_name='순환')
-    round = models.IntegerField(choices=round_choice, default=1, verbose_name='회차')
     subject = models.CharField(max_length=2, choices=subject_choice, default='형사', verbose_name='과목')
+    round = models.IntegerField(choices=round_choice, default=1, verbose_name='회차')
     number = models.IntegerField(choices=number_choice, default=1, verbose_name='문제 번호')
     answer = models.IntegerField(choices=answer_choice, default=1, verbose_name='정답')
-    question = models.TextField(verbose_name='발문')
-    data = RichTextUploadingField(config_name='problem', verbose_name='문제 내용')
-    opened_at = models.DateField(default=date.today, verbose_name='공개일')
+    question = models.TextField(default='', verbose_name='발문')
+    data = RichTextUploadingField(config_name='problem', default='', verbose_name='문제 내용')
+    opened_at = models.DateField(default=timezone.now, verbose_name='공개일')
 
     tags = TaggableManager(through=ProblemTaggedItem, blank=True)
 
@@ -122,14 +159,13 @@ class Problem(models.Model):
     rate_users = models.ManyToManyField(User, related_name='daily_rated_problems', through='ProblemRate')
     solve_users = models.ManyToManyField(User, related_name='daily_solved_problems', through='ProblemSolve')
     memo_users = models.ManyToManyField(User, related_name='daily_memoed_problems', through='ProblemMemo')
-    comment_users = models.ManyToManyField(User, related_name='daily_commented_problems', through='ProblemComment')
     collections = models.ManyToManyField(
         'ProblemCollection', related_name='collected_problems', through='ProblemCollectionItem')
 
     class Meta:
-        verbose_name = verbose_name_plural = "데일리테스트"
-        unique_together = ['year', 'circle', 'round', 'subject', 'number']
-        ordering = ['-year', 'id']
+        verbose_name = verbose_name_plural = "01_문제"
+        unique_together = ['semester', 'circle', 'round', 'subject', 'number']
+        ordering = ['-semester', 'id']
 
     def __str__(self):
         return f'[Daily]Problem(#{self.id}):{self.reference}'
@@ -143,14 +179,17 @@ class Problem(models.Model):
         return f'{self.circle}-{self.round}-{self.subject}{self.number:02}'
 
     @property
-    def circle_round_subject(self):
+    def semester_circle_round_subject(self):
         return ' '.join([
-            self.get_circle_display(), self.get_round_display(), self.get_subject_display()
+            self.get_semester_display(),
+            self.get_circle_display(),
+            self.get_round_display(),
+            self.get_subject_display()
         ])
 
     @property
     def full_reference(self):
-        return ' '.join([self.circle_round_subject, self.get_number_display()])
+        return ' '.join([self.semester_circle_round_subject, self.get_number_display()])
 
     @property
     def subject_field(self):
@@ -190,9 +229,6 @@ class Problem(models.Model):
     def get_collect_url(self):
         return reverse_lazy('daily:collect-problem', args=[self.id])
 
-    def get_comment_create_url(self):
-        return reverse_lazy('daily:comment-problem-create', args=[self.id])
-
 
 class ProblemOpen(models.Model):
     problem = models.ForeignKey(Problem, on_delete=models.CASCADE, related_name='opens')
@@ -201,7 +237,7 @@ class ProblemOpen(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name = verbose_name_plural = "데일리테스트 확인 기록"
+        verbose_name = verbose_name_plural = "02_확인기록"
         db_table = 'a_daily_problem_open'
 
     def __str__(self):
@@ -220,7 +256,7 @@ class ProblemLike(models.Model):
     remarks = models.TextField(null=True, blank=True)
 
     class Meta:
-        verbose_name = verbose_name_plural = "데일리테스트 즐겨찾기"
+        verbose_name = verbose_name_plural = "03_즐겨찾기"
         unique_together = ['user', 'problem']
         ordering = ['-id']
         db_table = 'a_daily_problem_like'
@@ -234,8 +270,8 @@ class ProblemLike(models.Model):
         return self.problem.reference
 
     @property
-    def year_subject(self):
-        return self.problem.circle_round_subject
+    def semester_circle_round_subject(self):
+        return self.problem.semester_circle_round_subject
 
     def save(self, *args, **kwargs):
         message_type = kwargs.pop('message_type', 'liked')
@@ -251,7 +287,7 @@ class ProblemRate(models.Model):
     remarks = models.TextField(null=True, blank=True)
 
     class Meta:
-        verbose_name = verbose_name_plural = "데일리테스트 난이도"
+        verbose_name = verbose_name_plural = "04_난이도"
         unique_together = ['user', 'problem']
         ordering = ['-id']
         db_table = 'a_daily_problem_rate'
@@ -264,8 +300,8 @@ class ProblemRate(models.Model):
         return self.problem.reference
 
     @property
-    def year_subject(self):
-        return self.problem.circle_round_subject
+    def semester_circle_round_subject(self):
+        return self.problem.semester_circle_round_subject
 
     def save(self, *args, **kwargs):
         message_type = f'rated({self.rating})'
@@ -282,7 +318,7 @@ class ProblemSolve(models.Model):
     remarks = models.TextField(null=True, blank=True)
 
     class Meta:
-        verbose_name = verbose_name_plural = "데일리테스트 정답확인"
+        verbose_name = verbose_name_plural = "05_정답확인"
         unique_together = ['user', 'problem']
         ordering = ['-id']
         db_table = 'a_daily_problem_solve'
@@ -296,8 +332,8 @@ class ProblemSolve(models.Model):
         return self.problem.reference
 
     @property
-    def year_subject(self):
-        return self.problem.circle_round_subject
+    def semester_circle_round_subject(self):
+        return self.problem.semester_circle_round_subject
 
     def save(self, *args, **kwargs):
         message_type = 'correct' if self.is_correct else 'wrong'
@@ -314,7 +350,7 @@ class ProblemMemo(models.Model):
     remarks = models.TextField(null=True, blank=True)
 
     class Meta:
-        verbose_name = verbose_name_plural = "데일리테스트 메모"
+        verbose_name = verbose_name_plural = "06_메모"
         unique_together = ['user', 'problem']
         ordering = ['-id']
         db_table = 'a_daily_problem_memo'
@@ -327,65 +363,8 @@ class ProblemMemo(models.Model):
         return self.problem.reference
 
     @property
-    def year_subject(self):
-        return self.problem.circle_round_subject
-
-
-class ProblemComment(models.Model):
-    problem = models.ForeignKey(Problem, on_delete=models.CASCADE, related_name='comments')
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='daily_comments')
-    title = models.TextField(max_length=100, default='')
-    content = RichTextField(config_name='minimal', default='')
-    like_users = models.ManyToManyField(
-        User, related_name='daily_liked_comments', through='ProblemCommentLike')
-    parent = models.ForeignKey(
-        'self', on_delete=models.CASCADE, null=True, blank=True, related_name='reply_comments')
-    hit = models.IntegerField(default=1, verbose_name='조회수')
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        verbose_name = verbose_name_plural = "데일리테스트 코멘트"
-        ordering = ['-id']
-        db_table = 'a_daily_problem_comment'
-
-    def __str__(self):
-        prefix = '↪ ' if self.parent else ''
-        return f'{prefix}[Daily]ProblemComment(#{self.id}):{self.problem.reference}-{self.user.username}'
-
-    @property
-    def reference(self):
-        return self.problem.reference
-
-    @property
-    def year_subject(self):
-        return self.problem.circle_round_subject
-
-
-class ProblemCommentLike(models.Model):
-    comment = models.ForeignKey(ProblemComment, on_delete=models.CASCADE, related_name='likes')
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='daily_problem_comment_likes')
-    is_liked = models.BooleanField(default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    remarks = models.TextField(null=True, blank=True)
-
-    def __str__(self):
-        return f'[Daily]ProblemCommentLike(#{self.id}):{self.comment.problem.reference}-{self.user.username}'
-
-    class Meta:
-        db_table = 'a_daily_problem_comment_like'
-
-    @property
-    def reference(self):
-        return self.comment.problem.reference
-
-    @property
-    def year_subject(self):
-        return self.comment.problem.circle_round_subject
-
-    def save(self, *args, **kwargs):
-        message_type = kwargs.pop('message_type', 'liked')
-        self.remarks = get_remarks(message_type, self.remarks)
-        super().save(*args, **kwargs)
+    def semester_circle_round_subject(self):
+        return self.problem.semester_circle_round_subject
 
 
 class ProblemCollection(models.Model):
@@ -395,7 +374,7 @@ class ProblemCollection(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name = verbose_name_plural = "데일리테스트 컬렉션"
+        verbose_name = verbose_name_plural = "09_컬렉션"
         unique_together = ['user', 'title']
         ordering = ['user', 'order']
         db_table = 'a_daily_problem_collection'
@@ -414,7 +393,7 @@ class ProblemCollectionItem(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name = verbose_name_plural = "데일리테스트 컬렉션 문제"
+        verbose_name = verbose_name_plural = "10_컬렉션 문제"
         unique_together = ['collection', 'problem']
         ordering = ['collection__user', 'collection', 'order']
         db_table = 'a_daily_problem_collection_item'
@@ -431,5 +410,5 @@ class ProblemCollectionItem(models.Model):
         return self.problem.reference
 
     @property
-    def year_subject(self):
-        return self.problem.circle_round_subject
+    def semester_circle_round_subject(self):
+        return self.problem.semester_circle_round_subject

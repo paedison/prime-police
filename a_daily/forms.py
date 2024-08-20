@@ -9,12 +9,6 @@ class ProblemTagForm(forms.ModelForm):
         fields = ['name']
 
 
-class ProblemCommentForm(forms.ModelForm):
-    class Meta:
-        model = models.ProblemComment
-        fields = ['content', 'parent']
-
-
 class ProblemMemoForm(forms.ModelForm):
     class Meta:
         model = models.ProblemMemo

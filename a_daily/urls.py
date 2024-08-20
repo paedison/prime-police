@@ -4,20 +4,8 @@ from . import views
 
 app_name = 'daily'
 
-collection_patterns = [
-    path('', views.collection_list_view, name='collection-list'),
-    path('create/', views.collection_create, name='collection-create'),
-    path('<int:pk>/', views.collection_detail_view, name='collection-detail'),
-]
-
-comment_patterns = [
-    path('', views.comment_list_view, name='comment-list'),
-    path('create/', views.comment_create, name='comment-create'),
-    path('<int:pk>/', views.comment_detail_view, name='comment-detail'),
-]
-
-urlpatterns = [
-    path('', views.problem_list_view, name='base'),
+problem_patterns = [
+    path('', views.problem_list_view, name='problem-list'),
     path('<int:pk>/', views.problem_detail_view, name='problem-detail'),
 
     path('like/<int:pk>/', views.like_problem, name='like-problem'),
@@ -27,12 +15,16 @@ urlpatterns = [
     path('tag/<int:pk>/', views.tag_problem, name='tag-problem'),
     path('collect/<int:pk>/', views.collect_problem, name='collect-problem'),
 
-    path('comment/<int:pk>/', views.comment_problem, name='comment-problem'),
+    path('collection/', views.collection_list_view, name='collection-list'),
+    path('collection/create/', views.collection_create, name='collection-create'),
+    path('collection/<int:pk>/', views.collection_detail_view, name='collection-detail'),
+]
 
-    path('comment/create/<int:pk>/', views.comment_problem_create, name='comment-problem-create'),
-    path('comment/update/<int:pk>/', views.comment_problem_update, name='comment-problem-update'),
-    path('comment/delete/<int:pk>/', views.comment_problem_delete, name='comment-problem-delete'),
+answer_patterns = [
 
-    path('collection/', include(collection_patterns)),
-    path('comment/', include(comment_patterns)),
+]
+
+urlpatterns = [
+    path('problem/', include(problem_patterns)),
+    path('answer/', include(answer_patterns)),
 ]

@@ -377,13 +377,6 @@ div.django-ckeditor-widget {
 #toggleProblemBtn {
     position: fixed;
     top: 80px;
-    right: 70px;
-    z-index: 10;
-}
-
-#toggleCommentBtn {
-    position: fixed;
-    top: 80px;
     right: 20px;
     z-index: 10;
 }

@@ -18,13 +18,12 @@
                 <li class="breadcrumb-item">
                     <a href="{% url 'index' %}">Home</a>
                 </li>
+                <li class="breadcrumb-item">Daily</li>
                 <li class="breadcrumb-item">
-                    <a href="{% url 'daily:base' %}">Daily</a>
+                    <a href="{% url 'daily:problem-list' %}">Problem</a>
                 </li>
                 <li class="breadcrumb-item">
-                    <a href="{{ problem.get_absolute_url }}" class="active">
-                        {{ problem.reference }}
-                    </a>
+                    <a href="{{ problem.get_absolute_url }}" class="active">{{ problem.reference }}</a>
                 </li>
             </ol>
         </nav>

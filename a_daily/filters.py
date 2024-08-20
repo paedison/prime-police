@@ -31,10 +31,6 @@ CHOICES_TAG = (
     ('true', '태그 작성'),
     ('none', '태그 미작성'),
 )
-CHOICES_COMMENT = (
-    ('true', '코멘트 작성'),
-    ('none', '코멘트 미작성'),
-)
 
 
 class AnonymousDailyFilter(django_filters.FilterSet):
@@ -64,9 +60,9 @@ class AnonymousDailyFilter(django_filters.FilterSet):
     @property
     def qs(self):
         keyword = self.request.GET.get('keyword', '') or self.request.POST.get('keyword', '')
-        queryset = super().qs.filter(year=models.year_default()).prefetch_related(
-            'like_users', 'rate_users', 'solve_users', 'memo_users', 'comment_users',
-            'likes', 'rates', 'solves', 'memos', 'comments', 'tagged_problems', 'collected_problems',
+        queryset = super().qs.filter(semester=models.semester_default()).prefetch_related(
+            'like_users', 'rate_users', 'solve_users', 'memo_users',
+            'likes', 'rates', 'solves', 'memos', 'tagged_problems', 'collected_problems',
         )
         if keyword:
             return queryset.filter(data__icontains=keyword)
@@ -104,16 +100,10 @@ class DailyFilter(AnonymousDailyFilter):
         choices=CHOICES_TAG,
         method='filter_tags',
     )
-    comments = django_filters.ChoiceFilter(
-        label='',
-        empty_label='[코멘트]',
-        choices=CHOICES_COMMENT,
-        method='filter_comments',
-    )
 
     class Meta:
         model = models.Problem
-        fields = ['circle', 'round', 'subject', 'likes', 'rates', 'solves', 'memos', 'comments', 'tags']
+        fields = ['circle', 'round', 'subject', 'likes', 'rates', 'solves', 'memos', 'tags']
 
     def filter_likes(self, queryset, _, value):
         filter_dict = {
@@ -158,12 +148,5 @@ class DailyFilter(AnonymousDailyFilter):
         filter_dict = {
             'true': queryset.filter(id__in=id_list),
             'none': queryset.exclude(id__in=id_list),
-        }
-        return filter_dict[value]
-
-    def filter_comments(self, queryset, _, value):
-        filter_dict = {
-            'true': queryset.filter(comment_users__isnull=False),
-            'none': queryset.exclude(comment_users__isnull=True),
         }
         return filter_dict[value]

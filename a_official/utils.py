@@ -70,15 +70,3 @@ def get_custom_data(user: User) -> dict:
                 collection__user=user).select_related('collection__user', 'problem'),
         }
     return {'like': [], 'rate': [], 'solve': [], 'memo': [], 'tag': [], 'collection': []}
-
-
-def get_all_comments(queryset, problem_id=None):
-    if problem_id:
-        queryset = queryset.filter(problem_id=problem_id)
-    parent_comments = queryset.filter(parent__isnull=True).order_by('-created_at')
-    child_comments = queryset.exclude(parent__isnull=True).order_by('parent_id', '-created_at')
-    all_comments = []
-    for comment in parent_comments:
-        all_comments.append(comment)
-        all_comments.extend(child_comments.filter(parent=comment))
-    return all_comments

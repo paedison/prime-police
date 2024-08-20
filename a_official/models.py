@@ -70,7 +70,7 @@ class ProblemTag(TagBase):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name = verbose_name_plural = "기출문제 태그"
+        verbose_name = verbose_name_plural = "07_태그"
         db_table = 'a_official_problem_tag'
 
     def __str__(self):
@@ -86,7 +86,7 @@ class ProblemTaggedItem(TaggedItemBase):
     remarks = models.TextField(null=True, blank=True)
 
     class Meta:
-        verbose_name = verbose_name_plural = "기출문제 태그 문제"
+        verbose_name = verbose_name_plural = "08_태그 문제"
         unique_together = ['tag', 'content_object', 'user']
         db_table = 'a_official_problem_tagged_item'
 
@@ -120,12 +120,11 @@ class Problem(models.Model):
     rate_users = models.ManyToManyField(User, related_name='official_rated_problems', through='ProblemRate')
     solve_users = models.ManyToManyField(User, related_name='official_solved_problems', through='ProblemSolve')
     memo_users = models.ManyToManyField(User, related_name='official_memoed_problems', through='ProblemMemo')
-    comment_users = models.ManyToManyField(User, related_name='official_commented_problems', through='ProblemComment')
     collections = models.ManyToManyField(
         'ProblemCollection', related_name='collected_problems', through='ProblemCollectionItem')
 
     class Meta:
-        verbose_name = verbose_name_plural = "기출문제"
+        verbose_name = verbose_name_plural = "01_문제"
         unique_together = ['year', 'exam', 'subject', 'number']
         ordering = ['-year', 'id']
 
@@ -190,9 +189,6 @@ class Problem(models.Model):
     def get_collect_url(self):
         return reverse_lazy('official:collect-problem', args=[self.id])
 
-    def get_comment_create_url(self):
-        return reverse_lazy('official:comment-problem-create', args=[self.id])
-
 
 class ProblemOpen(models.Model):
     problem = models.ForeignKey(Problem, on_delete=models.CASCADE, related_name='opens')
@@ -201,7 +197,7 @@ class ProblemOpen(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name = verbose_name_plural = "기출문제 확인 기록"
+        verbose_name = verbose_name_plural = "02_확인기록"
         db_table = 'a_official_problem_open'
 
     def __str__(self):
@@ -220,7 +216,7 @@ class ProblemLike(models.Model):
     remarks = models.TextField(null=True, blank=True)
 
     class Meta:
-        verbose_name = verbose_name_plural = "기출문제 즐겨찾기"
+        verbose_name = verbose_name_plural = "03_즐겨찾기"
         unique_together = ['user', 'problem']
         ordering = ['-id']
         db_table = 'a_official_problem_like'
@@ -251,7 +247,7 @@ class ProblemRate(models.Model):
     remarks = models.TextField(null=True, blank=True)
 
     class Meta:
-        verbose_name = verbose_name_plural = "기출문제 난이도"
+        verbose_name = verbose_name_plural = "04_난이도"
         unique_together = ['user', 'problem']
         ordering = ['-id']
         db_table = 'a_official_problem_rate'
@@ -282,7 +278,7 @@ class ProblemSolve(models.Model):
     remarks = models.TextField(null=True, blank=True)
 
     class Meta:
-        verbose_name = verbose_name_plural = "기출문제 정답확인"
+        verbose_name = verbose_name_plural = "05_정답확인"
         unique_together = ['user', 'problem']
         ordering = ['-id']
         db_table = 'a_official_problem_solve'
@@ -314,7 +310,7 @@ class ProblemMemo(models.Model):
     remarks = models.TextField(null=True, blank=True)
 
     class Meta:
-        verbose_name = verbose_name_plural = "기출문제 메모"
+        verbose_name = verbose_name_plural = "06_메모"
         unique_together = ['user', 'problem']
         ordering = ['-id']
         db_table = 'a_official_problem_memo'
@@ -331,63 +327,6 @@ class ProblemMemo(models.Model):
         return self.problem.year_subject
 
 
-class ProblemComment(models.Model):
-    problem = models.ForeignKey(Problem, on_delete=models.CASCADE, related_name='comments')
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='official_comments')
-    title = models.TextField(max_length=100, default='')
-    content = RichTextField(config_name='minimal', default='')
-    like_users = models.ManyToManyField(
-        User, related_name='official_liked_comments', through='ProblemCommentLike')
-    parent = models.ForeignKey(
-        'self', on_delete=models.CASCADE, null=True, blank=True, related_name='reply_comments')
-    hit = models.IntegerField(default=1, verbose_name='조회수')
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        verbose_name = verbose_name_plural = "기출문제 코멘트"
-        ordering = ['-id']
-        db_table = 'a_official_problem_comment'
-
-    def __str__(self):
-        prefix = '↪ ' if self.parent else ''
-        return f'{prefix}[Official]ProblemComment(#{self.id}):{self.problem.reference}-{self.user.username}'
-
-    @property
-    def reference(self):
-        return self.problem.reference
-
-    @property
-    def year_subject(self):
-        return self.problem.year_subject
-
-
-class ProblemCommentLike(models.Model):
-    comment = models.ForeignKey(ProblemComment, on_delete=models.CASCADE, related_name='likes')
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='official_problem_comment_likes')
-    is_liked = models.BooleanField(default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    remarks = models.TextField(null=True, blank=True)
-
-    def __str__(self):
-        return f'[Official]ProblemCommentLike(#{self.id}):{self.comment.problem.reference}-{self.user.username}'
-
-    class Meta:
-        db_table = 'a_official_problem_comment_like'
-
-    @property
-    def reference(self):
-        return self.comment.problem.reference
-
-    @property
-    def year_subject(self):
-        return self.comment.problem.year_subject
-
-    def save(self, *args, **kwargs):
-        message_type = kwargs.pop('message_type', 'liked')
-        self.remarks = get_remarks(message_type, self.remarks)
-        super().save(*args, **kwargs)
-
-
 class ProblemCollection(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='official_collections')
     title = models.CharField(max_length=20)
@@ -395,7 +334,7 @@ class ProblemCollection(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name = verbose_name_plural = "기출문제 컬렉션"
+        verbose_name = verbose_name_plural = "09_컬렉션"
         unique_together = ['user', 'title']
         ordering = ['user', 'order']
         db_table = 'a_official_problem_collection'
@@ -414,7 +353,7 @@ class ProblemCollectionItem(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name = verbose_name_plural = "기출문제 컬렉션 문제"
+        verbose_name = verbose_name_plural = "10_컬렉션 문제"
         unique_together = ['collection', 'problem']
         ordering = ['collection__user', 'collection', 'order']
         db_table = 'a_official_problem_collection_item'

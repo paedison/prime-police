@@ -36,10 +36,24 @@
 {% endpartialdef menu_official %}
 
 {% partialdef menu_daily %}
-    <li class="nav-item">
-        <a id="dailyList" class="nav-link collapsed" href="{% url 'daily:base' %}">
+    <li class="nav-item" role="menuitem" aria-label="데일리테스트">
+        <a class="nav-link collapsed" href="" aria-expanded="false"
+           data-bs-target="#daily-nav" data-bs-toggle="collapse">
             <i class="fa-solid fa-fw fa-inbox"></i> 데일리테스트
+            <i class="fa-solid fa-fw fa-chevron-down ms-auto"></i>
         </a>
+        <ul id="daily-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+            <li>
+                <a id="dailyProblemList" class="aside-nav-icon" hx-boost="true" href="{% url 'daily:problem-list' %}">
+                    <i class="fa-regular fa-fw fa-square"></i> 문제 리스트
+                </a>
+            </li>
+            <li>
+                <a id="dailyAnswerSubmit" class="aside-nav-icon" hx-boost="true" href="{% url 'daily:problem-list' %}">
+                    <i class="fa-regular fa-fw fa-square"></i> 답안 제출
+                </a>
+            </li>
+        </ul>
     </li>
 {% endpartialdef menu_daily %}
 

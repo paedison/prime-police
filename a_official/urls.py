@@ -10,12 +10,6 @@ collection_patterns = [
     path('<int:pk>/', views.collection_detail_view, name='collection-detail'),
 ]
 
-comment_patterns = [
-    path('', views.comment_list_view, name='comment-list'),
-    path('create/', views.comment_create, name='comment-create'),
-    path('<int:pk>/', views.comment_detail_view, name='comment-detail'),
-]
-
 urlpatterns = [
     path('', views.problem_list_view, name='base'),
     path('<int:pk>/', views.problem_detail_view, name='problem-detail'),
@@ -27,12 +21,5 @@ urlpatterns = [
     path('tag/<int:pk>/', views.tag_problem, name='tag-problem'),
     path('collect/<int:pk>/', views.collect_problem, name='collect-problem'),
 
-    path('comment/<int:pk>/', views.comment_problem, name='comment-problem'),
-
-    path('comment/create/<int:pk>/', views.comment_problem_create, name='comment-problem-create'),
-    path('comment/update/<int:pk>/', views.comment_problem_update, name='comment-problem-update'),
-    path('comment/delete/<int:pk>/', views.comment_problem_delete, name='comment-problem-delete'),
-
     path('collection/', include(collection_patterns)),
-    path('comment/', include(comment_patterns)),
 ]
