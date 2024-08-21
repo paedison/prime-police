@@ -17,6 +17,14 @@ def semester_default():
     return 75
 
 
+def answer_default():
+    return [0 for _ in range(10)]
+
+
+def statistics_default():
+    return {"max": 0, "t10": 0, "t20": 0, "avg": 0}
+
+
 def semester_choice() -> list:
     choice = [(semester, f'{semester}기') for semester in range(75, semester_default() + 1)]
     choice.reverse()
@@ -65,42 +73,6 @@ def get_remarks(message_type: str, remarks: str | None) -> str:
     else:
         remarks = f"{message_type}_at:{utc_now}"
     return remarks
-
-
-class Exam(models.Model):
-    semester = models.IntegerField(choices=semester_choice, default=semester_default, verbose_name='기수')
-    circle = models.IntegerField(choices=circle_choice, default=1, verbose_name='순환')
-    subject = models.CharField(max_length=2, choices=subject_choice, default='형사', verbose_name='과목')
-    round = models.IntegerField(choices=round_choice, default=1, verbose_name='회차')
-    opened_at = models.DateField(default=timezone.now, verbose_name='공개일')
-    answer_official = models.JSONField(default=list, verbose_name='정답')
-    participants = models.IntegerField(default=0, verbose_name='응시생수')
-    statistics = models.JSONField(default=dict, verbose_name='성적 통계')
-
-    class Meta:
-        verbose_name = verbose_name_plural = "00_시험"
-        unique_together = ['semester', 'circle', 'subject', 'round']
-        ordering = ['-semester', '-circle', 'subject', 'round']
-
-    def __str__(self):
-        return f'[Daily]Exam:{self.full_reference}'
-
-    @property
-    def full_reference(self):
-        return ' '.join([
-            self.get_semester_display(),
-            self.get_circle_display(),
-            self.get_subject_display(),
-            self.get_round_display(),
-        ])
-
-    @property
-    def sem_cir_sub_rnd(self):
-        return f'{self.semester}-{self.circle}-{self.subject}-{self.round}'
-
-    @property
-    def is_not_opened(self):
-        return timezone.now() <= self.opened_at
 
 
 class ProblemTag(TagBase):
@@ -412,3 +384,123 @@ class ProblemCollectionItem(models.Model):
     @property
     def semester_circle_round_subject(self):
         return self.problem.semester_circle_round_subject
+
+
+class Exam(models.Model):
+    semester = models.IntegerField(choices=semester_choice, default=semester_default, verbose_name='기수')
+    circle = models.IntegerField(choices=circle_choice, default=1, verbose_name='순환')
+    subject = models.CharField(max_length=2, choices=subject_choice, default='형사', verbose_name='과목')
+    round = models.IntegerField(choices=round_choice, default=1, verbose_name='회차')
+    opened_at = models.DateField(default=timezone.now, verbose_name='공개일')
+    answer_official = models.JSONField(default=answer_default, verbose_name='정답')
+    participants = models.IntegerField(default=0, verbose_name='응시생수')
+    statistics = models.JSONField(default=statistics_default, verbose_name='성적 통계')
+
+    class Meta:
+        verbose_name = verbose_name_plural = "11_시험"
+        unique_together = ['semester', 'circle', 'subject', 'round']
+        ordering = ['-semester', '-circle', 'subject', 'round']
+
+    def __str__(self):
+        return f'[Daily]Exam:{self.full_reference}'
+
+    @property
+    def full_reference(self):
+        return ' '.join([
+            self.get_semester_display(),
+            self.get_circle_display(),
+            self.get_subject_display(),
+            self.get_round_display(),
+        ])
+
+    @property
+    def sem_cir_sub_rnd(self):
+        return f'{self.semester}-{self.circle}-{self.subject}-{self.round}'
+
+    @property
+    def circle_subject_round(self):
+        return f'{self.get_circle_display()}-{self.get_subject_display()}-{self.get_round_display()}'
+
+    @property
+    def is_not_opened(self):
+        return timezone.now() <= self.opened_at
+
+
+class Student(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='생성 일시')
+    user = models.ForeignKey(
+        User, null=True, blank=True, on_delete=models.SET_NULL, related_name='daily_students')
+    semester = models.IntegerField(choices=semester_choice, default=semester_default, verbose_name='기수')
+    circle = models.IntegerField(choices=circle_choice, default=1, verbose_name='순환')
+    subject = models.CharField(max_length=2, choices=subject_choice, default='형사', verbose_name='과목')
+    round = models.IntegerField(choices=round_choice, default=1, verbose_name='회차')
+    answer_student = models.JSONField(default=answer_default, verbose_name='제출 답안')
+    answer_confirmed = models.BooleanField(default=False, verbose_name='답안 확정')
+    score = models.IntegerField(default=0, verbose_name='점수')
+    rank = models.IntegerField(default=0, verbose_name='등수')
+    remarks = models.TextField(null=True, blank=True, verbose_name='주석')
+
+    class Meta:
+        verbose_name = verbose_name_plural = "12_수험정보"
+        unique_together = ['user', 'semester', 'circle', 'subject', 'round']
+        ordering = ['-semester', '-circle', 'subject', 'round']
+
+    def __str__(self):
+        return f'[Daily]Student:{self.user.name}_{self.full_reference}'
+
+    @property
+    def full_reference(self):
+        return ' '.join([
+            self.get_semester_display(),
+            self.get_circle_display(),
+            self.get_subject_display(),
+            self.get_round_display(),
+        ])
+
+    def get_answer_count(self):
+        return len([ans for ans in self.answer_student if ans])
+
+
+class AnswerCount(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='생성 일시')
+    exam = models.ForeignKey(Exam, on_delete=models.CASCADE, related_name='students')
+    number = models.IntegerField(default=1, verbose_name="번호")
+
+    count_1 = models.IntegerField(default=0, verbose_name='①')
+    count_2 = models.IntegerField(default=0, verbose_name='②')
+    count_3 = models.IntegerField(default=0, verbose_name='③')
+    count_4 = models.IntegerField(default=0, verbose_name='④')
+    count_0 = models.IntegerField(default=0, verbose_name='미표기')
+    count_multiple = models.IntegerField(default=0, verbose_name='중복표기')
+    count_total = models.IntegerField(default=0, verbose_name='총계')
+    data = models.JSONField(default=dict, verbose_name='전체')
+
+    class Meta:
+        verbose_name = verbose_name_plural = "13_답안개수"
+        unique_together = ['exam', 'number']
+
+    def __str__(self):
+        return f'[Daily]AnswerCount:{self.exam.full_reference} {self.number:02}번'
+
+    def get_rate(self, answer: int | str) -> float:
+        count = getattr(self, f'count_{answer}', 0)
+        rate = count / self.count_total * 100 if self.count_total else 0
+        return rate
+
+    @property
+    def rate_1(self): return self.get_rate(1)
+
+    @property
+    def rate_2(self): return self.get_rate(2)
+
+    @property
+    def rate_3(self): return self.get_rate(3)
+
+    @property
+    def rate_4(self): return self.get_rate(4)
+
+    @property
+    def rate_0(self): return self.get_rate(0)
+
+    @property
+    def rate_multiple(self): return self.get_rate('multiple')

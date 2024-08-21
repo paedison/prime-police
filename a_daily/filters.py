@@ -33,18 +33,12 @@ CHOICES_TAG = (
 )
 
 
-class AnonymousDailyFilter(django_filters.FilterSet):
+class AnonymousDailyProblemFilter(django_filters.FilterSet):
     circle = django_filters.ChoiceFilter(
         field_name='circle',
         label='',
         empty_label='[전체 순환]',
         choices=models.circle_choice,
-    )
-    round = django_filters.ChoiceFilter(
-        field_name='round',
-        label='',
-        empty_label='[전체 회차]',
-        choices=models.round_choice,
     )
     subject = django_filters.ChoiceFilter(
         field_name='subject',
@@ -52,10 +46,16 @@ class AnonymousDailyFilter(django_filters.FilterSet):
         empty_label='[전체 과목]',
         choices=models.subject_choice,
     )
+    round = django_filters.ChoiceFilter(
+        field_name='round',
+        label='',
+        empty_label='[전체 회차]',
+        choices=models.round_choice,
+    )
 
     class Meta:
         model = models.Problem
-        fields = ['circle', 'round', 'subject']
+        fields = ['circle', 'subject', 'round']
 
     @property
     def qs(self):
@@ -69,7 +69,7 @@ class AnonymousDailyFilter(django_filters.FilterSet):
         return queryset
 
 
-class DailyFilter(AnonymousDailyFilter):
+class DailyProblemFilter(AnonymousDailyProblemFilter):
     likes = django_filters.ChoiceFilter(
         label='',
         empty_label='[즐겨찾기]',
@@ -103,7 +103,7 @@ class DailyFilter(AnonymousDailyFilter):
 
     class Meta:
         model = models.Problem
-        fields = ['circle', 'round', 'subject', 'likes', 'rates', 'solves', 'memos', 'tags']
+        fields = ['circle', 'subject', 'round', 'likes', 'rates', 'solves', 'memos', 'tags']
 
     def filter_likes(self, queryset, _, value):
         filter_dict = {
@@ -150,3 +150,32 @@ class DailyFilter(AnonymousDailyFilter):
             'none': queryset.exclude(id__in=id_list),
         }
         return filter_dict[value]
+
+
+class DailyExamFilter(django_filters.FilterSet):
+    circle = django_filters.ChoiceFilter(
+        field_name='circle',
+        label='',
+        empty_label='[전체 순환]',
+        choices=models.circle_choice,
+    )
+    subject = django_filters.ChoiceFilter(
+        field_name='subject',
+        label='',
+        empty_label='[전체 과목]',
+        choices=models.subject_choice,
+    )
+    round = django_filters.ChoiceFilter(
+        field_name='round',
+        label='',
+        empty_label='[전체 회차]',
+        choices=models.round_choice,
+    )
+
+    class Meta:
+        model = models.Exam
+        fields = ['circle', 'subject', 'round']
+
+    @property
+    def qs(self):
+        return super().qs.filter(semester=models.semester_default())

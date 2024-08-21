@@ -4,20 +4,6 @@ from unfold.admin import ModelAdmin
 from . import models
 
 
-@admin.register(models.Exam)
-class ExamAdmin(ModelAdmin):
-    list_display = list_display_links = ['id', 'semester', 'circle', 'subject', 'round', 'opened_at']
-    list_filter = ['semester', 'circle', 'subject', 'round']
-    show_facets = admin.ShowFacets.ALWAYS
-    save_on_top = True
-    show_full_result_count = True
-    fields = [
-        'semester', 'circle', 'subject', 'round', 'opened_at', 'answer_official', 'participants', 'statistics']
-
-    class Media:
-        css = {'all': ['css/admin_custom.css']}
-
-
 @admin.register(models.Problem)
 class ProblemAdmin(ModelAdmin):
     list_display = list_display_links = [
@@ -109,6 +95,37 @@ class ProblemCollectAdmin(ModelAdmin):
 class ProblemCollectedItemAdmin(ModelAdmin):
     list_display = list_display_links = ['id', 'created_at', 'reference', 'collect_title', 'order']
     fields = ['collect', 'problem', 'order', 'remarks']
+
+    class Media:
+        css = {'all': ['css/admin_custom.css']}
+
+
+@admin.register(models.Exam)
+class ExamAdmin(ModelAdmin):
+    list_display = list_display_links = ['id', 'semester', 'circle', 'subject', 'round', 'opened_at']
+    list_filter = ['semester', 'circle', 'subject', 'round']
+    show_facets = admin.ShowFacets.ALWAYS
+    save_on_top = True
+    show_full_result_count = True
+    fields = [
+        'semester', 'circle', 'subject', 'round', 'opened_at', 'answer_official', 'participants', 'statistics']
+
+    class Media:
+        css = {'all': ['css/admin_custom.css']}
+
+
+@admin.register(models.Student)
+class StudentAdmin(ModelAdmin):
+    list_display = list_display_links = [
+        'id', 'created_at', 'user', 'semester', 'circle', 'subject', 'round', 'score', 'rank']
+    list_filter = ['semester', 'circle', 'subject', 'round']
+    show_facets = admin.ShowFacets.ALWAYS
+    save_on_top = True
+    show_full_result_count = True
+    fields = [
+        'user', 'semester', 'circle', 'subject', 'round',
+        'answer_student', 'answer_confirmed', 'score', 'rank', 'remarks',
+    ]
 
     class Media:
         css = {'all': ['css/admin_custom.css']}

@@ -1,6 +1,5 @@
 from datetime import date
 
-from bs4 import BeautifulSoup as bs
 from django.db.models import F, Max, Case, When, BooleanField, Value
 from django.db.models.functions import Coalesce
 from django.http import HttpResponse
@@ -10,7 +9,7 @@ from django.views.decorators.http import require_POST
 
 from a_common.constants import icon_set
 from a_common.utils import HtmxHttpRequest, update_context_data
-from . import models, utils, forms, filters
+from .. import models, utils, forms, filters
 
 
 def problem_list_view(request: HtmxHttpRequest):
@@ -25,9 +24,9 @@ def problem_list_view(request: HtmxHttpRequest):
     sub_title = utils.get_sub_title(exam_circle, exam_round, exam_subject)
 
     if request.user.is_authenticated:
-        filterset = filters.DailyFilter(data=request.GET, request=request)
+        filterset = filters.DailyProblemFilter(data=request.GET, request=request)
     else:
-        filterset = filters.AnonymousDailyFilter(data=request.GET, request=request)
+        filterset = filters.AnonymousDailyProblemFilter(data=request.GET, request=request)
 
     custom_data = utils.get_custom_data(request.user)
     page_obj, page_range = utils.get_page_obj_and_range(page, filterset.qs)
