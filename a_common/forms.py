@@ -13,10 +13,10 @@ class LoginForm(allauth_forms.LoginForm):
 
 class SignupForm(allauth_forms.SignupForm):
     name = forms.CharField(
-        label='이름', min_length=10, required=True,
+        label='이름', max_length=10, required=True,
         widget=forms.TextInput(attrs={'placeholder': '이름', 'class': 'form-control'}))
     prime_id = forms.CharField(
-        label='프라임법학원 아이디', min_length=20, required=True,
+        label='프라임법학원 아이디', max_length=20, required=True,
         widget=forms.TextInput(attrs={'placeholder': '프라임법학원 아이디', 'class': 'form-control'}))
 
     def __init__(self, *args, **kwargs):
