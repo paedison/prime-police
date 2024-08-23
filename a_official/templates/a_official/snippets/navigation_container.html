@@ -44,7 +44,7 @@
        hx-target="#{{ view_type }}ListContents"
        hx-headers='{"View-Type":"{{ view_type }}"}'
        hx-trigger="click once"
-       hx-get="">
+       hx-get="{{ problem.get_absolute_url }}">
         <div class="text-white" data-bs-toggle="tooltip" title="{{ tooltip_title }}">
             {{ icon|safe }}
         </div>
