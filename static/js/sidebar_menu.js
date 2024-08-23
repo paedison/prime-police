@@ -1,95 +1,84 @@
+//#region constants
+/** @type {object} info */
 const info = JSON.parse($('#info').text());
-const menu = info['menu'];  // notice, dashboard, official, score, schedule
-const view_type = info['view_type'];  // problem, like, rate, solve, search
-const parent_menu = ['score']  // menu with child branches
-
-$(window).on("scroll", function() {
-    const distance = $(this).scrollTop();
-    const $herotext = $(".herotext-anim");
-    if ($herotext.length) {
-        const opacity = 1 - distance / ($(window).height() * 0.15);
-        $herotext.css({
-            transform: `translateY(${distance * 0.7}px)`,
-            opacity: opacity
-        });
+/** @type {string} info */
+const menuCurrent = info['menu'];  // notice, dashboard, official, score
+/** @type {string} info */
+const menuSelf = info.hasOwnProperty('menu_self') ? info['menu_self'] : '';
+/** @type {object} asideNav */
+const asideNav = {
+    link: function(current) {
+        const $this = $(this);
+        const isActive = $this.data('menu') === current;
+        $this.toggleClass('collapsed', !isActive)
+            .attr('aria-expanded', isActive)
+            .next('ul').toggleClass('show', isActive);
+    },
+    icon: function(current, self) {
+        const $this = $(this);
+        const bullet = $this.children('i').first();
+        const isActive = $this.data('menuParent') === current && $this.data('menuSelf') === self;
+        $this.toggleClass('active', isActive);
+        bullet.toggleClass('fa-solid', isActive).toggleClass('fa-regular', !isActive);
+    },
+    hide: function() {
+        if ($(window).width() < 1200) {
+            $('body').removeClass('toggle-sidebar');
+        }
     }
-});
-
-
-// Toggle the side navigation
-$("#sidebarToggle").click(function() {
-    $("body").toggleClass("toggle-sidebar");
-});
-
-function hideSidebar() {
-    if ($(window).width() < 1200) {
-        $('body').removeClass('toggle-sidebar');
-    }
 }
+//#endregion
 
-// Expand & activate menu
-function expandMenu(target) {
-    const navContent = $(target).closest('ul');
-    const navLink = navContent.prev('a');
-    const bulletPoint = $(target).children().first();
+// Toggle sidebar
+$("#sidebarToggle").click(function() {$("body").toggleClass("toggle-sidebar")});
 
-    navLink.removeClass('collapsed').attr('aria-expanded', 'true');
-    navContent.addClass('show');
-    $(target).addClass('active');
-    bulletPoint.removeClass('fa-regular').addClass('fa-solid');
-}
+// Hide sidebar when width < 1200
+asideNav.hide();
 
-// Initialize the side menu bar
-function initialMenu() {
-    $('.nav-link').addClass('collapsed').attr('aria-expanded', 'false');
-    $('.aside-nav-icon').removeClass('active').find('i').removeClass('fa-solid').addClass('fa-regular');
-}
+// Hide sidebar when clicked link
+$('#main a, #header a').click(function (){asideNav.hide()});
 
-// When the main menu activated
+// Default sidebar setting when loaded
 $(document).ready(function() {
-    if (parent_menu.includes(menu)) {
-        expandMenu(`#${view_type}List`);
-    }
-    else {
-        $(`#${menu}List`).removeClass('collapsed');
-    }
-});
-
-// When clicked the logo
-$('.logo').click(function() {
-    let target = $(this).data('target');
-    initialMenu();
-    $(target).removeClass('collapsed').attr('aria-expanded', 'true');
-    hideSidebar();
+    $('#sidebar .nav-link').each(function() {asideNav.link.call(this, menuCurrent)});
+    $('#sidebar .aside-nav-icon').each(function () {
+        asideNav.icon.call(this, menuCurrent, menuSelf)
+    });
 });
 
 // When clicked the main menu
-$('#noticeList, #dashboardList, #officialList, #dailyList, #predictList, #scheduleList, #lectureList').click(
-    function() {
-        initialMenu();
-        $(this).removeClass('collapsed').attr('aria-expanded', 'true');
-        hideSidebar()
-});
+jQuery('#sidebar .nav-link').click(function () {
+    let navContent = $(this).next('ul')
+    let dataMenu = $(this).data('menu')
+    let dataMenuParent = $(this).data('menuParent')
+    let dataMenuSelf = $(this).data('menuSelf')
 
-// When clicked the sub-menu
-jQuery('.aside-nav-icon').click(function() {
-    initialMenu();
-
-    $(this).closest('ul').prev('a').removeClass('collapsed').attr('aria-expanded', 'true');
-    $(this).closest('li').children().removeClass('active');
-    $(this).closest('li').children().find('i').removeClass('fa-solid').addClass('fa-regular');
-
-    $(this).addClass('active').find('i').removeClass('fa-regular').addClass('fa-solid');
-    hideSidebar();
-});
-
-function mainAnchorClick() {
-    $('#main a, #aside-group a, #aside-group select').click(function (){
-        hideSidebar();
+    $('#sidebar .nav-link').each(function() {
+        if (navContent.length) {
+            if ($(this).attr('class') === 'nav-link') asideNav.link.call(this, dataMenu)
+        } else asideNav.link.call(this, dataMenu)
     });
-}
+    $('#sidebar .aside-nav-icon').each(function() {
+        asideNav.icon.call(this, dataMenuParent, dataMenuSelf)
+    });
+    if (!navContent.length) asideNav.hide();
+});
 
-mainAnchorClick();
-// jQuery('body').on('htmx:afterSwap', function() {
-//     mainAnchorClick();
-// });
+// When clicked the sub menu
+jQuery('#sidebar .aside-nav-icon').click(function () {
+    let dataMenuParent = $(this).data('menuParent')
+    let dataMenuSelf = $(this).data('menuSelf')
+
+    $('#sidebar .nav-link').each(function() {asideNav.link.call(this, dataMenuParent)});
+    $('#sidebar .aside-nav-icon').each(function() {
+        asideNav.icon.call(this, dataMenuParent, dataMenuSelf)
+    });
+    asideNav.hide();
+});
+
+// When clicked the logo
+$('#header .logo').click(function() {
+    let dataMenu = $(this).data('menu');
+    $('#sidebar .nav-link').each(function() {asideNav.link.call(this, dataMenu)});
+    $('#sidebar .aside-nav-icon').each(function() {asideNav.icon.call(this, dataMenu, '')});
+});

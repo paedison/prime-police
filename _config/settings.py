@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from django.templatetags.static import static
 from django.utils.translation import gettext_lazy as _
 from environ import Env
 
@@ -398,4 +399,12 @@ LOGGING = {
 # django-debug-toolbar settings
 DEBUG_TOOLBAR_CONFIG = {
     "ROOT_TAG_EXTRA_ATTRS": "hx-preserve"
+}
+
+
+# Unfold settings
+UNFOLD = {
+    'STYLES': [
+        lambda request: static('css/admin_custom.css'),
+    ],
 }

@@ -12,6 +12,3 @@ class UserAdmin(AuthUserAdmin):
     readonly_fields = ['email', 'username', 'name', 'prime_id', 'joined_at', 'is_staff']
     search_fields = ['email']
     ordering = ['id']
-
-    class Media:
-        css = {'all': ['css/admin_custom.css']}

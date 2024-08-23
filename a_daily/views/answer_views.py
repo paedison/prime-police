@@ -21,7 +21,7 @@ def answer_list_view(request: HtmxHttpRequest):
     page = request.GET.get('page', '1')
     filterset = filters.DailyExamFilter(data=request.GET, request=request)
 
-    info = {'menu': 'daily'}
+    info = {'menu': 'daily', 'menu_self': 'answer'}
     sub_title = utils.get_sub_title(exam_circle, exam_round, exam_subject, end_string='답안 제출 현황')
 
     page_obj, page_range = utils.get_page_obj_and_range(page, filterset.qs)
@@ -50,7 +50,7 @@ def answer_list_view(request: HtmxHttpRequest):
 
 def answer_detail_view(request: HtmxHttpRequest, pk: int):
     # view_type = request.headers.get('View-Type', '')
-    info = {'menu': 'daily'}
+    info = {'menu': 'daily', 'menu_self': 'answer'}
     exam = get_object_or_404(models.Exam, pk=pk)
     exam_info = {
         'semester': models.semester_default(),

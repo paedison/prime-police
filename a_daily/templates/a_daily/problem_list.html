@@ -6,7 +6,7 @@
     <div class="pagetitle">
         <h1>
             {{ icon_menu|safe }} {{ title }}
-            <span class="fs-6 text-secondary">문제 리스트</span>
+            <span class="fs-6 text-secondary">오답 노트</span>
             {% if user.is_staff %}
                 <a class="btn btn-sm btn-outline-primary ms-1"
                    href="{% url 'admin:a_daily_problem_changelist' %}" target="admin">

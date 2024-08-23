@@ -20,7 +20,7 @@ def problem_list_view(request: HtmxHttpRequest):
     exam_subject = request.GET.get('subject', '')
     page = request.GET.get('page', '1')
 
-    info = {'menu': 'daily'}
+    info = {'menu': 'daily', 'menu_self': 'problem'}
     sub_title = utils.get_sub_title(exam_circle, exam_round, exam_subject)
 
     if request.user.is_authenticated:
@@ -49,7 +49,7 @@ def problem_list_view(request: HtmxHttpRequest):
 
 def problem_detail_view(request: HtmxHttpRequest, pk: int):
     view_type = request.headers.get('View-Type', '')
-    info = {'menu': 'daily'}
+    info = {'menu': 'daily', 'menu_self': 'problem'}
     queryset = models.Problem.objects.filter(opened_at__gte=date.today()).order_by('-year', 'id')
     problem = get_object_or_404(queryset, pk=pk)
 

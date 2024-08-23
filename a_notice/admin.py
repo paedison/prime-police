@@ -13,6 +13,3 @@ class PostAdmin(ModelAdmin):
     search_fields = ['title', 'content']
     show_full_result_count = True
     fields = ['user', 'title', 'content', 'top_fixed', 'is_hidden']
-
-    class Media:
-        css = {'all': ['css/admin_custom.css']}

@@ -13,7 +13,7 @@
 
 {% partialdef menu_notice %}
     <li class="nav-item">
-        <a id="noticeList" class="nav-link collapsed" href="{% url 'notice:base' %}">
+        <a class="nav-link collapsed" data-menu="notice" href="{% url 'notice:base' %}">
             <i class="fa-solid fa-fw fa-bullhorn"></i> 공지사항
         </a>
     </li>
@@ -21,7 +21,7 @@
 
 {% partialdef menu_dashboard %}
     <li class="nav-item">
-        <a id="dashboardList" class="nav-link collapsed" href="">
+        <a class="nav-link collapsed" data-menu="dashboard" href="">
             <i class="fa-solid fa-fw fa-list"></i> 대시보드
         </a>
     </li>
@@ -29,7 +29,7 @@
 
 {% partialdef menu_official %}
     <li class="nav-item">
-        <a id="officialList" class="nav-link collapsed" href="{% url 'official:base' %}">
+        <a class="nav-link collapsed" data-menu="official" href="{% url 'official:base' %}">
             <i class="fa-solid fa-fw fa-layer-group"></i> 기출문제
         </a>
     </li>
@@ -37,20 +37,22 @@
 
 {% partialdef menu_daily %}
     <li class="nav-item" role="menuitem" aria-label="데일리테스트">
-        <a class="nav-link collapsed" href="" aria-expanded="false"
-           data-bs-target="#daily-nav" data-bs-toggle="collapse">
+        <a class="nav-link collapsed" href="#dailyNavContent" data-menu="daily"
+           data-bs-toggle="collapse" aria-expanded="false" aria-controls="dailyNavContent">
             <i class="fa-solid fa-fw fa-inbox"></i> 데일리테스트
             <i class="fa-solid fa-fw fa-chevron-down ms-auto"></i>
         </a>
-        <ul id="daily-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+        <ul id="dailyNavContent" class="nav-content collapse" data-bs-parent="#sidebar">
             <li>
-                <a id="dailyProblemList" class="aside-nav-icon" hx-boost="true" href="{% url 'daily:problem-list' %}">
-                    <i class="fa-regular fa-fw fa-square"></i> 문제 리스트
+                <a class="aside-nav-icon" data-menu-parent="daily" data-menu-self="answer"
+                   hx-boost="true" href="{% url 'daily:answer-list' %}">
+                    <i class="fa-regular fa-fw fa-square"></i> 답안 제출
                 </a>
             </li>
             <li>
-                <a id="dailyAnswerSubmit" class="aside-nav-icon" hx-boost="true" href="{% url 'daily:answer-list' %}">
-                    <i class="fa-regular fa-fw fa-square"></i> 답안 제출
+                <a class="aside-nav-icon" data-menu-parent="daily" data-menu-self="problem"
+                   hx-boost="true" href="{% url 'daily:problem-list' %}">
+                    <i class="fa-regular fa-fw fa-square"></i> 오답 노트
                 </a>
             </li>
         </ul>
@@ -59,7 +61,7 @@
 
 {% partialdef menu_lecture %}
     <li class="nav-item">
-        <a id="lectureList" class="nav-link collapsed" href="">
+        <a class="nav-link collapsed" data-menu="lecture" href="">
             <i class="fa-solid fa-fw fa-pen-to-square"></i> 온라인강의
         </a>
     </li>
