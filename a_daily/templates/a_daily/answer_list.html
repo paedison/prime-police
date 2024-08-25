@@ -106,27 +106,59 @@
                     <th class="text-primary text-nowrap p-2 col-1">순환</th>
                     <th class="text-primary text-nowrap p-2 col-1">과목</th>
                     <th class="text-primary text-nowrap p-2 col-1">회차</th>
-                    <th class="text-primary text-nowrap p-2 col-1">응시생수(명)</th>
-                    <th class="text-primary text-nowrap p-2 col-1">성적(점)</th>
-                    <th class="text-primary text-nowrap p-2 col-1">등수(등)</th>
+                    <th class="text-primary text-nowrap p-2 col-1">응시생수</th>
+                    <th class="text-primary text-nowrap p-2 col-1">점수</th>
+                    <th class="text-primary text-nowrap p-2 col-1">등수</th>
                 </tr>
             </thead>
 
             <tbody>
                 {% for exam in page_obj %}
-                    <tr
-                        {% if exam.detail_url %}
-                            class="text-center cursor-pointer"
-                            hx-get="{{ exam.detail_url }}"
+                    <tr class="text-center cursor-pointer">
+                        {% if exam.student.answer_confirmed %}
+                            <td class="text-nowrap p-2" hx-get="{{ exam.get_answer_detail_url }}">
+                                {{ exam.get_circle_display }}
+                            </td>
+                            <td class="text-nowrap p-2" hx-get="{{ exam.get_answer_detail_url }}">
+                                {{ exam.get_subject_display }}
+                            </td>
+                            <td class="text-nowrap p-2" hx-get="{{ exam.get_answer_detail_url }}">
+                                {{ exam.get_round_display }}
+                            </td>
+                            <td class="text-nowrap p-2" hx-get="{{ exam.get_answer_detail_url }}">
+                                {{ exam.participants }}명
+                            </td>
+                            <td class="text-nowrap p-2" hx-get="{{ exam.get_answer_detail_url }}">
+                                {{ exam.student.score }}점
+                            </td>
+                            <td class="text-nowrap p-2">
+                                <span class="badge rounded-pill text-bg-success" hx-target="this"
+                                      hx-swap="outerHTML swap:0.25s" hx-get="{{ exam.student.get_rank_verify_url }}">
+                                    등수 확인
+                                </span>
+                            </td>
                         {% else %}
-                            class="text-center"
-                        {% endif %}>
-                        <td class="text-nowrap p-2">{{ exam.get_circle_display }}</td>
-                        <td class="text-nowrap p-2">{{ exam.get_subject_display }}</td>
-                        <td class="text-nowrap p-2">{{ exam.get_round_display }}</td>
-                        <td class="text-nowrap p-2">{{ exam.participants }}</td>
-                        <td class="text-nowrap p-2">{{ exam.score }}</td>
-                        <td class="text-nowrap p-2">{{ exam.rank }}</td>
+                            <td class="text-nowrap p-2" hx-get="{{ exam.get_answer_input_url }}">
+                                {{ exam.get_circle_display }}
+                            </td>
+                            <td class="text-nowrap p-2" hx-get="{{ exam.get_answer_input_url }}">
+                                {{ exam.get_subject_display }}
+                            </td>
+                            <td class="text-nowrap p-2" hx-get="{{ exam.get_answer_input_url }}">
+                                {{ exam.get_round_display }}
+                            </td>
+                            <td class="text-nowrap p-2" hx-get="{{ exam.get_answer_input_url }}">
+                                {{ exam.participants }}명
+                            </td>
+                            <td class="text-nowrap p-2">
+                                {% partialdef answer_input inline=True %}
+                                    <a class="badge rounded-pill text-bg-danger" hx-get="{{ exam.get_answer_input_url }}">
+                                        미응시
+                                    </a>
+                                {% endpartialdef answer_input %}
+                            </td>
+                            <td class="text-nowrap p-2">{% partial answer_input %}</td>
+                        {% endif %}
                     </tr>
                 {% empty %}
                     <tr>

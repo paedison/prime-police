@@ -30,4 +30,5 @@ answer_patterns = [
 urlpatterns = [
     path('problem/', include(problem_patterns)),
     path('answer/', include(answer_patterns)),
+    path('rank/<int:pk>/', answer_views.rank_verify, name='rank-verify'),
 ]

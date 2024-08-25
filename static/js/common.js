@@ -83,6 +83,10 @@ function attachFormHelpTextClass() {
     $('.form-field-container > ul > li').addClass('list-group-item small text-danger');
 }
 
+function deleteTooltipInner() {
+    $('.tooltip-inner').remove();
+}
+
 function initializeAll() {
     initializeTooltips();
     initializeSortables();
@@ -90,6 +94,7 @@ function initializeAll() {
     applyTagify();
     attachContentCkeditor();
     attachFormHelpTextClass();
+    deleteTooltipInner();
 }
 $(window).on('load', initializeAll);
 $(document).on('htmx:afterSettle', initializeAll);

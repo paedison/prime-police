@@ -36,7 +36,7 @@ def circle_choice() -> list:
 
 
 def round_choice() -> list:
-    return [(_round, f'{_round}회') for _round in range(1, 31)]
+    return [(_round, f'제{_round}회') for _round in range(1, 31)]
 
 
 def subject_choice() -> dict:
@@ -425,6 +425,19 @@ class Exam(models.Model):
     def is_not_opened(self):
         return timezone.now() <= self.opened_at
 
+    @staticmethod
+    def get_answer_list_url():
+        return reverse_lazy('daily:answer-list')
+
+    def get_answer_detail_url(self):
+        return reverse_lazy('daily:answer-detail', args=[self.id])
+
+    def get_answer_input_url(self):
+        return reverse_lazy('daily:answer-input', args=[self.id])
+
+    def get_answer_confirm_url(self):
+        return reverse_lazy('daily:answer-confirm', args=[self.id])
+
 
 class Student(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='생성 일시')
@@ -436,8 +449,8 @@ class Student(models.Model):
     round = models.IntegerField(choices=round_choice, default=1, verbose_name='회차')
     answer_student = models.JSONField(default=answer_default, verbose_name='제출 답안')
     answer_confirmed = models.BooleanField(default=False, verbose_name='답안 확정')
-    score = models.IntegerField(default=0, verbose_name='점수')
-    rank = models.IntegerField(default=0, verbose_name='등수')
+    score = models.IntegerField(null=True, blank=True, verbose_name='점수')
+    rank = models.IntegerField(null=True, blank=True, verbose_name='등수')
     remarks = models.TextField(null=True, blank=True, verbose_name='주석')
 
     class Meta:
@@ -460,10 +473,23 @@ class Student(models.Model):
     def get_answer_count(self):
         return len([ans for ans in self.answer_student if ans])
 
+    def get_absolute_url(self):
+        return reverse_lazy('daily:answer-detail', args=[self.id])
+
+    def get_rank_verify_url(self):
+        return reverse_lazy('daily:rank-verify', args=[self.id])
+
+    def get_rank_ratio(self, participants: int):
+        if participants:
+            return round(self.rank * 100 / participants, 1)
+
 
 class AnswerCount(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='생성 일시')
-    exam = models.ForeignKey(Exam, on_delete=models.CASCADE, related_name='students')
+    semester = models.IntegerField(choices=semester_choice, default=semester_default, verbose_name='기수')
+    circle = models.IntegerField(choices=circle_choice, default=1, verbose_name='순환')
+    subject = models.CharField(max_length=2, choices=subject_choice, default='형사', verbose_name='과목')
+    round = models.IntegerField(choices=round_choice, default=1, verbose_name='회차')
     number = models.IntegerField(default=1, verbose_name="번호")
 
     count_1 = models.IntegerField(default=0, verbose_name='①')
@@ -477,14 +503,24 @@ class AnswerCount(models.Model):
 
     class Meta:
         verbose_name = verbose_name_plural = "13_답안개수"
-        unique_together = ['exam', 'number']
+        unique_together = ['semester', 'circle', 'subject', 'round', 'number']
 
     def __str__(self):
-        return f'[Daily]AnswerCount:{self.exam.full_reference} {self.number:02}번'
+        return f'[Daily]AnswerCount:{self.full_reference} {self.number:02}번'
+
+    @property
+    def full_reference(self):
+        return ' '.join([
+            self.get_semester_display(),
+            self.get_circle_display(),
+            self.get_subject_display(),
+            self.get_round_display(),
+            self.number, '번'
+        ])
 
     def get_rate(self, answer: int | str) -> float:
         count = getattr(self, f'count_{answer}', 0)
-        rate = count / self.count_total * 100 if self.count_total else 0
+        rate = round(count / self.count_total * 100, 1) if self.count_total else 0
         return rate
 
     @property

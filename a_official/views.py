@@ -1,3 +1,4 @@
+from django.contrib.auth.decorators import login_not_required
 from django.db.models import F, Max, Case, When, BooleanField, Value
 from django.db.models.functions import Coalesce
 from django.http import HttpResponse
@@ -10,6 +11,7 @@ from a_common.utils import HtmxHttpRequest, update_context_data
 from . import models, utils, forms, filters
 
 
+@login_not_required
 def problem_list_view(request: HtmxHttpRequest):
     view_type = request.headers.get('View-Type', '')
 
@@ -44,6 +46,7 @@ def problem_list_view(request: HtmxHttpRequest):
     return render(request, 'a_official/problem_list.html', context)
 
 
+@login_not_required
 def problem_detail_view(request: HtmxHttpRequest, pk: int):
     view_type = request.headers.get('View-Type', '')
     info = {'menu': 'official'}

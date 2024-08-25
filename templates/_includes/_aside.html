@@ -5,7 +5,7 @@
 {#        {% partial menu_dashboard %}#}
 {#        {% partial menu_lecture %}#}
         {% partial menu_official %}
-        {% partial menu_daily %}
+        {% if perms.a_daily or user.is_staff %}{% partial menu_daily %}{% endif %}
 {#        {% partial menu_score %}#}
     </ul>
     {% partial sidebar_toggle %}
