@@ -10,12 +10,12 @@ from django.views.decorators.http import require_POST
 from django_htmx.http import reswap
 
 from a_common.constants import icon_set
-from a_common.decorators import permission_and_staff_required
+from a_common.decorators import permission_or_staff_required
 from a_common.utils import HtmxHttpRequest, update_context_data
 from .. import models, utils, forms, filters
 
 
-@permission_and_staff_required('a_daily.view_student', login_url='/')
+@permission_or_staff_required('a_daily.view_student', login_url='/')
 def answer_list_view(request: HtmxHttpRequest):
     view_type = request.headers.get('View-Type', '')
 
@@ -44,7 +44,7 @@ def answer_list_view(request: HtmxHttpRequest):
     return render(request, 'a_daily/answer_list.html', context)
 
 
-@permission_and_staff_required('a_daily.view_student', login_url='/')
+@permission_or_staff_required('a_daily.view_student', login_url='/')
 def answer_detail_view(request: HtmxHttpRequest, pk: int):
     # view_type = request.headers.get('View-Type', '')
     info = {'menu': 'daily', 'menu_self': 'answer'}
@@ -82,7 +82,7 @@ def answer_detail_view(request: HtmxHttpRequest, pk: int):
     return render(request, 'a_daily/answer_detail.html', context)
 
 
-@permission_and_staff_required('a_daily.view_student', login_url='/')
+@permission_or_staff_required('a_daily.view_student', login_url='/')
 def answer_input_view(request: HtmxHttpRequest, pk: int):
     info = {'menu': 'daily', 'menu_self': 'answer'}
     exam = get_object_or_404(models.Exam, pk=pk)
@@ -121,7 +121,7 @@ def answer_input_view(request: HtmxHttpRequest, pk: int):
     return render(request, 'a_daily/answer_input.html', context)
 
 
-@permission_and_staff_required('a_daily.view_student', login_url='/')
+@permission_or_staff_required('a_daily.view_student', login_url='/')
 def answer_confirm_view(request: HtmxHttpRequest, pk: int):
     exam = get_object_or_404(models.Exam, pk=pk)
     exam_info = get_exam_info(exam)
@@ -163,7 +163,7 @@ def answer_confirm_view(request: HtmxHttpRequest, pk: int):
     return render(request, 'a_daily/snippets/answer_confirmed_modal.html', context)
 
 
-@permission_and_staff_required('a_daily.view_student', login_url='/')
+@permission_or_staff_required('a_daily.view_student', login_url='/')
 def rank_verify(_: HtmxHttpRequest, pk: int):
     student = get_object_or_404(models.Student, pk=pk)
     exam_info = get_exam_info(student)

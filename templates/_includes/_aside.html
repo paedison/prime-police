@@ -1,5 +1,4 @@
-<aside id="sidebar" class="sidebar" hx-target="#main"
-       hx-swap="innerHTML swap:0.25s" hx-boost="true">
+<aside id="sidebar" class="sidebar" hx-target="#main" hx-swap="innerHTML swap:0.25s" hx-boost="true">
     <ul id="sidebar-nav" class="sidebar-nav">
         {% partial menu_notice %}
 {#        {% partial menu_dashboard %}#}
@@ -45,13 +44,13 @@
         <ul id="dailyNavContent" class="nav-content collapse" data-bs-parent="#sidebar">
             <li>
                 <a class="aside-nav-icon" data-menu-parent="daily" data-menu-self="answer"
-                   hx-boost="true" href="{% url 'daily:answer-list' %}">
+                   href="{% url 'daily:answer-list' %}">
                     <i class="fa-regular fa-fw fa-square"></i> 답안 제출
                 </a>
             </li>
             <li>
                 <a class="aside-nav-icon" data-menu-parent="daily" data-menu-self="problem"
-                   hx-boost="true" href="{% url 'daily:problem-list' %}">
+                   href="{% url 'daily:problem-list' %}">
                     <i class="fa-regular fa-fw fa-square"></i> 오답 노트
                 </a>
             </li>

@@ -8,12 +8,12 @@ from django.urls import reverse_lazy
 from django.views.decorators.http import require_POST
 
 from a_common.constants import icon_set
-from a_common.decorators import permission_and_staff_required
+from a_common.decorators import permission_or_staff_required
 from a_common.utils import HtmxHttpRequest, update_context_data
 from .. import models, utils, forms, filters
 
 
-@permission_and_staff_required('a_daily.view_student', login_url='/')
+@permission_or_staff_required('a_daily.view_student', login_url='/')
 def problem_list_view(request: HtmxHttpRequest):
     view_type = request.headers.get('View-Type', '')
 
@@ -49,7 +49,7 @@ def problem_list_view(request: HtmxHttpRequest):
     return render(request, 'a_daily/problem_list.html', context)
 
 
-@permission_and_staff_required('a_daily.view_student', login_url='/')
+@permission_or_staff_required('a_daily.view_student', login_url='/')
 def problem_detail_view(request: HtmxHttpRequest, pk: int):
     view_type = request.headers.get('View-Type', '')
     info = {'menu': 'daily', 'menu_self': 'problem'}
@@ -147,7 +147,7 @@ def problem_detail_view(request: HtmxHttpRequest, pk: int):
 
 
 @require_POST
-@permission_and_staff_required('a_daily.view_student', login_url='/')
+@permission_or_staff_required('a_daily.view_student', login_url='/')
 def like_problem(request: HtmxHttpRequest, pk: int):
     problem = get_object_or_404(models.Problem, pk=pk)
     problem_like, created = models.ProblemLike.objects.get_or_create(user=request.user, problem=problem)
@@ -161,7 +161,7 @@ def like_problem(request: HtmxHttpRequest, pk: int):
     return HttpResponse(f'{icon_like}')
 
 
-@permission_and_staff_required('a_daily.view_student', login_url='/')
+@permission_or_staff_required('a_daily.view_student', login_url='/')
 def rate_problem(request: HtmxHttpRequest, pk: int):
     problem = get_object_or_404(models.Problem, pk=pk)
 
@@ -182,7 +182,7 @@ def rate_problem(request: HtmxHttpRequest, pk: int):
 
 
 @require_POST
-@permission_and_staff_required('a_daily.view_student', login_url='/')
+@permission_or_staff_required('a_daily.view_student', login_url='/')
 def solve_problem(request: HtmxHttpRequest, pk: int):
     answer = request.POST.get('answer')
     problem = get_object_or_404(models.Problem, pk=pk)
@@ -207,7 +207,7 @@ def solve_problem(request: HtmxHttpRequest, pk: int):
     return render(request, 'a_daily/snippets/solve_modal.html', context)
 
 
-@permission_and_staff_required('a_daily.view_student', login_url='/')
+@permission_or_staff_required('a_daily.view_student', login_url='/')
 def memo_problem(request: HtmxHttpRequest, pk: int):
     view_type = request.headers.get('View-Type', '')
     problem = get_object_or_404(models.Problem, pk=pk)
@@ -248,7 +248,7 @@ def memo_problem(request: HtmxHttpRequest, pk: int):
 
 
 @require_POST
-@permission_and_staff_required('a_daily.view_student', login_url='/')
+@permission_or_staff_required('a_daily.view_student', login_url='/')
 def tag_problem(request: HtmxHttpRequest, pk: int):
     view_type = request.headers.get('View-Type', '')
     problem = get_object_or_404(models.Problem, pk=pk)
@@ -275,7 +275,7 @@ def tag_problem(request: HtmxHttpRequest, pk: int):
     return HttpResponse(html_code)
 
 
-@permission_and_staff_required('a_daily.view_student', login_url='/')
+@permission_or_staff_required('a_daily.view_student', login_url='/')
 def collection_list_view(request: HtmxHttpRequest):
     collections = []
     collection_ids = request.POST.getlist('collection')
@@ -291,7 +291,7 @@ def collection_list_view(request: HtmxHttpRequest):
     return render(request, 'a_daily/collection_list.html', context)
 
 
-@permission_and_staff_required('a_daily.view_student', login_url='/')
+@permission_or_staff_required('a_daily.view_student', login_url='/')
 def collection_create(request: HtmxHttpRequest):
     view_type = request.headers.get('View-Type', '')
     url_create = reverse_lazy('daily:collection-create')
@@ -337,7 +337,7 @@ def collection_create(request: HtmxHttpRequest):
             return render(request, 'a_daily/snippets/collection_create.html', context)
 
 
-@permission_and_staff_required('a_daily.view_student', login_url='/')
+@permission_or_staff_required('a_daily.view_student', login_url='/')
 def collection_detail_view(request: HtmxHttpRequest, pk: int):
     view_type = request.headers.get('View-Type', '')
     collection = get_object_or_404(models.ProblemCollection, pk=pk)
@@ -374,7 +374,7 @@ def collection_detail_view(request: HtmxHttpRequest, pk: int):
     return render(request, 'a_daily/snippets/collection_item_card.html', context)
 
 
-@permission_and_staff_required('a_daily.view_student', login_url='/')
+@permission_or_staff_required('a_daily.view_student', login_url='/')
 def collect_problem(request: HtmxHttpRequest, pk: int):
     if request.method == 'POST':
         collection_id = request.POST.get('collection_id')
