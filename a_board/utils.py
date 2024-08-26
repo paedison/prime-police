@@ -5,7 +5,7 @@ from . import models
 
 def get_filtered_queryset(request, top_fixed: bool = False):
     """ Get filtered queryset for list view. """
-    fq = models.Post.objects.filter(top_fixed=top_fixed)
+    fq = models.Notice.objects.filter(top_fixed=top_fixed)
     if not request.user.is_authenticated or not request.user.is_staff:
         fq = fq.filter(is_hidden=False)
     return fq

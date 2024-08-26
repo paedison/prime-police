@@ -5,14 +5,22 @@
 {% block main %}
     {{ info|json_script:'info' }}
     <div class="pagetitle">
-        <h1>{{ icon_menu|safe }} 공지사항</h1>
+        <h1>
+            {{ icon_menu|safe }} {{ title.kor }}
+            {% if user.is_staff %}
+                <a class="btn btn-sm btn-outline-primary ms-1" target="admin"
+                   href="{{ page_url.admin }}">
+                    관리자 페이지
+                </a>
+            {% endif %}
+        </h1>
         <nav>
             <ol class="breadcrumb" hx-target="#main" hx-swap="innerHTML swap:0.25s" hx-boost="true">
                 <li class="breadcrumb-item">
                     <a href="{% url 'index' %}">Home</a>
                 </li>
                 <li class="breadcrumb-item">
-                    <a href="{% url 'notice:base' %}" class="active">Notice</a>
+                    <a href="{{ page_url.current }}" class="active">{{ title.kor }}</a>
                 </li>
             </ol>
         </nav>
@@ -21,12 +29,12 @@
     <section class="section" hx-target="#main" hx-swap="innerHTML swap:0.25s">
         <div class="row">
             <div class="col-12" aria-label="공지사항">
-                <div id="noticeCard" class="card htmx-fade-in"
+                <div id="card" class="card htmx-fade-in"
                      hx-target="#main" hx-swap="innerHTML swap:0.25s show:window:top">
-                    <div id="noticeCardHeader" class="card-header bg-warning-subtle text-black fw-bold">
+                    <div id="cardHeader" class="card-header bg-warning-subtle text-black fw-bold">
                         {{ sub_title }}
                     </div>
-                    <div id="noticeCardContent" class="card-body htmx-fade-in htmx-fade-out">
+                    <div id="cardContent" class="card-body htmx-fade-in htmx-fade-out">
                         {% partial form %}
                     </div>
                 </div>

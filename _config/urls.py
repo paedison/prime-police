@@ -15,5 +15,5 @@ urlpatterns = [
 
     path('official/', include('a_official.urls')),
     path('daily/', include('a_daily.urls')),
-    path('notice/', include('a_notice.urls')),
+    path('board/', include('a_board.urls')),
 ] + debug_toolbar_urls()

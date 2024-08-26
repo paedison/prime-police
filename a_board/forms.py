@@ -3,7 +3,7 @@ from django import forms
 from . import models
 
 
-class PostForm(forms.ModelForm):
+class NoticeForm(forms.ModelForm):
     title = forms.CharField(
         label='제목', label_suffix='',
         widget=forms.TextInput(
@@ -26,17 +26,17 @@ class PostForm(forms.ModelForm):
     )
 
     class Meta:
-        model = models.Post
+        model = models.Notice
         fields = ['title', 'content', 'top_fixed', 'is_hidden']
 
 
-class CommentCreateForm(forms.ModelForm):
+class NoticeCommentCreateForm(forms.ModelForm):
     class Meta:
-        model = models.Comment
+        model = models.NoticeComment
         fields = ['post', 'content']
 
 
-class CommentUpdateForm(forms.ModelForm):
+class NoticeCommentUpdateForm(forms.ModelForm):
     class Meta:
-        model = models.Comment
+        model = models.NoticeComment
         fields = ['content']

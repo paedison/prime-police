@@ -4,8 +4,8 @@ from unfold.admin import ModelAdmin
 from . import models
 
 
-@admin.register(models.Post)
-class PostAdmin(ModelAdmin):
+@admin.register(models.Notice)
+class NoticeAdmin(ModelAdmin):
     list_display = list_display_links = [
         'id', 'user', 'title', 'created_at', 'modified_at', 'top_fixed', 'is_hidden']
     list_filter = ['top_fixed', 'is_hidden']
@@ -15,8 +15,8 @@ class PostAdmin(ModelAdmin):
     fields = ['user', 'title', 'content', 'top_fixed', 'is_hidden']
 
 
-@admin.register(models.Comment)
-class PostComment(ModelAdmin):
+@admin.register(models.NoticeComment)
+class NoticeCommentAdmin(ModelAdmin):
     list_display = list_display_links = ['id', 'user', 'post', 'content', 'created_at', 'modified_at']
     save_on_top = True
     search_fields = ['content']
