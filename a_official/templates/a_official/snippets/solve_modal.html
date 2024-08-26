@@ -1,13 +1,12 @@
-<span id="officialSolve{{ problem.id }}" hx-swap-oob="innerHTML">
-    {{ icon_solve|safe }}
-</span>
-
 {% #modal header='정답 확인' %}
     <input id="solve_answer" type="text" name="answer" value="{{ answer }}"
            hidden aria-label="Answer"/>
     {% if is_correct is None %}
         <h5 class="modal-title fw-bold text-danger">정답을 선택해주세요.</h5>
     {% else %}
+        <span id="officialSolve{{ problem.id }}" hx-swap-oob="innerHTML">
+            {{ icon_solve|safe }}
+        </span>
         <h5 class="modal-title mx-auto fw-bold">
             {% if is_correct %}
                 <span class="text-success">정답입니다.</span>

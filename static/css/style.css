@@ -446,3 +446,22 @@ ul.errorlist>li {
 .cke_notifications_area {
     display: none;
 }
+
+.comment_input {
+    margin: 4px 0;
+    padding: 0;
+    border: 0;
+    width: 100%;
+    font-size: 0.8rem;
+    font-weight: 400;
+    display: block;
+    min-height: 17px;
+    appearance: none;
+    resize: none;
+    box-sizing: border-box;
+    background: transparent;
+    outline: 0;
+    max-height: 500px;
+    overflow: hidden;
+    overflow-wrap: break-word;
+}

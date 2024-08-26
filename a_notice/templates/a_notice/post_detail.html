@@ -3,7 +3,15 @@
 {% block main %}
     {{ info|json_script:'info' }}
     <div class="pagetitle">
-        <h1>{{ icon_menu|safe }} 공지사항</h1>
+        <h1>
+            {{ icon_menu|safe }} 공지사항
+            {% if user.is_staff %}
+                <a class="btn btn-sm btn-outline-primary ms-1"
+                   href="{{ post.get_admin_change_url }}" target="admin">
+                    관리자 페이지
+                </a>
+            {% endif %}
+        </h1>
         <nav>
             <ol class="breadcrumb" hx-target="#main" hx-swap="innerHTML swap:0.25s" hx-boost="true">
                 <li class="breadcrumb-item">
@@ -62,25 +70,14 @@
                                 {% if user.is_staff %}
                                     <a class="btn btn-circle btn-outline-success"
                                        title="수정" target="admin"
-                                       href="{% url 'admin:a_notice_post_change' post.id %}">
+                                       href="{{ post.get_admin_change_url }}">
                                         {{ icon_board.update|safe }}
                                     </a>
                                     <a class="btn btn-circle btn-outline-danger"
                                        title="삭제" target="admin"
-                                       href="{% url 'admin:a_notice_post_delete' post.id %}">
+                                       href="{{ post.get_admin_delete_url }}">
                                         {{ icon_board.delete|safe }}
                                     </a>
-{#                                    <a class="btn btn-circle btn-outline-success"#}
-{#                                       title="수정" hx-headers='{"View-Type":"update"}'#}
-{#                                       href="{{ post.get_update_url }}">#}
-{#                                        {{ icon_board.update|safe }}#}
-{#                                    </a>#}
-{#                                    <button class="btn btn-circle btn-outline-danger"#}
-{#                                            title="삭제" hx-push-url="{{ post.get_list_url }}"#}
-{#                                            hx-confirm="글을 삭제하시겠습니까?"#}
-{#                                            hx-post="{{ post.get_delete_url }}">#}
-{#                                        {{ icon_board.delete|safe }}#}
-{#                                    </button>#}
                                 {% endif %}
                             </div>
                         </div>
@@ -115,7 +112,7 @@
                             {{ post.content|safe }}
                         </div>
 
-{#                        {% include 'a_notice/comment_container.html' %}#}
+                        {% include 'a_notice/comment_container.html' %}
                     </div>
                 </div>
             </div>

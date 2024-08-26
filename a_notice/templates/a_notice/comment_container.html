@@ -1,101 +1,136 @@
-<section id="commentContainer" class="border-top pt-3 htmx-fade-in htmx-fade-out">
-    {% if comments %}
-        {% for comment in comments %}
-            <div id="commentContents">
-                <div id="comment{{ comment.id }}" class="py-2">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <span class="text-gray-500 mr-1">
-                                {{ comment.user.username }}
-                            </span>
-                            <span class="mr-1">
-                                {% with timestamp=comment.created_at %}
-                                    {{ timestamp|date:'Y.m.d' }}({{ timestamp|date:'w'|to_kor_day }})
-                                    {{ timestamp|time:'H:i' }}
-                                {% endwith %}
-                            </span>
-                        </div>
-                    {% if comment.user == user %}
-                        <div>
-                            <a class="btn btn-circle btn-sm btn-outline-success" href=""
-                               hx-get="{{ comment.get_update_url }}"
-                               title="수정"
-                               hx-target="#commentUpdate{{ comment.id }}"
-                               hx-swap="innerHTML swap:0.25s">
-                                {{ board_icon.update|safe }}
-                            </a>
-                            <a class="btn btn-circle btn-sm btn-outline-danger" href=""
-                               hx-post="{{ comment.get_delete_url }}"
-                               title="삭제"
-                               hx-target="#commentContainer"
-                               hx-swap="outerHTML swap:0.25s"
-                               hx-confirm="댓글을 삭제하시겠습니까?">
-                                {{ board_icon.delete|safe }}
-                            </a>
-                        </div>
-                    {% endif %}
-                    </div>
-                    <div id="commentContent{{ comment.id }}" class="comment text-gray-900">
-                        {{ comment.content }}
-                    </div>
-                </div>
-                <div id="commentUpdate{{ comment.id }}" class="htmx-fade-in htmx-fade-out"></div>
-            </div>
-            <hr class="my-2">
-        {% endfor %}
-    {% endif %}
+{% load static %}
 
-    {% partialdef comment_create inline=True %} {# comment_create partial #}
-        {% if user.is_authenticated %}
-            <div class="py-2 bg-white">
-                <form method="post">
-                    {% csrf_token %}
-                    {% if form.errors.content %}
-                        <div class="alert alert-danger fade show small py-2 fw-bold" role="alert">
-                            댓글을 입력해주세요.
-                        </div>
-                    {% endif %}
-                    <input id="id_user{{ comment_id }}" type="text" name="user"
-                           value="{{ user.id }}" aria-label="User" hidden/>
-                    <input id="id_post{{ comment_id }}" type="text" name="post"
-                           value="{{ post_id }}" aria-label="Post" hidden/>
-                    <div class="input-group">
-                        <textarea name="content" cols="40" rows="1" required
-                                  class='form-control form-control-sm' aria-label="Content"
-                                  placeholder="댓글"
-                                  id="id_content{{ comment_id }}">{{ form.content.value }}</textarea>
-                        <div class="d-flex justify-content-end">
-                            {% if info.view_type == 'comment_update' %}
-                                <button type="submit" class="btn btn-sm btn-outline-primary"
-                                        title="수정" hx-boost="true"
-                                        hx-target="#commentContainer" hx-swap="outerHTML swap:0.25s"
-                                        hx-post="{{ comment_update_url }}"
-                                        hx-push-url="{{ post_detail_url }}">
-                                    수정
-                                </button>
-                            {% else %}
-                                <button type="submit" class="btn btn-sm btn-outline-primary"
-                                        title="입력" hx-boost="true"
-                                        hx-target="#commentContainer" hx-swap="outerHTML swap:0.25s"
-                                        hx-post="{{ comment_create_url }}"
-                                        hx-push-url="{{ post_detail_url }}">
-                                    입력
-                                </button>
-                            {% endif %}
-                        </div>
-                    </div>
-                </form>
-            </div>
-        {% else %}
-            <div class="p-2 bg-white">
-                <ul class="list-group">
-                   <li class="list-group-item" hx-get="{% url 'account_login' %}"
-                       hx-target="#main" hx-swap="outerHTML"
-                       hx-confirm="로그인하시겠습니까?">
-                       로그인이 필요합니다.
-                   </li>
+<section id="commentContainer" class="CommentBox border-top pt-3 htmx-fade-in htmx-fade-out">
+    <div>
+        <div class="comment_option">
+            <div class="comment_tab">
+                <ul class="nav" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link cursor-pointer ps-0" role="button" aria-selected="false"
+                           hx-target="closest section" hx-swap="outerHTML swap:0.25s"
+                           hx-get="{{ post.get_comment_list_url }}?post_id={{ post.id }}&order_type=oldest">
+                            등록순
+                        </a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link cursor-pointer ps-0" role="button" aria-selected="false"
+                           hx-target="closest section" hx-swap="outerHTML swap:0.25s"
+                           hx-get="{{ post.get_comment_list_url }}?post_id={{ post.id }}&order_type=newest">
+                            최신순
+                        </a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link cursor-pointer ps-0" role="button" aria-selected="false"
+                           hx-target="closest section" hx-swap="outerHTML swap:0.25s"
+                           hx-get="{{ post.get_comment_list_url }}?post_id={{ post.id }}&order_type={{ order_type|default:'newest' }}">
+                            새로고침
+                        </a>
+                    </li>
                 </ul>
             </div>
-        {% endif %}
-    {% endpartialdef comment_create %}
+        </div>
+    </div>
+
+    {% if comments %}
+        <div>
+            <ul id="commentBox" class="list-group">
+                {% for comment in comments %}
+                    {% partialdef comment_item inline=True %}
+                        <li id="comment{{ comment.id }}" class="list-group-item p-3">
+                            {% partialdef comment_content inline=True %}
+                                <div class="d-flex">
+                                    <div class="pe-2">
+                                        <img src="{% static 'image/undraw_profile.jpg' %}" alt="프로필 사진" width="36" height="36">
+                                    </div>
+                                    <div class="flex-fill">
+                                        <div class="fw-bold small">{{ comment.user.username }}</div>
+                                        <div class="py-1">{{ comment.content }}</div>
+                                        <div class="text-secondary small">
+                                            {% with timestamp=comment.created_at %}
+                                                {{ timestamp|date:'Y.m.d' }}({{ timestamp|date:'w'|to_kor_day }})
+                                                {{ timestamp|time:'H:i' }}
+                                            {% endwith %}
+                                        </div>
+                                    </div>
+
+                                    {% if comment.user == user %}
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle"
+                                                    type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                <i class="fa-solid fa-ellipsis"></i>
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li>
+                                                    <a class="dropdown-item cursor-pointer" title="수정"
+                                                       hx-target="#comment{{ comment.id }}"
+                                                       hx-swap="innerHTML swap:0.25s"
+                                                       hx-get="{{ comment.get_update_url }}">
+                                                        수정
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a class="dropdown-item cursor-pointer" title="삭제"
+                                                       hx-target="#commentContainer"
+                                                       hx-swap="outerHTML swap:0.25s"
+                                                       hx-confirm="댓글을 삭제하시겠습니까?"
+                                                       hx-post="{{ comment.get_delete_url }}">
+                                                        삭제
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            {% endpartialdef %}
+                        </li>
+                    {% endpartialdef %}
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    <div class="CommentWriter">
+        <ul class="list-group mt-4">
+            <li id="commentForm" class="list-group-item p-3">
+                {% partialdef comment_form inline=True %}
+                    {% if user.is_authenticated %}
+                        {{ user.username }}
+                        <form method="post">
+                            {% csrf_token %}
+                            {% if form.errors.content %}
+                                <div class="alert alert-danger fade show small py-2 fw-bold" role="alert">
+                                    댓글을 입력해주세요.
+                                </div>
+                            {% endif %}
+                            <input name="post" type="hidden" value="{{ post.id }}">
+                            <textarea name="content" class="comment_input" rows="4" required
+                                      aria-label="내용" placeholder="댓글을 남겨보세요"
+                                      id="commentContent{{ comment_id }}">{{ form.content.value }}</textarea>
+                            <div class="d-flex justify-content-end">
+                                {% if comment %}
+                                    <button type="submit" class="btn btn-sm btn-outline-primary" title="수정"
+                                            hx-swap="innerHTML swap:0.25s" hx-target="#comment{{ comment.id }}"
+                                            hx-post="{{ comment.get_update_url }}">
+                                        수정
+                                    </button>
+                                {% else %}
+                                    <button type="submit" class="btn btn-sm btn-outline-secondary" title="등록"
+                                            hx-target="#commentBox" hx-swap="afterbegin swap:0.25s"
+                                            hx-post="{{ post.get_comment_create_url }}">
+                                        등록
+                                    </button>
+                                {% endif %}
+                            </div>
+                        </form>
+                    {% else %}
+                       <a class="cursor-pointer" hx-get="{% url 'account_login' %}"
+                          hx-target="#main" hx-swap="outerHTML"
+                          hx-confirm="로그인하시겠습니까?">
+                           로그인이 필요합니다.
+                       </a>
+                    {% endif %}
+                {% endpartialdef comment_form %}
+            </li>
+        </ul>
+    </div>
 </section>

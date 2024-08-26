@@ -30,7 +30,13 @@ class PostForm(forms.ModelForm):
         fields = ['title', 'content', 'top_fixed', 'is_hidden']
 
 
-class CommentForm(forms.ModelForm):
+class CommentCreateForm(forms.ModelForm):
     class Meta:
         model = models.Comment
-        fields = ['user', 'post', 'content']
+        fields = ['post', 'content']
+
+
+class CommentUpdateForm(forms.ModelForm):
+    class Meta:
+        model = models.Comment
+        fields = ['content']

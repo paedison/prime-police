@@ -1,6 +1,8 @@
+from django.contrib.auth.decorators import login_not_required
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views.decorators.http import require_POST
+from django_htmx.http import retarget, reswap
 
 from a_common.constants import icon_set
 from a_common.utils import update_context_data, HtmxHttpRequest
@@ -14,6 +16,7 @@ def get_queryset(request):
     return queryset
 
 
+@login_not_required
 def list_view(request: HtmxHttpRequest):
     info = {'menu': 'notice'}
     view_type = request.headers.get('View-Type', '')
@@ -32,16 +35,18 @@ def list_view(request: HtmxHttpRequest):
     return render(request, 'a_notice/post_list.html', context)
 
 
+@login_not_required
 def detail_view(request: HtmxHttpRequest, pk: int):
     view_type = request.headers.get('View-Type', '')
     info = {'menu': 'notice'}
     queryset = get_queryset(request)
     post = get_object_or_404(queryset, pk=pk)
     prev_post, next_post = utils.get_prev_next_post(queryset, post)
+    comments = models.Comment.objects.filter(post=post)
     context = update_context_data(
         info=info, view_type=view_type,
         icon_menu=icon_set.ICON_MENU['notice'], icon_board=icon_set.ICON_BOARD,
-        post=post, prev_post=prev_post, next_post=next_post)
+        post=post, prev_post=prev_post, next_post=next_post, comments=comments)
     return render(request, 'a_notice/post_detail.html', context)
 
 
@@ -91,16 +96,63 @@ def delete_view(request: HtmxHttpRequest, pk: int):
 
 
 def comment_list_view(request: HtmxHttpRequest):
-    pass
+    post_id = request.GET.get('post_id')
+    post = get_object_or_404(models.Post, pk=post_id)
+    comments = models.Comment.objects.filter(post=post)
+
+    order_type = request.GET.get('order_type')
+    if order_type == 'oldest':
+        comments = comments.order_by('created_at')
+    if order_type == 'newest':
+        comments = comments.order_by('-created_at')
+
+    context = update_context_data(post=post, comments=comments, order_type=order_type)
+    return render(request, 'a_notice/comment_container.html', context)
 
 
 def comment_create_view(request: HtmxHttpRequest):
-    pass
+    form = forms.CommentCreateForm()
+
+    if request.method == 'POST':
+        form = forms.CommentCreateForm(data=request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.user = request.user
+            comment.post = form.cleaned_data['post']
+            comment.save()
+            context = update_context_data(comment=comment)
+            return render(request, 'a_notice/comment_container.html#comment_item', context)
+        else:
+            context = update_context_data(form=form)
+            response = render(request, 'a_notice/comment_container.html#comment_form', context)
+            return reswap(retarget(response, '#commentForm'), 'innerHTML swap:0.25s')
+
+    context = update_context_data(form=form)
+    return render(request, 'a_notice/comment_container.html#comment_form', context)
 
 
-def comment_update_view(request: HtmxHttpRequest):
-    pass
+def comment_update_view(request: HtmxHttpRequest, pk: int):
+    instance = get_object_or_404(models.Comment, pk=pk)
+
+    if request.method == 'POST':
+        form = forms.CommentUpdateForm(data=request.POST, instance=instance)
+        if form.is_valid():
+            form.save()
+            context = update_context_data(comment=instance)
+            return render(request, 'a_notice/comment_container.html#comment_content', context)
+        else:
+            context = update_context_data(form=form, comment=instance)
+            return render(request, 'a_notice/comment_container.html#comment_form', context)
+
+    form = forms.CommentUpdateForm(instance=instance)
+    context = update_context_data(form=form, comment=instance)
+    return render(request, 'a_notice/comment_container.html#comment_form', context)
 
 
-def comment_delete_view(request: HtmxHttpRequest):
-    pass
+@require_POST
+def comment_delete_view(request: HtmxHttpRequest, pk: int):
+    comment = get_object_or_404(models.Comment, pk=pk)
+    post_id = comment.post_id
+    url = f"{reverse_lazy('notice:comment_list')}?post_id={post_id}"
+    comment.delete()
+    return redirect(url)

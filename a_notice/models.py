@@ -1,6 +1,6 @@
 from ckeditor_uploader.fields import RichTextUploadingField
 from django.db import models
-from django.urls import reverse
+from django.urls import reverse_lazy
 
 from a_common.models import User
 
@@ -27,23 +27,38 @@ class Post(models.Model):
         return self.post_comments.count()
 
     def get_absolute_url(self):
-        return reverse(f'notice:detail', args=[self.id])
+        return reverse_lazy(f'notice:detail', args=[self.id])
 
     @staticmethod
     def get_list_url():
-        return reverse(f'notice:base')
+        return reverse_lazy(f'notice:base')
 
     def get_create_url(self):
-        return reverse(f'notice:create', args=[self.id])
+        return reverse_lazy(f'notice:create', args=[self.id])
 
     def get_update_url(self):
-        return reverse(f'notice:update', args=[self.id])
+        return reverse_lazy(f'notice:update', args=[self.id])
 
     def get_delete_url(self):
-        return reverse(f'notice:delete', args=[self.id])
+        return reverse_lazy(f'notice:delete', args=[self.id])
 
-    def get_comment_create_url(self):
-        return reverse(f'notice:comment_create', args=[self.id])
+    @staticmethod
+    def get_comment_list_url():
+        return reverse_lazy(f'notice:comment_list')
+
+    @staticmethod
+    def get_comment_create_url():
+        return reverse_lazy(f'notice:comment_create')
+
+    @staticmethod
+    def get_admin_change_list_url():
+        return reverse_lazy(f'admin:a_notice_post_changelist')
+
+    def get_admin_change_url(self):
+        return reverse_lazy(f'admin:a_notice_post_change', args=[self.id])
+
+    def get_admin_delete_url(self):
+        return reverse_lazy(f'admin:a_notice_post_delete', args=[self.id])
 
     def update_hit(self):
         hit = self.hit
@@ -70,10 +85,10 @@ class Comment(models.Model):
         return f'[Notice]Comment(#{self.id}):{self.user.username}-{self.post.title}'
 
     def get_update_url(self):
-        return reverse(f'notice:comment_update', args=[self.id])
+        return reverse_lazy(f'notice:comment_update', args=[self.id])
 
     def get_delete_url(self):
-        return reverse(f'notice:comment_delete', args=[self.id])
+        return reverse_lazy(f'notice:comment_delete', args=[self.id])
 
     def get_post_detail_url(self):
-        return reverse(f'notice:detail', args=[self.post.id])
+        return reverse_lazy(f'notice:detail', args=[self.post.id])

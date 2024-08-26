@@ -1,10 +1,10 @@
 from django.contrib import admin
 from unfold.admin import ModelAdmin
 
-from .models import Post
+from . import models
 
 
-@admin.register(Post)
+@admin.register(models.Post)
 class PostAdmin(ModelAdmin):
     list_display = list_display_links = [
         'id', 'user', 'title', 'created_at', 'modified_at', 'top_fixed', 'is_hidden']
@@ -13,3 +13,12 @@ class PostAdmin(ModelAdmin):
     search_fields = ['title', 'content']
     show_full_result_count = True
     fields = ['user', 'title', 'content', 'top_fixed', 'is_hidden']
+
+
+@admin.register(models.Comment)
+class PostComment(ModelAdmin):
+    list_display = list_display_links = ['id', 'user', 'post', 'content', 'created_at', 'modified_at']
+    save_on_top = True
+    search_fields = ['content']
+    show_full_result_count = True
+    fields = ['user', 'post', 'content']
