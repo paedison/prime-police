@@ -17,6 +17,7 @@ class Notice(models.Model):
 
     class Meta:
         verbose_name = verbose_name_plural = "01_공지사항"
+        db_table = 'a_board_notice'
         ordering = ["-id"]
 
     def __str__(self):
@@ -75,6 +76,7 @@ class NoticeComment(models.Model):
 
     class Meta:
         verbose_name = verbose_name_plural = "02_공지사항 댓글"
+        db_table = 'a_board_notice_comment'
         ordering = ["-id"]
 
     def __str__(self):
