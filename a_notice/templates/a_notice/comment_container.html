@@ -31,9 +31,9 @@
         </div>
     </div>
 
-    {% if comments %}
-        <div>
-            <ul id="commentBox" class="list-group">
+    <div>
+        <ul id="commentBox" class="list-group">
+            {% if comments %}
                 {% for comment in comments %}
                     {% partialdef comment_item inline=True %}
                         <li id="comment{{ comment.id }}" class="list-group-item p-3">
@@ -85,9 +85,9 @@
                         </li>
                     {% endpartialdef %}
                 {% endfor %}
-            </ul>
-        </div>
-    {% endif %}
+            {% endif %}
+        </ul>
+    </div>
 
     <div class="CommentWriter">
         <ul class="list-group mt-4">
