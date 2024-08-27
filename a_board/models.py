@@ -6,10 +6,10 @@ from a_common.models import User
 
 
 class Notice(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='사용자')
     title = models.CharField(max_length=50, verbose_name='제목')
     content = RichTextUploadingField(verbose_name='내용')
-    hit = models.IntegerField(default=1, verbose_name='조회수')
+    hit = models.IntegerField(default=0, verbose_name='조회수')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='작성일')
     modified_at = models.DateTimeField(auto_now=True, verbose_name='수정일')
     top_fixed = models.BooleanField(default=False, verbose_name='고정글')
@@ -62,15 +62,16 @@ class Notice(models.Model):
         return reverse_lazy(f'admin:a_board_notice_delete', args=[self.id])
 
     def update_hit(self):
-        hit = self.hit
-        self.hit = hit + 1
+        self.hit += 1
         self.save()
 
 
 class NoticeComment(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_comments')
-    post = models.ForeignKey(Notice, on_delete=models.CASCADE, related_name='post_comments')
-    content = models.TextField(verbose_name='내용')
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='user_comments', verbose_name='사용자')
+    post = models.ForeignKey(
+        Notice, on_delete=models.CASCADE, related_name='post_comments', verbose_name='공지사항')
+    content = models.TextField(verbose_name='댓글')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='작성일')
     modified_at = models.DateTimeField(auto_now=True, verbose_name='수정일')
 

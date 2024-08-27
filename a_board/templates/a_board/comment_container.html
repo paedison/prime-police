@@ -6,22 +6,22 @@
                     <li class="nav-item" role="presentation">
                         <a class="nav-link cursor-pointer ps-0" role="button" aria-selected="false"
                            hx-target="closest section" hx-swap="outerHTML swap:0.25s"
-                           hx-get="{{ post.get_comment_list_url }}?post_id={{ post.id }}&order_type=oldest">
+                           hx-get="{{ post.get_comment_list_url }}?post_id={{ post.id }}&order_by=oldest">
                             등록순
                         </a>
                     </li>
                     <li class="nav-item" role="presentation">
                         <a class="nav-link cursor-pointer ps-0" role="button" aria-selected="false"
                            hx-target="closest section" hx-swap="outerHTML swap:0.25s"
-                           hx-get="{{ post.get_comment_list_url }}?post_id={{ post.id }}&order_type=newest">
+                           hx-get="{{ post.get_comment_list_url }}?post_id={{ post.id }}&order_by=newest">
                             최신순
                         </a>
                     </li>
                     <li class="nav-item" role="presentation">
                         <a class="nav-link cursor-pointer ps-0" role="button" aria-selected="false"
                            hx-target="closest section" hx-swap="outerHTML swap:0.25s"
-                           hx-get="{{ post.get_comment_list_url }}?post_id={{ post.id }}&order_type={{ order_type|default:'newest' }}">
-                            새로고침
+                           hx-get="{{ post.get_comment_list_url }}?post_id={{ post.id }}&order_by={{ order_by|default:'newest' }}">
+                            <i class="fa-solid fa-rotate-right"></i>
                         </a>
                     </li>
                 </ul>
@@ -30,12 +30,10 @@
     </div>
 
     <div>
-        <ul id="commentBox" class="list-group htmx-fade-in htmx-fade-out">
+        <ul id="commentBox" class="list-group mt-1 htmx-fade-in htmx-fade-out">
             {% if comments %}
                 {% for comment in comments %}
                     {% include 'a_board/snippets/comment_item.html' %}
-                    {% partialdef comment_item inline=True %}
-                    {% endpartialdef %}
                 {% endfor %}
             {% endif %}
         </ul>

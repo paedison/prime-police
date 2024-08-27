@@ -3,28 +3,7 @@
 {% block google_adsense %}{% endblock %}
 
 {% block main %}
-    {{ info|json_script:'info' }}
-    <div class="pagetitle">
-        <h1>
-            {{ icon_menu|safe }} {{ title.kor }}
-            {% if user.is_staff %}
-                <a class="btn btn-sm btn-outline-primary ms-1" target="admin"
-                   href="{{ page_url.admin }}">
-                    관리자 페이지
-                </a>
-            {% endif %}
-        </h1>
-        <nav>
-            <ol class="breadcrumb" hx-target="#main" hx-swap="innerHTML swap:0.25s" hx-boost="true">
-                <li class="breadcrumb-item">
-                    <a href="{% url 'index' %}">Home</a>
-                </li>
-                <li class="breadcrumb-item">
-                    <a href="{{ page_url.current }}" class="active">{{ title.kor }}</a>
-                </li>
-            </ol>
-        </nav>
-    </div><!-- Page Title End -->
+    {% include 'a_board/snippets/page_title.html' %}
 
     <section class="section" hx-target="#main" hx-swap="innerHTML swap:0.25s">
         <div class="row">
@@ -32,7 +11,7 @@
                 <div id="card" class="card htmx-fade-in"
                      hx-target="#main" hx-swap="innerHTML swap:0.25s show:window:top">
                     <div id="cardHeader" class="card-header bg-warning-subtle text-black fw-bold">
-                        {{ sub_title }}
+                        {{ config.title.kor }} {{ message }}
                     </div>
                     <div id="cardContent" class="card-body htmx-fade-in htmx-fade-out">
                         {% partial form %}
@@ -78,10 +57,15 @@
                     {{ form.top_fixed.label }}
                 </label>
             </div>
-
-            <button type="submit" class="ckeditor-submit btn btn-sm btn-outline-primary ms-2" title="{{ message }}">
-                {{ message }}
-            </button>
+            <div class="btn-group ms-2">
+                <a class="btn btn-sm btn-outline-danger cursor-pointer" title="취소"
+                   hx-get="{{ config.url.list }}">
+                    취소
+                </a>
+                <button type="submit" class="ckeditor-submit btn btn-sm btn-primary" title="{{ message }}">
+                    {{ message }}
+                </button>
+            </div>
         </div>
     </form>
 {% endpartialdef %}

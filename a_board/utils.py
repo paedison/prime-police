@@ -1,9 +1,17 @@
 from django.core.paginator import Paginator
 
+from a_common.utils import HtmxHttpRequest
 from . import models
 
 
-def get_filtered_queryset(request, top_fixed: bool = False):
+def get_queryset(request: HtmxHttpRequest, model):
+    queryset = model.objects.prefetch_related('post_comments')
+    if not request.user.is_authenticated or not request.user.is_staff:
+        queryset = queryset.filter(is_hidden=False)
+    return queryset
+
+
+def get_filtered_queryset(request: HtmxHttpRequest, top_fixed: bool = False):
     """ Get filtered queryset for list view. """
     fq = models.Notice.objects.filter(top_fixed=top_fixed)
     if not request.user.is_authenticated or not request.user.is_staff:

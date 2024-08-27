@@ -1,3 +1,5 @@
+import json
+
 from django.contrib.auth.decorators import login_not_required
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
@@ -13,21 +15,10 @@ class NoticeConfiguration:
     menu = 'notice'
     info = {'menu': menu}
     title = {'kor': '공지사항', 'eng': menu.capitalize()}
-    list_page_url = {
-        'admin': reverse_lazy(f'admin:a_board_{menu}_changelist'),
-        'current': reverse_lazy(f'board:{menu}-list'),
-        'create': reverse_lazy(f'admin:a_board_{menu}_add'),
-    }
-    detail_page_url = {
-        'create': reverse_lazy(f'admin:a_board_{menu}_add'),
-    }
-
-
-def get_queryset(request):
-    queryset = models.Notice.objects.prefetch_related('post_comments')
-    if not request.user.is_authenticated or not request.user.is_staff:
-        queryset = queryset.filter(is_hidden=False)
-    return queryset
+    url_admin = reverse_lazy(f'admin:a_board_notice_changelist')
+    url_list = reverse_lazy(f'board:notice-list')
+    url_create = reverse_lazy(f'board:notice-create')
+    url = {'admin': url_admin, 'list': url_list, 'create': url_create}
 
 
 @login_not_required
@@ -35,13 +26,11 @@ def list_view(request: HtmxHttpRequest):
     config = NoticeConfiguration()
     view_type = request.headers.get('View-Type', '')
     page_number = request.GET.get('page', '1')
-    queryset = get_queryset(request)
+    queryset = utils.get_queryset(request, models.Notice)
     page_obj, page_range = utils.get_paginator_info(queryset, page_number)
     top_fixed = utils.get_filtered_queryset(request, top_fixed=True)
     context = update_context_data(
-        info=config.info, title=config.title, page_url=config.list_page_url,
-        view_type=view_type,
-        icon_menu=icon_set.ICON_MENU['notice'], icon_board=icon_set.ICON_BOARD,
+        config=config, icon_menu=icon_set.ICON_MENU['notice'], icon_board=icon_set.ICON_BOARD,
         page_obj=page_obj, page_range=page_range, top_fixed=top_fixed,
     )
     if view_type == 'pagination':
@@ -52,35 +41,41 @@ def list_view(request: HtmxHttpRequest):
 @login_not_required
 def detail_view(request: HtmxHttpRequest, pk: int):
     config = NoticeConfiguration()
-    view_type = request.headers.get('View-Type', '')
-    queryset = get_queryset(request)
-    post = get_object_or_404(queryset, pk=pk)
+    queryset = utils.get_queryset(request, models.Notice)
+    post: models.Notice = get_object_or_404(queryset, pk=pk)
+
+    verified_list = json.loads(request.COOKIES.get('verified_list', '{}'))
+    if 'notice' not in verified_list:
+        verified_list['notice'] = []
+    if pk not in verified_list['notice']:
+        verified_list['notice'].append(pk)
+        post.update_hit()
+
     prev_post, next_post = utils.get_prev_next_post(queryset, post)
     comments = models.NoticeComment.objects.filter(post=post)
     context = update_context_data(
-        info=config.info, view_type=view_type, title=config.title,
-        icon_menu=icon_set.ICON_MENU['notice'], icon_board=icon_set.ICON_BOARD,
+        config=config, icon_menu=icon_set.ICON_MENU['notice'], icon_board=icon_set.ICON_BOARD,
         post=post, prev_post=prev_post, next_post=next_post, comments=comments)
-    return render(request, 'a_board/post_detail.html', context)
+
+    response = render(request, 'a_board/post_detail.html', context)
+    response.set_cookie('verified_list', json.dumps(verified_list))
+    return response
 
 
 def create_view(request: HtmxHttpRequest):
     config = NoticeConfiguration()
     context = update_context_data(
-        info=config.info, icon_menu=icon_set.ICON_MENU['notice'],
-        icon_board=icon_set.ICON_BOARD)
+        config=config, icon_menu=icon_set.ICON_MENU['notice'], icon_board=icon_set.ICON_BOARD)
     if request.method == 'POST':
         form = forms.NoticeForm(request.POST)
         if form.is_valid():
             post = form.save(commit=False)
             post.user = request.user
             post.save()
-            return redirect('notice:detail', pk=post.id)
+            return redirect('board:notice-detail', pk=post.id)
     form = forms.NoticeForm()
-    post_url = reverse_lazy('notice:create')
-    context = update_context_data(
-        context, form=form, sub_title='공지사항 작성',
-        post_url=post_url, message='입력')
+    post_url = reverse_lazy('board:notice-create')
+    context = update_context_data(context, form=form, post_url=post_url, message='등록')
     return render(request, 'a_board/post_create.html', context)
 
 
@@ -88,17 +83,14 @@ def update_view(request: HtmxHttpRequest, pk: int):
     config = NoticeConfiguration()
     instance = get_object_or_404(models.Notice, pk=pk)
     context = update_context_data(
-        info=config.info, icon_menu=icon_set.ICON_MENU['notice'],
-        icon_board=icon_set.ICON_BOARD)
+        config=config, icon_menu=icon_set.ICON_MENU['notice'], icon_board=icon_set.ICON_BOARD)
     if request.method == 'POST':
         form = forms.NoticeForm(request.POST, instance=instance)
         if form.is_valid():
             notice = form.save()
-            return redirect('notice:detail', pk=notice.id)
+            return redirect('board:notice-detail', pk=notice.id)
     form = forms.NoticeForm(instance=instance)
-    context = update_context_data(
-        context, form=form, sub_title='공지사항 수정',
-        post_url=instance.get_update_url(), message='수정')
+    context = update_context_data(context, form=form, post_url=instance.get_update_url(), message='수정')
     return render(request, 'a_board/post_create.html', context)
 
 
@@ -106,21 +98,22 @@ def update_view(request: HtmxHttpRequest, pk: int):
 def delete_view(_, pk: int):
     instance = get_object_or_404(models.Notice, pk=pk)
     instance.delete()
-    return redirect('notice:base')
+    return redirect('board:notice-list')
 
 
+@login_not_required
 def comment_list_view(request: HtmxHttpRequest):
     post_id = request.GET.get('post_id')
     post = get_object_or_404(models.Notice, pk=post_id)
     comments = models.NoticeComment.objects.filter(post=post)
 
-    order_type = request.GET.get('order_type')
-    if order_type == 'oldest':
+    order_by = request.GET.get('order_by')
+    if order_by == 'oldest':
         comments = comments.order_by('created_at')
-    if order_type == 'newest':
+    if order_by == 'newest':
         comments = comments.order_by('-created_at')
 
-    context = update_context_data(post=post, comments=comments, order_type=order_type)
+    context = update_context_data(post=post, comments=comments, order_by=order_by)
     return render(request, 'a_board/comment_container.html', context)
 
 

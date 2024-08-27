@@ -1,27 +1,7 @@
 {% extends '_base.html' %}
 
 {% block main %}
-    {{ info|json_script:'info' }}
-    <div class="pagetitle">
-        <h1>
-            {{ icon_menu|safe }} {{ title.kor }}
-            {% if user.is_staff %}
-                <a class="btn btn-sm btn-outline-primary ms-1"
-                   href="{{ post.get_admin_change_url }}" target="admin">
-                    관리자 페이지
-                </a>
-            {% endif %}
-        </h1>
-        <nav>
-            <ol class="breadcrumb" hx-target="#main" hx-swap="innerHTML swap:0.25s" hx-boost="true">
-                <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
-                <li class="breadcrumb-item">Board</li>
-                <li class="breadcrumb-item">
-                    <a href="{{ post.get_list_url }}" class="active">{{ title.eng }}</a>
-                </li>
-            </ol>
-        </nav>
-    </div><!-- Page Title End -->
+    {% include 'a_board/snippets/page_title.html' %}
 
     <section class="section">
         <div class="row">
@@ -29,7 +9,7 @@
                 <div class="card htmx-fade-in"
                      hx-target="#main" hx-swap="innerHTML swap:0.25s show:window:top">
                     <div id="cardHeader" class="card-header mb-0 bg-warning-subtle text-black fw-bold">
-                        {{ title.kor }}
+                        {{ config.title.kor }}
                     </div>
                     <div id="cardContent" class="card-body htmx-fade-in htmx-fade-out">
                         <div class="card-title d-flex justify-content-between mb-0" hx-target="#main"
@@ -67,14 +47,13 @@
 
                             <div aria-label="right-button">
                                 {% if user.is_staff %}
-                                    <a class="btn btn-circle btn-outline-success"
-                                       title="수정" target="admin"
-                                       href="{{ post.get_admin_change_url }}">
+                                    <a class="btn btn-circle btn-outline-success" title="수정"
+                                       hx-get="{{ post.get_update_url }}">
                                         {{ icon_board.update|safe }}
                                     </a>
-                                    <a class="btn btn-circle btn-outline-danger"
-                                       title="삭제" target="admin"
-                                       href="{{ post.get_admin_delete_url }}">
+                                    <a class="btn btn-circle btn-outline-danger" title="삭제"
+                                       hx-confirm="글을 삭제하시겠습니까?"
+                                       hx-post="{{ post.get_delete_url }}">
                                         {{ icon_board.delete|safe }}
                                     </a>
                                 {% endif %}

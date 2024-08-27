@@ -9,7 +9,7 @@
                 <th class="text-center text-nowrap px-2 col-1">댓글</th>
             </tr>
         </thead>
-        <tbody hx-push-url="true" hx-target="#main">
+        <tbody>
             {% if top_fixed %}
                 {% for post in top_fixed %}{% partial tbody %}{% endfor %}
             {% endif %}
@@ -35,8 +35,7 @@
     {% if user.is_staff %}
         <div class="ms-auto p-2">
             <a class="btn btn-sm btn-outline-primary cursor-pointer"
-               title="글쓰기" target="admin"
-               href="{{ page_url.create }}">
+               title="글쓰기" hx-get="{{ config.url.create }}">
                 글쓰기
             </a>
         </div>
