@@ -144,24 +144,24 @@ class Problem(models.Model):
 
     @property
     def circle_round_sub(self):
-        return f'{self.circle}-{self.round}-{self.subject}'
+        return f'{self.circle}{self.subject}{self.round}'
 
     @property
     def reference(self):
-        return f'{self.circle}-{self.round}-{self.subject}{self.number:02}'
+        return f'{self.circle_round_sub}-{self.number:02}'
 
     @property
-    def semester_circle_round_subject(self):
+    def semester_circle_subject_round(self):
         return ' '.join([
             self.get_semester_display(),
             self.get_circle_display(),
+            self.get_subject_display(),
             self.get_round_display(),
-            self.get_subject_display()
         ])
 
     @property
     def full_reference(self):
-        return ' '.join([self.semester_circle_round_subject, self.get_number_display()])
+        return ' '.join([self.semester_circle_subject_round, self.get_number_display()])
 
     @property
     def subject_field(self):
@@ -243,7 +243,7 @@ class ProblemLike(models.Model):
 
     @property
     def semester_circle_round_subject(self):
-        return self.problem.semester_circle_round_subject
+        return self.problem.semester_circle_subject_round
 
     def save(self, *args, **kwargs):
         message_type = kwargs.pop('message_type', 'liked')
@@ -273,7 +273,7 @@ class ProblemRate(models.Model):
 
     @property
     def semester_circle_round_subject(self):
-        return self.problem.semester_circle_round_subject
+        return self.problem.semester_circle_subject_round
 
     def save(self, *args, **kwargs):
         message_type = f'rated({self.rating})'
@@ -305,7 +305,7 @@ class ProblemSolve(models.Model):
 
     @property
     def semester_circle_round_subject(self):
-        return self.problem.semester_circle_round_subject
+        return self.problem.semester_circle_subject_round
 
     def save(self, *args, **kwargs):
         message_type = 'correct' if self.is_correct else 'wrong'
@@ -336,7 +336,7 @@ class ProblemMemo(models.Model):
 
     @property
     def semester_circle_round_subject(self):
-        return self.problem.semester_circle_round_subject
+        return self.problem.semester_circle_subject_round
 
 
 class ProblemCollection(models.Model):
@@ -383,7 +383,7 @@ class ProblemCollectionItem(models.Model):
 
     @property
     def semester_circle_round_subject(self):
-        return self.problem.semester_circle_round_subject
+        return self.problem.semester_circle_subject_round
 
 
 class Exam(models.Model):
