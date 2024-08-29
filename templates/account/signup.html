@@ -3,6 +3,14 @@
 {% block body_title %}회원가입{% endblock body_title %}
 
 {% block body_content %}
+    <div class="col-12">
+        <div class="alert alert-danger text-center fw-bold small alert-dismissible fade show mt-3"
+             role="alert">
+            <span class="text-danger">*</span> 표시가 된 부분은 필수 입력 항목입니다.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </div>
+
     <form method="post" action="{% url 'account_signup' %}" class="row g-3">
         {% csrf_token %}
         {% if redirect_field_value %}
@@ -10,15 +18,19 @@
         {% endif %}
 
         {% for field in form %}
-            <div class="col-12 form-field-container">
-                <div class="form-floating">
-                    {{ field }}
-                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {% if field.name != 'address' %}
+                <div class="col-12 form-field-container">
+                    <div class="form-floating required-field">
+                        {{ field }}
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    </div>
+                    {% if field.help_text %}
+                        {{ field.help_text }}
+                    {% endif %}
                 </div>
-                {% if field.help_text %}
-                    {{ field.help_text }}
-                {% endif %}
-            </div>
+            {% else %}
+                {{ field }}
+            {% endif %}
         {% endfor %}
 
         <div class="col-12">

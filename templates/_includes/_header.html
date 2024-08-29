@@ -59,7 +59,7 @@
                    href="" data-bs-toggle="dropdown">
                     <img src="{% static 'image/undraw_profile.jpg' %}"
                          alt="Profile" class="img-profile rounded-circle">
-                    <span class="d-none d-md-block dropdown-toggle ps-2">{{ user.username }}</span>
+                    <span class="d-none d-md-block dropdown-toggle ps-2">{{ user.name }}</span>
                 </a>
 
                 {% if user.is_authenticated %}

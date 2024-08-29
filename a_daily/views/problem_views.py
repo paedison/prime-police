@@ -49,16 +49,23 @@ def problem_list_view(request: HtmxHttpRequest):
     return render(request, 'a_daily/problem_list.html', context)
 
 
+def get_problem_info(instance: models.Problem):
+    return {
+        'semester': models.semester_default(), 'circle': instance.circle,
+        'subject': instance.subject, 'round': instance.round}
+
+
 @permission_or_staff_required('a_daily.view_student', login_url='/')
 def problem_detail_view(request: HtmxHttpRequest, pk: int):
     view_type = request.headers.get('View-Type', '')
     info = {'menu': 'daily', 'menu_self': 'problem'}
-    queryset = models.Problem.objects.filter(opened_at__gte=date.today()).order_by('-year', 'id')
+    queryset = models.Problem.objects.filter(opened_at__gte=date.today()).order_by('-semester', 'id')
     problem = get_object_or_404(queryset, pk=pk)
+    exam_info = get_problem_info(problem)
 
     context = update_context_data(info=info, problem_id=pk, problem=problem)
 
-    problem_data = queryset.filter(year=problem.year, exam=problem.exam, subject=problem.subject)
+    problem_data = queryset.filter(**exam_info)
     prob_prev, prob_next = utils.get_prev_next_prob(pk, problem_data)
 
     template_nav = 'a_daily/snippets/navigation_container.html'

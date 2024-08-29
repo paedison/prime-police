@@ -1,62 +1,49 @@
-from django.contrib.auth.validators import UnicodeUsernameValidator
+from django.contrib.auth import models as auth_models
 from django.db import models
-from django.contrib.auth.models import BaseUserManager, AbstractBaseUser, PermissionsMixin
-from django.templatetags.static import static
 from django.utils import timezone
-from django_resized import ResizedImageField
 
 
-class UserManager(BaseUserManager):
-    def create_user(self, email, username, password=None):
+class UserManager(auth_models.BaseUserManager):
+    def create_user(self, email, name, prime_id, password=None, **extra_fields):
         if not email:
-            raise ValueError("이메일을 입력해주세요.")
-        user = self.model(email=self.normalize_email(email), username=username)
+            raise ValueError('이메일을 입력해주세요.')
+        email = self.normalize_email(email)
+        user = self.model(email=email, name=name, prime_id=prime_id, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email, username, password=None):
-        user = self.create_user(email, username=username, password=password)
-        user.is_superuser = True
-        user.is_staff = True
-        user.is_active = True
-        user.save(using=self._db)
-        return user
+    def create_superuser(self, email, name, prime_id, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+
+        if extra_fields.get('is_staff') is not True:
+            raise ValueError('슈퍼유저는 반드시 "is_staff=True"여야 합니다.')
+        if extra_fields.get('is_superuser') is not True:
+            raise ValueError('슈퍼유저는 반드시 "is_superuser=True"여야 합니다.')
+
+        return self.create_user(email, name, prime_id, password, **extra_fields)
 
 
-class User(AbstractBaseUser, PermissionsMixin):
-    objects = UserManager()
-    username_validator = UnicodeUsernameValidator()
-
-    email = models.EmailField('이메일', max_length=255, unique=True)
-    username = models.CharField(
-        '아이디', max_length=150, unique=True,
-        help_text='150자 이하 문자, 숫자 그리고 @/./+/-/_만 가능합니다.',
-        validators=[username_validator],
-        error_messages={"unique": '해당 아이디는 이미 존재합니다.'})
-    name = models.CharField('이름', max_length=10, default='')
-    prime_id = models.CharField('프라임법학원 아이디', max_length=20, default='')
-    joined_at = models.DateTimeField('가입일', default=timezone.now)
+class User(auth_models.AbstractBaseUser, auth_models.PermissionsMixin):
+    email = models.EmailField(max_length=255, unique=True, verbose_name='이메일')
+    name = models.CharField(max_length=10, default='', verbose_name='이름')
+    prime_id = models.CharField(max_length=20, default='', verbose_name='프라임법학원 아이디')
+    joined_at = models.DateTimeField(default=timezone.now, verbose_name='가입일')
     is_active = models.BooleanField(
-        '활성', default=False,
-        help_text="이 사용자가 활성화되어 있는지를 나타냅니다. 계정을 삭제하는 대신 이것을 선택 해제하세요.")
+        help_text='이 사용자가 활성화되어 있는지를 나타냅니다. 계정을 삭제하는 대신 이 옵션을 해제하세요.',
+        default=True, verbose_name='활성')
     is_staff = models.BooleanField(
-        '스탭 권한', default=False,
-        help_text='사용자가 관리사이트에 로그인이 가능한지를 나타냅니다.')
-    image = ResizedImageField(size=[600, 600], quality=85, upload_to='avatars/', null=True, blank=True)
+        help_text='관리사이트 로그인 가능 여부를 나타냅니다.', default=False, verbose_name='스탭')
 
-    USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = ["username"]
+    objects = UserManager()
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['name', 'prime_id']
 
     class Meta:
         ordering = ['id']
         verbose_name = verbose_name_plural = "사용자"
 
     def __str__(self):
-        return self.email
-
-    @property
-    def avatar(self):
-        if self.image:
-            return self.image.url
-        return static('image/undraw_profile.jpg')
+        return f'{self.name}({self.email})'

@@ -81,6 +81,7 @@ function attachContentCkeditor() {
 function attachFormHelpTextClass() {
     $('.form-field-container > ul').addClass('list-group list-group-flush mt-1');
     $('.form-field-container > ul > li').addClass('list-group-item small text-danger');
+    $('.form-field-container > ul > li:last-child').addClass('list-group-item small text-danger pb-0');
 }
 
 function deleteTooltipInner() {

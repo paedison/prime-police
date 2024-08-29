@@ -1,18 +1,14 @@
 import json
-from datetime import date
 
-from django.db.models import F, Max, Case, When, BooleanField, Value
-from django.db.models.functions import Coalesce
+from django.db.models import F
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
-from django.urls import reverse_lazy
-from django.views.decorators.http import require_POST
 from django_htmx.http import reswap
 
 from a_common.constants import icon_set
 from a_common.decorators import permission_or_staff_required
 from a_common.utils import HtmxHttpRequest, update_context_data
-from .. import models, utils, forms, filters
+from .. import models, utils, filters
 
 
 @permission_or_staff_required('a_daily.view_student', login_url='/')
@@ -55,12 +51,15 @@ def answer_detail_view(request: HtmxHttpRequest, pk: int):
         return redirect('daily:answer-list')
     student.rank_ratio = student.get_rank_ratio(exam.participants)
 
-    answer_official = [{'no': no, 'ans': ans} for no, ans in enumerate(exam.answer_official, start=1)]
+    problems = models.Problem.objects.filter(**exam_info).order_by('number')
+    answer_official = []
+    for problem in problems:
+        answer_official.append({'no': problem.number, 'ans': problem.answer})
     answer_student = [{'no': no, 'ans': ans} for no, ans in enumerate(student.answer_student, start=1)]
 
     qs_answer_count = models.AnswerCount.objects.filter(**exam_info).order_by('number')
     for idx, answer_count in enumerate(qs_answer_count):
-        ans_official = exam.answer_official[idx]
+        ans_official = answer_official[idx]['ans']
         ans_student = student.answer_student[idx]
         if 1 <= ans_official <= 5:
             rate_correct = getattr(answer_count, f'rate_{ans_official}')
@@ -90,7 +89,9 @@ def answer_input_view(request: HtmxHttpRequest, pk: int):
     student = get_student(request, exam_info)
     if not student:
         models.Student.objects.create(user=request.user, **exam_info)
-    empty_answer_data = [0 for _ in range(len(exam.answer_official))]
+
+    problem_count = models.Problem.objects.filter(**exam_info).count()
+    empty_answer_data = [0 for _ in range(problem_count)]
     answer_input = json.loads(request.COOKIES.get('answer_input', '[]')) or empty_answer_data
 
     # answer_submit
@@ -106,7 +107,7 @@ def answer_input_view(request: HtmxHttpRequest, pk: int):
         context = update_context_data(answer=answer, exam=exam)
         response = render(request, 'a_daily/snippets/answer_button.html', context)
 
-        if 1 <= no <= len(exam.answer_official) and 1 <= ans <= 4:
+        if 1 <= no <= problem_count and 1 <= ans <= 4:
             answer_input[no - 1] = ans
             response.set_cookie('answer_input', json.dumps(answer_input), max_age=300)
             return response
@@ -129,13 +130,16 @@ def answer_confirm_view(request: HtmxHttpRequest, pk: int):
     context = update_context_data(exam=exam, header=f'답안을 제출하시겠습니까?', verifying=True)
 
     if request.method == 'POST':
-        empty_answer_data = [0 for _ in range(len(exam.answer_official))]
+        answer_official = models.Problem.objects.filter(**exam_info).order_by(
+            'number').values_list('answer', flat=True)
+
+        empty_answer_data = [0 for _ in range(len(answer_official))]
         answer_input = json.loads(request.COOKIES.get('answer_input', '[]')) or empty_answer_data
 
-        is_confirmed = all(answer_input) and len(answer_input) == len(exam.answer_official)
+        is_confirmed = all(answer_input) and len(answer_input) == len(answer_official)
         if is_confirmed:
-            correct_cnt = sum(1 for x, y in zip(exam.answer_official, answer_input) if x == y)
-            score = round(correct_cnt * 100 / len(exam.answer_official), 1)
+            correct_cnt = sum(1 for x, y in zip(answer_official, answer_input) if x == y)
+            score = round(correct_cnt * 100 / len(answer_official), 1)
 
             score_list = list(models.Student.objects.filter(
                 score__isnull=False, **exam_info).values_list('score', flat=True)) + [score]

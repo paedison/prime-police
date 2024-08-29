@@ -226,6 +226,7 @@ AUTHENTICATION_BACKENDS = [
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
+ACCOUNT_ADAPTER = 'a_common.adapter.AccountAdapter'
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_EMAIL_VERIFICATION = 'none'
@@ -238,6 +239,9 @@ ACCOUNT_FORMS = {
     'change_password': 'a_common.forms.ChangePasswordForm'
 }
 ACCOUNT_SESSION_COOKIE_AGE = 1209600
+ACCOUNT_SIGNUP_FORM_HONEYPOT_FIELD = 'address'
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_USERNAME_REQUIRED = False
 
 EMAIL_HOST = env('EMAIL_HOST')
 EMAIL_PORT = env('EMAIL_PORT')

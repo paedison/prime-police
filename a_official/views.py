@@ -206,7 +206,7 @@ def memo_problem(request: HtmxHttpRequest, pk: int):
     problem = get_object_or_404(models.Problem, pk=pk)
     instance = models.ProblemMemo.objects.filter(problem=problem, user=request.user).first()
     context = update_context_data(
-        problem=problem, icon_memo=icon_set.ICON_MEMO, icon_board = icon_set.ICON_BOARD)
+        problem=problem, icon_memo=icon_set.ICON_MEMO, icon_board=icon_set.ICON_BOARD)
 
     if view_type == 'create' and request.method == 'POST':
         create_form = forms.ProblemMemoForm(request.POST)

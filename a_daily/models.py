@@ -391,8 +391,7 @@ class Exam(models.Model):
     circle = models.IntegerField(choices=circle_choice, default=1, verbose_name='순환')
     subject = models.CharField(max_length=2, choices=subject_choice, default='형사', verbose_name='과목')
     round = models.IntegerField(choices=round_choice, default=1, verbose_name='회차')
-    opened_at = models.DateField(default=timezone.now, verbose_name='공개일')
-    answer_official = models.JSONField(default=answer_default, verbose_name='정답')
+    opened_at = models.DateTimeField(default=timezone.now, verbose_name='공개일시')
     participants = models.IntegerField(default=0, verbose_name='응시생수')
     statistics = models.JSONField(default=statistics_default, verbose_name='성적 통계')
 
@@ -440,7 +439,7 @@ class Exam(models.Model):
 
 
 class Student(models.Model):
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name='생성 일시')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='생성일시')
     user = models.ForeignKey(
         User, null=True, blank=True, on_delete=models.SET_NULL, related_name='daily_students')
     semester = models.IntegerField(choices=semester_choice, default=semester_default, verbose_name='기수')

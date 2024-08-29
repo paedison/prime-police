@@ -464,3 +464,9 @@ ul.errorlist>li {
     overflow: hidden;
     overflow-wrap: break-word;
 }
+
+.required-field label::after {
+    content: " *";
+    color: rgba(var(--bs-danger-rgb), 1);
+    font-weight: bold;
+}
