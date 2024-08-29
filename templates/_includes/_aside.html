@@ -5,6 +5,9 @@
 {#        {% partial menu_lecture %}#}
         {% partial menu_official %}
         {% if perms.a_daily or user.is_staff %}{% partial menu_daily %}{% endif %}
+        {% partial menu_weekly %}
+        {% partial menu_infinite %}
+        {% partial menu_test_exam %}
 {#        {% partial menu_score %}#}
     </ul>
     {% partial sidebar_toggle %}
@@ -57,6 +60,30 @@
         </ul>
     </li>
 {% endpartialdef menu_daily %}
+
+{% partialdef menu_weekly %}
+    <li class="nav-item">
+        <a class="nav-link collapsed" data-menu="weekly" href="{% url 'official:base' %}">
+            <i class="fa-solid fa-fw fa-inbox"></i> 주간모의고사
+        </a>
+    </li>
+{% endpartialdef menu_weekly %}
+
+{% partialdef menu_infinite %}
+    <li class="nav-item">
+        <a class="nav-link collapsed" data-menu="infinite" href="{% url 'official:base' %}">
+            <i class="fa-solid fa-fw fa-inbox"></i> 무한반복반
+        </a>
+    </li>
+{% endpartialdef menu_infinite %}
+
+{% partialdef menu_test_exam %}
+    <li class="nav-item">
+        <a class="nav-link collapsed" data-menu="test_exam" href="{% url 'official:base' %}">
+            <i class="fa-solid fa-fw fa-inbox"></i> 전국모의고사
+        </a>
+    </li>
+{% endpartialdef menu_test_exam %}
 
 {% partialdef menu_lecture %}
     <li class="nav-item">
