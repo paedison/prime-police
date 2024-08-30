@@ -213,7 +213,7 @@ class ProblemOpen(models.Model):
         db_table = 'a_daily_problem_open'
 
     def __str__(self):
-        return f'[Daily]ProblemOpen(#{self.id}):{self.problem.reference}-{self.user.username}'
+        return f'[Daily]ProblemOpen(#{self.id}):{self.problem.reference}-{self.user}'
 
     @property
     def reference(self):
@@ -235,7 +235,7 @@ class ProblemLike(models.Model):
 
     def __str__(self):
         status = 'Liked' if self.is_liked else 'Unliked'
-        return f'[Daily]ProblemLike(#{self.id}):{self.problem.reference}({status})-{self.user.username}'
+        return f'[Daily]ProblemLike(#{self.id}):{self.problem.reference}({status})-{self.user}'
 
     @property
     def reference(self):
@@ -265,7 +265,7 @@ class ProblemRate(models.Model):
         db_table = 'a_daily_problem_rate'
 
     def __str__(self):
-        return f'[Daily]ProblemRate(#{self.id}):{self.problem.reference}({self.rating})-{self.user.username}'
+        return f'[Daily]ProblemRate(#{self.id}):{self.problem.reference}({self.rating})-{self.user}'
 
     @property
     def reference(self):
@@ -297,7 +297,7 @@ class ProblemSolve(models.Model):
 
     def __str__(self):
         status = 'Correct' if self.is_correct else 'Wrong'
-        return f'[Daily]ProblemSolve(#{self.id}):{self.problem.reference}({status})-{self.user.username}'
+        return f'[Daily]ProblemSolve(#{self.id}):{self.problem.reference}({status})-{self.user}'
 
     @property
     def reference(self):
@@ -328,7 +328,7 @@ class ProblemMemo(models.Model):
         db_table = 'a_daily_problem_memo'
 
     def __str__(self):
-        return f'[Daily]ProblemMemo(#{self.id}):{self.problem.reference}-{self.user.username}'
+        return f'[Daily]ProblemMemo(#{self.id}):{self.problem.reference}-{self.user}'
 
     @property
     def reference(self):
@@ -352,7 +352,7 @@ class ProblemCollection(models.Model):
         db_table = 'a_daily_problem_collection'
 
     def __str__(self):
-        return f'[Daily]ProblemCollection(#{self.id}):{self.title}-{self.user.username}'
+        return f'[Daily]ProblemCollection(#{self.id}):{self.title}-{self.user}'
 
     def get_detail_url(self):
         return reverse_lazy('daily:collection-detail', args=[self.id])

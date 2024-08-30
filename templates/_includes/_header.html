@@ -34,7 +34,7 @@
             </li>
 
             {% if user.is_superuser or user.is_staff %}
-                <a class="nav-link px-1" href="{% url 'admin:index' %}" target="#admin">
+                <a class="nav-link px-1" href="{% url 'admin:index' %}" target="admin">
                     <i class="fa-solid fa-crown fa-fw text-warning"></i>
                 </a>
             {% endif %}

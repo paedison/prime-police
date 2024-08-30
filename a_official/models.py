@@ -201,7 +201,7 @@ class ProblemOpen(models.Model):
         db_table = 'a_official_problem_open'
 
     def __str__(self):
-        return f'[Official]ProblemOpen(#{self.id}):{self.problem.reference}-{self.user.username}'
+        return f'[Official]ProblemOpen(#{self.id}):{self.problem.reference}-{self.user}'
 
     @property
     def reference(self):
@@ -223,7 +223,7 @@ class ProblemLike(models.Model):
 
     def __str__(self):
         status = 'Liked' if self.is_liked else 'Unliked'
-        return f'[Official]ProblemLike(#{self.id}):{self.problem.reference}({status})-{self.user.username}'
+        return f'[Official]ProblemLike(#{self.id}):{self.problem.reference}({status})-{self.user}'
 
     @property
     def reference(self):
@@ -253,7 +253,7 @@ class ProblemRate(models.Model):
         db_table = 'a_official_problem_rate'
 
     def __str__(self):
-        return f'[Official]ProblemRate(#{self.id}):{self.problem.reference}({self.rating})-{self.user.username}'
+        return f'[Official]ProblemRate(#{self.id}):{self.problem.reference}({self.rating})-{self.user}'
 
     @property
     def reference(self):
@@ -285,7 +285,7 @@ class ProblemSolve(models.Model):
 
     def __str__(self):
         status = 'Correct' if self.is_correct else 'Wrong'
-        return f'[Official]ProblemSolve(#{self.id}):{self.problem.reference}({status})-{self.user.username}'
+        return f'[Official]ProblemSolve(#{self.id}):{self.problem.reference}({status})-{self.user}'
 
     @property
     def reference(self):
@@ -316,7 +316,7 @@ class ProblemMemo(models.Model):
         db_table = 'a_official_problem_memo'
 
     def __str__(self):
-        return f'[Official]ProblemMemo(#{self.id}):{self.problem.reference}-{self.user.username}'
+        return f'[Official]ProblemMemo(#{self.id}):{self.problem.reference}-{self.user}'
 
     @property
     def reference(self):
@@ -340,7 +340,7 @@ class ProblemCollection(models.Model):
         db_table = 'a_official_problem_collection'
 
     def __str__(self):
-        return f'[Official]ProblemCollection(#{self.id}):{self.title}-{self.user.username}'
+        return f'[Official]ProblemCollection(#{self.id}):{self.title}-{self.user}'
 
     def get_detail_url(self):
         return reverse_lazy('official:collection-detail', args=[self.id])

@@ -81,7 +81,7 @@ class NoticeComment(models.Model):
         ordering = ["-id"]
 
     def __str__(self):
-        return f'[Board]NoticeComment(#{self.id}):{self.user.username}-{self.post.title}'
+        return f'[Board]NoticeComment(#{self.id}):{self.user}-{self.post.title}'
 
     @staticmethod
     def get_list_url():
