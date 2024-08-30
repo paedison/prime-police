@@ -11,15 +11,23 @@ from a_common.utils import HtmxHttpRequest, update_context_data
 from . import models, utils, forms, filters
 
 
+class ProblemConfiguration:
+    menu = 'official'
+    submenu = 'problem'
+    info = {'menu': menu}
+    menu_title = {'kor': '기출문제', 'eng': menu.capitalize()}
+    url_admin = reverse_lazy(f'admin:a_official_problem_changelist')
+    url_list = reverse_lazy(f'official:base')
+
+
 @login_not_required
 def problem_list_view(request: HtmxHttpRequest):
+    config = ProblemConfiguration()
     view_type = request.headers.get('View-Type', '')
-
     exam_year = request.GET.get('year', '')
     exam_subject = request.GET.get('subject', '')
     page = request.GET.get('page', '1')
 
-    info = {'menu': 'official'}
     sub_title = utils.get_sub_title(exam_year, exam_subject)
 
     if request.user.is_authenticated:
@@ -30,7 +38,7 @@ def problem_list_view(request: HtmxHttpRequest):
     custom_data = utils.get_custom_data(request.user)
     page_obj, page_range = utils.get_page_obj_and_range(page, filterset.qs)
     context = update_context_data(
-        info=info, title='기출문제', sub_title=sub_title, form=filterset.form,
+        config=config, sub_title=sub_title, form=filterset.form,
         icon_menu=icon_set.ICON_MENU['official'], icon_image=icon_set.ICON_IMAGE,
         custom_data=custom_data, page_obj=page_obj, page_range=page_range,
     )
@@ -48,57 +56,58 @@ def problem_list_view(request: HtmxHttpRequest):
 
 @login_not_required
 def problem_detail_view(request: HtmxHttpRequest, pk: int):
+    config = ProblemConfiguration()
     view_type = request.headers.get('View-Type', '')
-    info = {'menu': 'official'}
     queryset = models.Problem.objects.order_by('-year', 'id')
     problem = get_object_or_404(queryset, pk=pk)
 
-    context = update_context_data(info=info, problem_id=pk, problem=problem)
+    context = update_context_data(config=config, problem_id=pk, problem=problem)
 
-    problem_data = queryset.filter(year=problem.year, exam=problem.exam, subject=problem.subject)
-    prob_prev, prob_next = utils.get_prev_next_prob(pk, problem_data)
+    exam_info = {'year': problem.year, 'subject': problem.subject}
+    queryset = queryset.filter(**exam_info)
+    prob_prev, prob_next = utils.get_prev_next_prob(pk, queryset)
 
     template_nav = 'a_official/snippets/navigation_container.html'
     template_nav_problem_list = f'{template_nav}#nav_problem_list'
     template_nav_other_list = f'{template_nav}#nav_other_list'
 
     if view_type == 'problem_list':
-        list_data = utils.get_list_data(problem_data)
+        list_data = utils.get_list_data(queryset)
         context = update_context_data(context, list_title='', list_data=list_data, color='primary')
         return render(request, template_nav_problem_list, context)
 
     if view_type == 'like_list':
-        problem_data = queryset.prefetch_related('likes').filter(
+        queryset = queryset.prefetch_related('likes').filter(
             likes__is_liked=True, likes__user=request.user).annotate(is_liked=F('likes__is_liked'))
-        list_data = utils.get_list_data(problem_data)
+        list_data = utils.get_list_data(queryset)
         context = update_context_data(context, list_title='즐겨찾기 추가 문제', list_data=list_data, color='danger')
         return render(request, template_nav_other_list, context)
 
     if view_type == 'rate_list':
-        problem_data = queryset.prefetch_related('rates').filter(
+        queryset = queryset.prefetch_related('rates').filter(
             rates__isnull=False, rates__user=request.user).annotate(rating=F('rates__rating'))
-        list_data = utils.get_list_data(problem_data)
+        list_data = utils.get_list_data(queryset)
         context = update_context_data(context, list_title='난이도 선택 문제', list_data=list_data, color='warning')
         return render(request, template_nav_other_list, context)
 
     if view_type == 'solve_list':
-        problem_data = queryset.prefetch_related('solves').filter(
+        queryset = queryset.prefetch_related('solves').filter(
             solves__isnull=False, solves__user=request.user).annotate(
             user_answer=F('solves__answer'), is_correct=F('solves__is_correct'))
-        list_data = utils.get_list_data(problem_data)
+        list_data = utils.get_list_data(queryset)
         context = update_context_data(context, list_title='정답 확인 문제', list_data=list_data, color='success')
         return render(request, template_nav_other_list, context)
 
     if view_type == 'memo_list':
-        problem_data = queryset.prefetch_related('memos').filter(memos__isnull=False, memos__user=request.user)
-        list_data = utils.get_list_data(problem_data)
+        queryset = queryset.prefetch_related('memos').filter(memos__isnull=False, memos__user=request.user)
+        list_data = utils.get_list_data(queryset)
         context = update_context_data(context, list_title='메모 작성 문제', list_data=list_data, color='warning')
         return render(request, template_nav_other_list, context)
 
     if view_type == 'tag_list':
-        problem_data = queryset.prefetch_related('tagged_problems').filter(
+        queryset = queryset.prefetch_related('tagged_problems').filter(
             tags__isnull=False, tagged_problems__user=request.user).distinct()
-        list_data = utils.get_list_data(problem_data)
+        list_data = utils.get_list_data(queryset)
         context = update_context_data(context, list_title='태그 작성 문제', list_data=list_data, color='primary')
         return render(request, template_nav_other_list, context)
 

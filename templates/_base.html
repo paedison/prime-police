@@ -19,7 +19,12 @@
             <meta property="og:image" content="{% static 'favicon/logo_typo.png' %}" />
         {% endblock page_image %}
         <title>
-            {% block head_title %}PRIME 경위공채{% endblock head_title %}
+            {% block head_title %}
+                PRIME 경위공채
+                {% if config %}
+                    | {{ config.menu_title.kor }} {{ config.submenu_title.kor }}
+                {% endif %}
+            {% endblock head_title %}
         </title>
 
         <!-- Favicons -->

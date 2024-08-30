@@ -1,8 +1,7 @@
-{% load static %}
-
 <article id="detailNavContainer" class="flex-nowrap input-group me-2"
          hx-target="#main" hx-swap="innerHTML swap:0.25s">
     <a id="problemListBtn" class="btn btn-primary cursor-pointer"
+       hx-push-url="{{ problem.get_list_url }}"
        hx-get="{{ problem.get_list_url }}{% querystring %}">
         {{ icon_nav.left_arrow|safe }}
     </a>
@@ -25,32 +24,32 @@
         <a class="btn btn-primary text-primary">{{ icon_nav.next_prob|safe }}</a>
     {% endif %}
 
-    {% with view_type='problem_list' list_url=list_url_problem icon=icon_nav.list %}
+    {% with custom='problem' list_url=list_url_problem icon=icon_nav.list %}
         {% partial list_buttons_default %}
     {% endwith %}
 
     {% if user.is_authenticated %}
-        {% for _ in '12345' %}
-            {% cycle 'rate_list' 'like_list' 'solve_list' 'memo_list' 'tag_list' as view_type silent %}
-            {% cycle icon_rate_white icon_like_white icon_solve_white icon_memo_white icon_tag_white as icon silent %}
+        {% for _ in '1234' %}
+            {% cycle 'rate' 'like' 'memo' 'tag' as custom silent %}
+            {% cycle icon_rate_white icon_like_white icon_memo_white icon_tag_white as icon silent %}
             {% partial list_buttons_default %}
         {% endfor %}
     {% endif %}
 </article>
 
 {% partialdef list_buttons_default %}
-    <a id="{{ view_type }}List" class="btn btn-circle btn-primary dropdown-toggle"
+    <a id="{{ custom }}List" class="btn btn-circle btn-primary dropdown-toggle"
        href="" role="button" data-bs-toggle="dropdown" aria-expanded="false"
-       hx-target="#{{ view_type }}ListContents"
-       hx-headers='{"View-Type":"{{ view_type }}"}'
+       hx-target="#{{ custom }}ListContents"
+       hx-headers='{"View-Type":"{{ custom }}_list"}'
        hx-trigger="click once"
-       hx-get="">
+       hx-get="{{ problem.get_absolute_url }}">
         <div class="text-white" data-bs-toggle="tooltip" title="{{ tooltip_title }}">
             {{ icon|safe }}
         </div>
     </a>
-    <div class="dropdown-menu" aria-labelledby="{{ view_type }}List">
-        <div id="{{ view_type }}ListContents" class="dropdown p-2" role="option">
+    <div class="dropdown-menu" aria-labelledby="{{ custom }}List">
+        <div id="{{ custom }}ListContents" class="dropdown p-2" role="option">
         </div>
     </div>
 {% endpartialdef list_buttons_default %}
@@ -58,15 +57,15 @@
 {% partialdef nav_problem_list %}
     <div class="container" style="min-width: 300px;">
         <div class="row justify-content-center p-2 text-bg-primary fw-bold">
-            {{ problem.year_subject }}
+            {{ problem.exam_name }}
         </div>
         <div class="row justify-content-center">
-            {% for _ in '_'|ljust:40 %}
+            {% for data in list_data %}
                     <div class="col-2 text-center small p-1">
-                        <a hx-get="{% url 'daily:problem-detail' problem.number|subtract:problem.id|add:forloop.counter %}{% querystring %}"
-                           class="p-1 dropdown-item text-nowrap text-center cursor-pointer
-                           {% if forloop.counter == problem.number %} text-bg-{{ color }}{% endif %}">
-                            {{ forloop.counter }}번
+                        <a hx-get="{{ data.get_absolute_url }}{% querystring %}"
+                           class="p-1 dropdown-item text-nowrap text-center cursor-pointer fw-bold
+                           {% if data.is_correct == True %}text-success{% elif data.is_correct == False %}text-danger{% endif %}">
+                            {{ data.number }}번
                         </a>
                     </div>
                     {% if forloop.counter|divisibleby:5 %}
@@ -95,15 +94,15 @@
                 {% if forloop.counter0 != 0 %}
                 <hr class="m-1">
                 {% endif %}
-                <div class="row justify-content-center p-2 text-{{ color }} fw-bold">{{ data.year_subject }}</div>
+                <div class="row justify-content-center p-2 text-{{ color }} fw-bold">{{ data.exam_name }}</div>
             {% endifchanged %}
                 <div class="row justify-content-center p-2">
             {% endif %}
             {% if data %}
                 <div class="col-2 text-center p-0">
                     <a hx-get="{{ data.get_absolute_url }}{% querystring %}"
-                       class="p-1 dropdown-item text-nowrap text-center cursor-pointer
-                       {% if data.id == problem.id %}fw-bold text-bg-{{ color }}{% endif %}">
+                       class="p-1 dropdown-item text-nowrap text-center cursor-pointer fw-bold
+                       {% if data.is_correct == True %}text-success{% elif data.is_correct == False %}text-danger{% endif %}">
                         {{ data.number }}번
                     </a>
                 </div>

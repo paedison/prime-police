@@ -29,9 +29,9 @@
     {% endwith %}
 
     {% if user.is_authenticated %}
-        {% for _ in '12345' %}
-            {% cycle 'rate' 'like' 'solve' 'memo' 'tag' as custom silent %}
-            {% cycle icon_rate_white icon_like_white icon_solve_white icon_memo_white icon_tag_white as icon silent %}
+        {% for _ in '1234' %}
+            {% cycle 'rate' 'like' 'memo' 'tag' as custom silent %}
+            {% cycle icon_rate_white icon_like_white icon_memo_white icon_tag_white as icon silent %}
             {% partial list_buttons_default %}
         {% endfor %}
     {% endif %}
@@ -63,8 +63,8 @@
             {% for data in list_data %}
                     <div class="col-2 text-center small p-1">
                         <a hx-get="{{ data.get_absolute_url }}{% querystring %}"
-                           class="p-1 dropdown-item text-nowrap text-center cursor-pointer
-                           {% if data.number == problem.number %} text-bg-{{ color }}{% endif %}">
+                           class="p-1 dropdown-item text-nowrap text-center cursor-pointer fw-bold
+                           {% if data.is_correct == True %}text-success{% elif data.is_correct == False %}text-danger{% endif %}">
                             {{ data.number }}번
                         </a>
                     </div>
@@ -73,6 +73,19 @@
                 <div class="row justify-content-center">
                     {% endif %}
             {% endfor %}
+{#            {% for data in list_data %}#}
+{#                    <div class="col-2 text-center small p-1">#}
+{#                        <a hx-get="{{ data.get_absolute_url }}{% querystring %}"#}
+{#                           class="p-1 dropdown-item text-nowrap text-center cursor-pointer#}
+{#                           {% if data.number == problem.number %} text-bg-{{ color }}{% endif %}">#}
+{#                            {{ data.number }}번#}
+{#                        </a>#}
+{#                    </div>#}
+{#                    {% if forloop.counter|divisibleby:5 %}#}
+{#                </div>#}
+{#                <div class="row justify-content-center">#}
+{#                    {% endif %}#}
+{#            {% endfor %}#}
         </div>
     </div>
 {% endpartialdef nav_problem_list %}
@@ -101,8 +114,9 @@
             {% if data %}
                 <div class="col-2 text-center p-0">
                     <a hx-get="{{ data.get_absolute_url }}{% querystring %}"
-                       class="p-1 dropdown-item text-nowrap text-center cursor-pointer
-                       {% if data.id == problem.id %}fw-bold text-bg-{{ color }}{% endif %}">
+                       class="p-1 dropdown-item text-nowrap text-center cursor-pointer fw-bold
+                       {% if data.is_correct == True %}text-success{% elif data.is_correct == False %}text-danger{% endif %}">
+{#                       {% if data.id == problem.id %}fw-bold text-bg-{{ color }}{% endif %}">#}
                         {{ data.number }}번
                     </a>
                 </div>

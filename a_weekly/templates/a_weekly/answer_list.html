@@ -2,7 +2,7 @@
 {% load crispy_forms_field %}
 
 {% block main %}
-    {% include 'a_daily/snippets/page_title.html' %}
+    {% include 'a_weekly/snippets/page_title.html' %}
 
     <section class="section htmx-fade-in htmx-fade-out"
              hx-target="#main" hx-swap="innerHTML swap:0.25s show:window:top">
@@ -148,7 +148,7 @@
 {% endpartialdef list_content %}
 
 {% if page_obj.has_next or page_obj.has_previous %}
-    {% include 'a_daily/snippets/pagination.html' with header='exam_list' %}
+    {% include 'a_weekly/snippets/pagination.html' with header='exam_list' %}
 {% endif %}
 
 {% partialdef reference %}

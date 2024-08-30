@@ -1,0 +1,40 @@
+{{ config.info|json_script:'info' }}
+<div class="pagetitle">
+    <h1>
+        {{ icon_menu|safe }} {{ config.menu_title.kor }}
+        <span class="fs-6 text-secondary">{{ config.submenu_title.kor }}</span>
+        {% if user.is_staff %}
+            <a class="btn btn-sm btn-outline-primary ms-1"
+               href="{{ config.url_admin }}" target="admin">
+                관리자 페이지
+            </a>
+        {% endif %}
+    </h1>
+    <nav>
+        <ol class="breadcrumb" hx-target="#main" hx-swap="innerHTML swap:0.25s" hx-boost="true">
+            <li class="breadcrumb-item">
+                <a href="{% url 'index' %}">Home</a>
+            </li>
+            <li class="breadcrumb-item">{{ config.menu_title.eng }}</li>
+            {% if not problem and not exam %}
+                <li class="breadcrumb-item">
+                    <a class="active" href="{{ config.url_list }}">{{ config.submenu_title.eng }}</a>
+                </li>
+            {% elif problem %}
+                <li class="breadcrumb-item">
+                    <a href="{{ config.url_list }}">{{ config.submenu_title.eng }}</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{{ problem.get_absolute_url }}" class="active">{{ problem.reference }}</a>
+                </li>
+            {% elif exam %}
+                <li class="breadcrumb-item">
+                    <a href="{{ config.url_list }}">{{ config.submenu_title.eng }}</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{{ exam.get_absolute_url }}" class="active">{{ exam.reference }}</a>
+                </li>
+            {% endif %}
+        </ol>
+    </nav>
+</div><!-- Page Title End -->

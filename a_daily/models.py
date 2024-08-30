@@ -143,12 +143,16 @@ class Problem(models.Model):
         return f'[Daily]Problem(#{self.id}):{self.reference}'
 
     @property
-    def circle_round_sub(self):
+    def exam_code(self):
         return f'{self.circle}{self.subject}{self.round}'
 
     @property
+    def exam_name(self):
+        return f'{self.get_circle_display()} {self.get_subject_display()} {self.get_round_display()}'
+
+    @property
     def reference(self):
-        return f'{self.circle_round_sub}-{self.number:02}'
+        return f'{self.exam_code}-{self.number:02}'
 
     @property
     def semester_circle_subject_round(self):
@@ -182,6 +186,10 @@ class Problem(models.Model):
 
     def get_absolute_url(self):
         return reverse_lazy('daily:problem-detail', args=[self.id])
+
+    @staticmethod
+    def get_list_url():
+        return reverse_lazy('daily:problem-list')
 
     def get_like_url(self):
         return reverse_lazy('daily:like-problem', args=[self.id])
@@ -417,7 +425,7 @@ class Exam(models.Model):
         return f'{self.semester}-{self.circle}-{self.subject}-{self.round}'
 
     @property
-    def circle_subject_round(self):
+    def reference(self):
         return f'{self.get_circle_display()}-{self.get_subject_display()}-{self.get_round_display()}'
 
     @property

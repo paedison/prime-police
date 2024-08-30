@@ -9,20 +9,18 @@ from django_htmx.http import reswap
 from a_common.constants import icon_set
 from a_common.decorators import permission_or_staff_required
 from a_common.utils import HtmxHttpRequest, update_context_data
-from .. import models, utils, filters
+from . import models, utils, filters
 
 
 class AnswerConfiguration:
-    menu = 'daily'
-    submenu = 'answer'
-    info = {'menu': menu, 'menu_self': submenu}
-    menu_title = {'kor': '데일리테스트', 'eng': menu.capitalize()}
-    submenu_title = {'kor': '답안 제출', 'eng': submenu.capitalize()}
-    url_admin = reverse_lazy(f'admin:a_daily_exam_changelist')
-    url_list = reverse_lazy(f'daily:answer-list')
+    menu = 'weekly'
+    info = {'menu': menu}
+    menu_title = {'kor': '주간모의고사', 'eng': menu.capitalize()}
+    url_admin = reverse_lazy(f'admin:a_weekly_exam_changelist')
+    url_list = reverse_lazy(f'weekly:answer-list')
 
 
-@permission_or_staff_required('a_daily.view_student', login_url='/')
+@permission_or_staff_required('a_weekly.view_student', login_url='/')
 def answer_list_view(request: HtmxHttpRequest):
     config = AnswerConfiguration()
     view_type = request.headers.get('View-Type', '')
@@ -41,21 +39,23 @@ def answer_list_view(request: HtmxHttpRequest):
 
     context = update_context_data(
         config=config, sub_title=sub_title, form=filterset.form,
-        icon_menu=icon_set.ICON_MENU['daily'], page_obj=page_obj, page_range=page_range)
+        icon_menu=icon_set.ICON_MENU['daily'],
+        page_obj=page_obj, page_range=page_range,
+    )
     if view_type == 'problem_list':
-        template_name = 'a_daily/answer_list.html#list_content'
+        template_name = 'a_weekly/answer_list.html#list_content'
         return render(request, template_name, context)
-    return render(request, 'a_daily/answer_list.html', context)
+    return render(request, 'a_weekly/answer_list.html', context)
 
 
-@permission_or_staff_required('a_daily.view_student', login_url='/')
+@permission_or_staff_required('a_weekly.view_student', login_url='/')
 def answer_detail_view(request: HtmxHttpRequest, pk: int):
     config = AnswerConfiguration()
     exam = get_object_or_404(models.Exam, pk=pk)
     exam_info = get_exam_info(exam)
     student = get_student(request, exam_info)
     if not student:
-        return redirect('daily:answer-list')
+        return redirect('weekly:answer-list')
     student.rank_ratio = student.get_rank_ratio(exam.participants)
 
     problems = models.Problem.objects.filter(**exam_info).order_by('number')
@@ -80,13 +80,15 @@ def answer_detail_view(request: HtmxHttpRequest, pk: int):
     context = update_context_data(
         config=config, exam=exam, student=student,
         answer_official=answer_official, answer_student=answer_student,
-        icon_menu=icon_set.ICON_MENU['daily'], icon_question=icon_set.ICON_QUESTION,
-        icon_nav=icon_set.ICON_NAV, icon_board=icon_set.ICON_BOARD,
+        icon_menu=icon_set.ICON_MENU['daily'],
+        icon_question=icon_set.ICON_QUESTION,
+        icon_nav=icon_set.ICON_NAV,
+        icon_board=icon_set.ICON_BOARD,
     )
-    return render(request, 'a_daily/answer_detail.html', context)
+    return render(request, 'a_weekly/answer_detail.html', context)
 
 
-@permission_or_staff_required('a_daily.view_student', login_url='/')
+@permission_or_staff_required('a_weekly.view_student', login_url='/')
 def answer_input_view(request: HtmxHttpRequest, pk: int):
     config = AnswerConfiguration()
     exam = get_object_or_404(models.Exam, pk=pk)
@@ -110,7 +112,7 @@ def answer_input_view(request: HtmxHttpRequest, pk: int):
 
         answer = {'no': no, 'ans': ans}
         context = update_context_data(answer=answer, exam=exam)
-        response = render(request, 'a_daily/snippets/answer_button.html', context)
+        response = render(request, 'a_weekly/snippets/answer_button.html', context)
 
         if 1 <= no <= problem_count and 1 <= ans <= 4:
             answer_input[no - 1] = ans
@@ -123,10 +125,10 @@ def answer_input_view(request: HtmxHttpRequest, pk: int):
     answer_student = [{'no': no, 'ans': ans} for no, ans in enumerate(answer_input, start=1)]
     context = update_context_data(
         config=config, exam=exam, icon_menu=icon_set.ICON_MENU['daily'], answer_student=answer_student)
-    return render(request, 'a_daily/answer_input.html', context)
+    return render(request, 'a_weekly/answer_input.html', context)
 
 
-@permission_or_staff_required('a_daily.view_student', login_url='/')
+@permission_or_staff_required('a_weekly.view_student', login_url='/')
 def answer_confirm_view(request: HtmxHttpRequest, pk: int):
     exam = get_object_or_404(models.Exam, pk=pk)
     exam_info = get_exam_info(exam)
@@ -168,10 +170,10 @@ def answer_confirm_view(request: HtmxHttpRequest, pk: int):
                 answer_count.save()
         context = update_context_data(exam=exam, header=f'답안 제출', is_confirmed=is_confirmed)
 
-    return render(request, 'a_daily/snippets/answer_confirmed_modal.html', context)
+    return render(request, 'a_weekly/snippets/answer_confirmed_modal.html', context)
 
 
-@permission_or_staff_required('a_daily.view_student', login_url='/')
+@permission_or_staff_required('a_weekly.view_student', login_url='/')
 def rank_verify(_: HtmxHttpRequest, pk: int):
     student = get_object_or_404(models.Student, pk=pk)
     exam_info = get_exam_info(student)

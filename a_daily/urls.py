@@ -10,7 +10,7 @@ problem_patterns = [
 
     path('like/<int:pk>/', problem_views.like_problem, name='like-problem'),
     path('rate/<int:pk>/', problem_views.rate_problem, name='rate-problem'),
-    path('solve/<int:pk>/', problem_views.solve_problem, name='solve-problem'),
+    # path('solve/<int:pk>/', problem_views.solve_problem, name='solve-problem'),
     path('memo/<int:pk>/', problem_views.memo_problem, name='memo-problem'),
     path('tag/<int:pk>/', problem_views.tag_problem, name='tag-problem'),
     path('collect/<int:pk>/', problem_views.collect_problem, name='collect-problem'),

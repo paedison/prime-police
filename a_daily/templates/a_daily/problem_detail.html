@@ -2,32 +2,7 @@
 {% load daily_templatetags %}
 
 {% block main %}
-    {{ info|json_script:'info' }}
-    <div class="pagetitle">
-        <h1>{{ icon_menu|safe }} 데일리테스트
-            <span class="fs-6 text-secondary">{{ problem.full_reference }}</span>
-            {% if user.is_staff %}
-                <a class="btn btn-sm btn-outline-primary ms-1"
-                   href="{% url 'admin:a_daily_problem_change' problem.id %}" target="admin">
-                    관리자 페이지
-                </a>
-            {% endif %}
-        </h1>
-        <nav>
-            <ol class="breadcrumb" hx-target="#main" hx-swap="innerHTML swap:0.25s" hx-boost="true">
-                <li class="breadcrumb-item">
-                    <a href="{% url 'index' %}">Home</a>
-                </li>
-                <li class="breadcrumb-item">Daily</li>
-                <li class="breadcrumb-item">
-                    <a href="{% url 'daily:problem-list' %}">Problem</a>
-                </li>
-                <li class="breadcrumb-item">
-                    <a href="{{ problem.get_absolute_url }}" class="active">{{ problem.reference }}</a>
-                </li>
-            </ol>
-        </nav>
-    </div><!-- Page Title End -->
+    {% include 'a_daily/snippets/page_title.html' %}
 
     <section class="section">
         <div class="row">
@@ -40,13 +15,14 @@
                                     {% include 'a_daily/snippets/navigation_container.html' %}
                                 </div>
                             </div>
-                            <div class="d-flex align-items-center fs-6">
-                                <div class="text-nowrap ms-auto">
+                            <div class="d-flex align-items-center">
+                                <div class="text-primary fw-bold">{{ problem.full_reference }}</div>
+                                <div class="text-nowrap ms-auto fs-6">
                                     {% custom_icons user problem custom_data %}
                                 </div>
                             </div>
                         </div>
-                        <div id="problemQuestion" class="border-top htmx-fade-in htmx-fade-out">
+                        <div id="problemQuestion" class="border-top pt-3 htmx-fade-in htmx-fade-out">
                             <div class="d-flex">
                                 <h6 class="lh-base text-nowrap mb-0 me-2 fw-bold text-primary">
                                     문&nbsp;{{ problem.number|add_space }}.

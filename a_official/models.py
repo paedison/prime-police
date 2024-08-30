@@ -132,8 +132,12 @@ class Problem(models.Model):
         return f'[Official]Problem(#{self.id}):{self.reference}'
 
     @property
-    def year_sub(self):
+    def exam_code(self):
         return f'{self.year}{self.subject}'
+
+    @property
+    def exam_name(self):
+        return f'{self.get_year_display()} {self.get_subject_display()}'
 
     @property
     def reference(self):

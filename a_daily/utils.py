@@ -21,8 +21,7 @@ def get_sub_title(exam_circle, exam_round, exam_subject, end_string='문제') ->
         title_parts.append(f'{exam_round}회차')
     if not exam_circle and not exam_round and not exam_subject:
         title_parts.append('전체')
-    sub_title = f'{" ".join(title_parts)} {end_string}'
-    return sub_title
+    return f'{" ".join(title_parts)} {end_string}'
 
 
 def get_prev_next_prob(pk, custom_data) -> tuple:
@@ -38,23 +37,13 @@ def get_prev_next_prob(pk, custom_data) -> tuple:
     return prev_prob, next_prob
 
 
-def get_list_data(custom_data) -> list:
-    organized_dict = {}
-    organized_list = []
-    for prob in custom_data:
-        key = f'{prob.year}{prob.subject}'
-        if key not in organized_dict:
-            organized_dict[key] = []
-        organized_dict[key].append(prob)
-
-    for key, items in organized_dict.items():
-        num_empty_instances = 5 - (len(items) % 5)
-        if num_empty_instances < 5:
-            items.extend([None] * num_empty_instances)
-        for i in range(0, len(items), 5):
-            row = items[i:i+5]
-            organized_list.extend(row)
-    return organized_list
+def get_list_data(queryset, student) -> list:
+    list_data = []
+    for data in queryset:
+        if student and student.answer_student:
+            data.is_correct = data.answer == student.answer_student[data.number - 1]
+        list_data.append(data)
+    return list_data
 
 
 def get_custom_data(user: User) -> dict:

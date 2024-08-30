@@ -19,10 +19,16 @@ def custom_icons(user: User, problem: models.Problem, custom_data: dict):
 
     is_liked = get_status(status_type='like', field='is_liked')
     rating = get_status(status_type='rate', field='rating', default=0)
-    is_correct = get_status(status_type='solve', field='is_correct', default=None)
     is_memoed = get_status('memo')
     is_tagged = get_status('tag')
     is_collected = get_status('collection')
+
+    is_correct = None
+    student: models.Student | None = models.Student.objects.filter(
+        user=user, semester=problem.semester, circle=problem.circle,
+        subject=problem.subject, round=problem.round).first()
+    if student and student.answer_student:
+        is_correct = problem.answer == student.answer_student[problem.number - 1]
 
     return update_context_data(
         user=user, problem=problem,

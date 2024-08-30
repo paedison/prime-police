@@ -6,8 +6,8 @@
         {% partial menu_official %}
         {% if perms.a_daily or user.is_staff %}{% partial menu_daily %}{% endif %}
         {% partial menu_weekly %}
-        {% partial menu_infinite %}
-        {% partial menu_test_exam %}
+{#        {% partial menu_infinite %}#}
+{#        {% partial menu_test_exam %}#}
 {#        {% partial menu_score %}#}
     </ul>
     {% partial sidebar_toggle %}
@@ -63,7 +63,7 @@
 
 {% partialdef menu_weekly %}
     <li class="nav-item">
-        <a class="nav-link collapsed" data-menu="weekly" href="{% url 'official:base' %}">
+        <a class="nav-link collapsed" data-menu="weekly" href="{% url 'weekly:answer-list' %}">
             <i class="fa-solid fa-fw fa-inbox"></i> 주간모의고사
         </a>
     </li>
