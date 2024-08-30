@@ -211,7 +211,7 @@ class Student(models.Model):
     remarks = models.TextField(null=True, blank=True, verbose_name='주석')
 
     class Meta:
-        verbose_name = verbose_name_plural = "4_수험정보"
+        verbose_name = verbose_name_plural = "04_수험정보"
         unique_together = ['user', 'semester', 'circle', 'subject', 'round']
         ordering = ['-semester', '-circle', 'subject', 'round']
 
