@@ -46,9 +46,7 @@ function applyTagify() {
     inputs.forEach(input => {
         if (input.dataset.tagifyApplied) {return}
 
-        const problemId = input.getAttribute('data-problem-id');
-        const tagType = input.getAttribute('data-tag-type');
-        const action = `/${tagType}/tag/${problemId}/`
+        const action = input.getAttribute('data-action');
         const tags = input.getAttribute('data-tags').split(',').map(tag => tag.trim());
         const tagify = new Tagify(input, {
             editTags: false,

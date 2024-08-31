@@ -1,6 +1,5 @@
 {% load crispy_forms_tags %}
 {% load crispy_forms_field %}
-{% load daily_templatetags %}
 
 <article class="table-responsive">
     <table class="table align-middle m-0">
@@ -9,7 +8,7 @@
                 {% ifchanged %}
                     <tr class="table-warning">
                         <td class="text-nowrap text-primary p-2">
-                            <h5 class="fw-bold m-0">{{ problem.semester_circle_subject_round }}</h5>
+                            <h2 class="fw-bold m-0 fs-6">{{ problem.semester_circle_subject_round }} {{ config.menu_title.kor }}</h2>
                         </td>
                     </tr>
                 {% endifchanged %}
@@ -20,7 +19,7 @@
                                 <div class="d-inline-block d-sm-none">
                                     {% partial reference %}
                                 </div>
-                                {% custom_icons user problem custom_data %}
+                                {% include 'a_common/prime_test/custom_icons.html' %}
                             </div>
                             <div class="d-block d-sm-none">
                                 {% partial question %}
@@ -46,12 +45,12 @@
 </article>
 
 {% if page_obj.has_next or page_obj.has_previous %}
-    {% include 'a_daily/snippets/pagination.html' with header='problem_list' %}
+    {% include 'a_common/prime_test/pagination.html' with header='problem_list' %}
 {% endif %}
 
 {% partialdef reference %}
     <a class="text-decoration-none fw-bold cursor-pointer"
-       hx-get="{% url 'daily:problem-detail' problem_id %}{% querystring %}">
+       hx-get="{{ problem.get_absolute_url }}{% querystring %}">
         {{ problem.reference }}
     </a>
 {% endpartialdef reference %}
@@ -64,7 +63,7 @@
 
     {% partialdef link_snippet %}
         <a class="text-decoration-none {{ class }} cursor-pointer"
-           hx-get="{% url 'daily:problem-detail' problem_id %}{% querystring %}">
+           hx-get="{{ problem.get_absolute_url }}{% querystring %}">
             <h3 class="d-inline-block fs-6 small m-0">
                 {{ problem.question|truncatechars:chars }}
             </h3>

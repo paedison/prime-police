@@ -34,7 +34,7 @@
 {% endfor %}
 <div class="list-group-item list-group-item-action p-2 htmx-fade-in htmx-fade-out cursor-pointer text-secondary">
     <span hx-target="closest div" hx-headers='{"View-Type":"create"}'
-          hx-get="{% url 'weekly:collection-create' %}">
+          hx-get="{{ config.url_create_collection }}">
         <i class="fa-solid fa-plus"></i> 컬렉션 추가
     </span>
 </div>

@@ -1,8 +1,7 @@
 {% extends '_base.html' %}
-{% load daily_templatetags %}
 
 {% block main %}
-    {% include 'a_daily/snippets/page_title.html' %}
+    {% include 'a_common/prime_test/page_title.html' %}
 
     <section class="section">
         <div class="row">
@@ -12,13 +11,13 @@
                         <div class="card-title mb-0 row">
                             <div class="d-flex align-items-center fs-6">
                                 <div class="d-flex align-items-center">
-                                    {% include 'a_daily/snippets/navigation_container.html' %}
+                                    {% include 'a_common/prime_test/navigation_container.html' %}
                                 </div>
                             </div>
                             <div class="d-flex align-items-center">
                                 <div class="text-primary fw-bold">{{ problem.full_reference }}</div>
                                 <div class="text-nowrap ms-auto fs-6">
-                                    {% custom_icons user problem custom_data %}
+                                    {% include 'a_common/prime_test/custom_icons.html' %}
                                 </div>
                             </div>
                         </div>
@@ -64,7 +63,7 @@
                                             <div id="collapseMemoContent" class="htmx-fade-in htmx-fade-out"
                                                  hx-target="#collapseMemoContent" hx-swap="innerHTML swap:0.25s">
                                                 {% if user.is_authenticated %}
-                                                    {% include 'a_daily/snippets/memo_container.html' %}
+                                                    {% include 'a_common/prime_test/memo_container.html' %}
                                                 {% else %}
                                                     {% partial need_login %}
                                                 {% endif %}
@@ -100,8 +99,7 @@
                                                     <div class="tw-text-sm tw-mb-2 tw-px-2">
                                                         <input id="problemTag{{ problem.id }}"
                                                                placeholder="태그를 입력해주세요" type="hidden"
-                                                               data-tagify data-problem-id="{{ problem.id }}"
-                                                               data-tag-type="daily"
+                                                               data-tagify data-action="{{ problem.get_tag_url }}"
                                                                data-tags="{{ tags|join:',' }}">
                                                     </div>
                                                 {% else %}
@@ -117,66 +115,8 @@
                 </div>
             </div>
         </div>
-
-        <div class="row">
-{#            <article class="col-12">{% partial container_comment %}</article>#}
-        </div>
     </section>
 {% endblock main %}
-
-{% partialdef container_comment %}
-    <comment id="containerComment" class="card htmx-fade-in htmx-fade-out">
-        <div class="card-body">
-            <div id="accordionComment" class="accordion accordion-flush">
-                <div class="accordion-item">
-                    <h2 id="headingComment" class="accordion-header">
-                        <button class="accordion-button" type="button"
-                                data-bs-toggle="collapse" data-bs-target="#collapseComment"
-                                aria-expanded="true" aria-controls="collapseComment">
-                            <span class="badge bg-success me-2">{{ icon_question.white|safe }} 질문</span>
-                            <span class="small text-success fw-bold">
-                                문제에 관한 질문이나 댓글을 남겨보세요.
-                            </span>
-                        </button>
-                    </h2>
-                    <div class="d-flex justify-content-end mb-3">
-                        <div class="btn-group">
-                            <button class="btn btn-sm btn-outline-success" title="새로고침"
-                                    hx-target="#collapseCommentContent" hx-swap="innerHTL swap:0.25s"
-                                    hx-get="">
-{#                                    hx-get="{% url 'daily:comment_container' problem.id %}">#}
-                                <i class="fa-solid fa-rotate-right"></i> 새로고침
-                            </button>
-                            <button class="btn btn-sm btn-outline-success" title="질문하기"
-                                    hx-target="#modalContainer" data-bs-toggle="modal" data-bs-target="#modalContainer"
-                                    hx-get="">
-{#                                    hx-get="{% url 'daily:comment_create' problem.id %}">#}
-                                {{ icon_question.filter|safe }} 질문하기
-                            </button>
-                    {#        <button class="btn btn-sm btn-outline-success"#}
-                    {#                hx-get="{% url 'daily:comment_container' problem_id %}">#}
-                    {#            <i class="fa-regular fa-window-maximize"></i>#}
-                    {#            새 창#}
-                    {#        </button>#}
-                        </div>
-                    </div>
-                    <hr class="border-secondary"/>
-                    <div id="collapseComment" class="accordion-collapse collapse show"
-                         aria-labelledby="headingComment" data-bs-parent="#accordionComment">
-                        <div id="collapseCommentContent" class="htmx-fade-in htmx-fade-out"
-                             hx-target="#collapseCommentContent" hx-swap="innerHTML swap:0.25s">
-                            {% if user.is_authenticated %}
-{#                                <div hx-trigger="load" hx-get="{% url 'daily:comment_container' problem.id %}"></div>#}
-                            {% else %}
-                                {% partial need_login %}
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </comment>
-{% endpartialdef container_comment %}
 
 {% partialdef need_login %}
     <ul class="list-group">

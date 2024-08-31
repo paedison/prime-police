@@ -8,8 +8,8 @@ from django_htmx.http import reswap
 
 from a_common.constants import icon_set
 from a_common.decorators import permission_or_staff_required
-from a_common.utils import HtmxHttpRequest, update_context_data
-from .. import models, utils, filters
+from a_common import utils
+from .. import models, filters
 
 
 class AnswerConfiguration:
@@ -23,7 +23,7 @@ class AnswerConfiguration:
 
 
 @permission_or_staff_required('a_weekly.view_student', login_url='/')
-def answer_list_view(request: HtmxHttpRequest):
+def answer_list_view(request: utils.HtmxHttpRequest):
     config = AnswerConfiguration()
     view_type = request.headers.get('View-Type', '')
     exam_circle = request.GET.get('circle', '')
@@ -36,24 +36,24 @@ def answer_list_view(request: HtmxHttpRequest):
 
     page_obj, page_range = utils.get_page_obj_and_range(page, filterset.qs)
     for exam in page_obj:
-        exam_info = get_exam_info(exam)
-        exam.student = get_student(request, exam_info)
+        exam_info = utils.get_exam_info(exam)
+        exam.student = utils.get_student(request, models, exam_info)
 
-    context = update_context_data(
+    context = utils.update_context_data(
         config=config, sub_title=sub_title, form=filterset.form,
-        icon_menu=icon_set.ICON_MENU['daily'], page_obj=page_obj, page_range=page_range)
+        icon_menu=icon_set.ICON_MENU['weekly'], page_obj=page_obj, page_range=page_range)
     if view_type == 'problem_list':
-        template_name = 'a_weekly/answer_list.html#list_content'
+        template_name = 'a_common/prime_test/answer_list.html#list_content'
         return render(request, template_name, context)
-    return render(request, 'a_weekly/answer_list.html', context)
+    return render(request, 'a_common/prime_test/answer_list.html', context)
 
 
 @permission_or_staff_required('a_weekly.view_student', login_url='/')
-def answer_detail_view(request: HtmxHttpRequest, pk: int):
+def answer_detail_view(request: utils.HtmxHttpRequest, pk: int):
     config = AnswerConfiguration()
     exam = get_object_or_404(models.Exam, pk=pk)
-    exam_info = get_exam_info(exam)
-    student = get_student(request, exam_info)
+    exam_info = utils.get_exam_info(exam)
+    student = utils.get_student(request, models, exam_info)
     if not student:
         return redirect('daily:answer-list')
     student.rank_ratio = student.get_rank_ratio(exam.participants)
@@ -77,21 +77,21 @@ def answer_detail_view(request: HtmxHttpRequest, pk: int):
         answer_student[idx]['rate_selection'] = getattr(answer_count, f'rate_{ans_student}')
         answer_student[idx]['result'] = ans_student == ans_official
 
-    context = update_context_data(
+    context = utils.update_context_data(
         config=config, exam=exam, student=student,
         answer_official=answer_official, answer_student=answer_student,
-        icon_menu=icon_set.ICON_MENU['daily'], icon_question=icon_set.ICON_QUESTION,
+        icon_menu=icon_set.ICON_MENU['weekly'], icon_question=icon_set.ICON_QUESTION,
         icon_nav=icon_set.ICON_NAV, icon_board=icon_set.ICON_BOARD,
     )
-    return render(request, 'a_weekly/answer_detail.html', context)
+    return render(request, 'a_common/prime_test/answer_detail.html', context)
 
 
 @permission_or_staff_required('a_weekly.view_student', login_url='/')
-def answer_input_view(request: HtmxHttpRequest, pk: int):
+def answer_input_view(request: utils.HtmxHttpRequest, pk: int):
     config = AnswerConfiguration()
     exam = get_object_or_404(models.Exam, pk=pk)
-    exam_info = get_exam_info(exam)
-    student = get_student(request, exam_info)
+    exam_info = utils.get_exam_info(exam)
+    student = utils.get_student(request, models, exam_info)
     if not student:
         models.Student.objects.create(user=request.user, **exam_info)
 
@@ -109,8 +109,8 @@ def answer_input_view(request: HtmxHttpRequest, pk: int):
             return reswap(HttpResponse(''), 'none')
 
         answer = {'no': no, 'ans': ans}
-        context = update_context_data(answer=answer, exam=exam)
-        response = render(request, 'a_weekly/snippets/answer_button.html', context)
+        context = utils.update_context_data(answer=answer, exam=exam)
+        response = render(request, 'a_common/prime_test/answer_button.html', context)
 
         if 1 <= no <= problem_count and 1 <= ans <= 4:
             answer_input[no - 1] = ans
@@ -121,17 +121,17 @@ def answer_input_view(request: HtmxHttpRequest, pk: int):
             return reswap(HttpResponse(''), 'none')
 
     answer_student = [{'no': no, 'ans': ans} for no, ans in enumerate(answer_input, start=1)]
-    context = update_context_data(
+    context = utils.update_context_data(
         config=config, exam=exam, icon_menu=icon_set.ICON_MENU['daily'], answer_student=answer_student)
-    return render(request, 'a_weekly/answer_input.html', context)
+    return render(request, 'a_common/prime_test/answer_input.html', context)
 
 
 @permission_or_staff_required('a_weekly.view_student', login_url='/')
-def answer_confirm_view(request: HtmxHttpRequest, pk: int):
+def answer_confirm_view(request: utils.HtmxHttpRequest, pk: int):
     exam = get_object_or_404(models.Exam, pk=pk)
-    exam_info = get_exam_info(exam)
-    student = get_student(request, exam_info)
-    context = update_context_data(exam=exam, header=f'답안을 제출하시겠습니까?', verifying=True)
+    exam_info = utils.get_exam_info(exam)
+    student = utils.get_student(request, models, exam_info)
+    context = utils.update_context_data(exam=exam, header=f'답안을 제출하시겠습니까?', verifying=True)
 
     if request.method == 'POST':
         answer_official = models.Problem.objects.filter(**exam_info).order_by(
@@ -147,7 +147,7 @@ def answer_confirm_view(request: HtmxHttpRequest, pk: int):
 
             score_list = list(models.Student.objects.filter(
                 score__isnull=False, **exam_info).values_list('score', flat=True)) + [score]
-            stat = get_statistics(score_list, score)
+            stat = utils.get_statistics(score_list, score)
             rank = stat.pop('rank')
             participants = stat.pop('participants')
 
@@ -166,19 +166,19 @@ def answer_confirm_view(request: HtmxHttpRequest, pk: int):
                 setattr(answer_count, f'count_{ans}', F(f'count_{ans}') + 1)
                 setattr(answer_count, f'count_total', F(f'count_total') + 1)
                 answer_count.save()
-        context = update_context_data(exam=exam, header=f'답안 제출', is_confirmed=is_confirmed)
+        context = utils.update_context_data(exam=exam, header=f'답안 제출', is_confirmed=is_confirmed)
 
-    return render(request, 'a_weekly/snippets/answer_confirmed_modal.html', context)
+    return render(request, 'a_common/prime_test/answer_confirmed_modal.html', context)
 
 
 @permission_or_staff_required('a_weekly.view_student', login_url='/')
-def rank_verify(_: HtmxHttpRequest, pk: int):
+def rank_verify(_: utils.HtmxHttpRequest, pk: int):
     student = get_object_or_404(models.Student, pk=pk)
-    exam_info = get_exam_info(student)
+    exam_info = utils.get_exam_info(student)
     exam = get_object_or_404(models.Exam, **exam_info)
     score_list = models.Student.objects.filter(score__isnull=False, **exam_info).values_list('score', flat=True)
 
-    stat = get_statistics(score_list, student.score)
+    stat = utils.get_statistics(score_list, student.score)
     rank = stat.pop('rank')
     participants = stat.pop('participants')
 
@@ -193,32 +193,3 @@ def rank_verify(_: HtmxHttpRequest, pk: int):
     student.refresh_from_db()
     rank_ratio = student.get_rank_ratio(exam.participants)
     return HttpResponse(f'{student.rank}등({rank_ratio}%)')
-
-
-def get_exam_info(instance: models.Exam | models.Student):
-    return {
-        'semester': models.semester_default(), 'circle': instance.circle,
-        'subject': instance.subject, 'round': instance.round}
-
-
-def get_student(request: HtmxHttpRequest, exam_info: dict):
-    return models.Student.objects.filter(user=request.user, **exam_info).first()
-
-
-def get_statistics(score_list: list, score: float) -> dict:
-    participants = len(score_list)
-    sorted_scores = sorted(score_list, reverse=True)
-    try:
-        rank = sorted_scores.index(score) + 1
-        max_score = round(sorted_scores[0], 1)
-        top_10_threshold = max(1, int(participants * 0.1))
-        top_20_threshold = max(1, int(participants * 0.2))
-        top_score_10 = round(sorted_scores[top_10_threshold - 1], 1)
-        top_score_20 = round(sorted_scores[top_20_threshold - 1], 1)
-        avg_score = round(sum(score_list) / participants if participants else 0, 1)
-    except ValueError:
-        rank = max_score = top_score_10 = top_score_20 = avg_score = None
-    return {
-        'participants': participants, 'rank': rank,
-        'max': max_score, 't10': top_score_10, 't20': top_score_20, 'avg': avg_score,
-    }
