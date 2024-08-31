@@ -111,3 +111,26 @@ class StudentAdmin(ModelAdmin):
 
     create_datetime.short_description = '생성일시'
     name.short_description = '이름'
+
+
+@admin.register(models.AnswerCount)
+class AnswerCountAdmin(ModelAdmin):
+    list_display = list_display_links = [
+        'id', 'semester', 'circle', 'subject', 'round', 'number',
+        'count_1', 'count_2', 'count_3', 'count_4', 'count_0', 'count_multiple', 'count_total',
+    ]
+    readonly_fields = [
+        'id', 'semester', 'circle', 'subject', 'round', 'number',
+        'count_1', 'count_2', 'count_3', 'count_4', 'count_0', 'count_multiple', 'count_total', 'data',
+    ]
+    fields = None
+    fieldsets = [
+        (
+            None, {
+                'fields': (
+                    ('semester', 'circle', 'subject', 'round', 'number'),
+                    ('count_1', 'count_2', 'count_3', 'count_4', 'count_total'),
+                )
+            }
+        ),
+    ]

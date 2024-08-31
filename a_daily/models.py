@@ -189,4 +189,4 @@ class AnswerCount(BaseAnswerCount):
         db_table = 'a_daily_answer_count'
 
     def __str__(self):
-        return f'[Daily]AnswerCount:{self.full_reference} {self.number:02}번'
+        return f'[Daily]AnswerCount:{self.full_reference}'

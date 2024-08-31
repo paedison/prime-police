@@ -430,6 +430,7 @@ class BaseAnswerCount(models.Model):
     class Meta:
         verbose_name = verbose_name_plural = "13_답안개수"
         unique_together = ['semester', 'circle', 'subject', 'round', 'number']
+        ordering = ['-semester', '-circle', 'subject', 'round', 'number']
         abstract = True
 
     @property
@@ -439,7 +440,7 @@ class BaseAnswerCount(models.Model):
             self.get_circle_display(),
             self.get_subject_display(),
             self.get_round_display(),
-            self.number, '번'
+            f'{self.number}번',
         ])
 
     def get_rate(self, answer: int | str) -> float:
