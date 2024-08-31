@@ -14,16 +14,16 @@ from .. import models, utils, forms, filters
 
 
 class ProblemConfiguration:
-    menu = 'daily'
+    menu = 'weekly'
     submenu = 'problem'
     info = {'menu': menu, 'menu_self': submenu}
     menu_title = {'kor': '데일리테스트', 'eng': menu.capitalize()}
     submenu_title = {'kor': '오답 노트', 'eng': submenu.capitalize()}
-    url_admin = reverse_lazy(f'admin:a_daily_problem_changelist')
-    url_list = reverse_lazy(f'daily:problem-list')
+    url_admin = reverse_lazy(f'admin:a_weekly_problem_changelist')
+    url_list = reverse_lazy(f'weekly:problem-list')
 
 
-@permission_or_staff_required('a_daily.view_student', login_url='/')
+@permission_or_staff_required('a_weekly.view_student', login_url='/')
 def problem_list_view(request: HtmxHttpRequest):
     config = ProblemConfiguration()
     view_type = request.headers.get('View-Type', '')
@@ -43,11 +43,11 @@ def problem_list_view(request: HtmxHttpRequest):
     page_obj, page_range = utils.get_page_obj_and_range(page, filterset.qs)
     context = update_context_data(
         config=config, sub_title=sub_title, form=filterset.form,
-        icon_menu=icon_set.ICON_MENU['daily'], icon_image=icon_set.ICON_IMAGE,
+        icon_menu=icon_set.ICON_MENU['weekly'], icon_image=icon_set.ICON_IMAGE,
         custom_data=custom_data, page_obj=page_obj, page_range=page_range,
     )
     if view_type == 'problem_list':
-        return render(request, 'a_daily/problem_list_content.html', context)
+        return render(request, 'a_weekly/problem_list_content.html', context)
 
     if request.user.is_authenticated:
         collections = models.ProblemCollection.objects.filter(user=request.user).order_by('order')
@@ -55,16 +55,16 @@ def problem_list_view(request: HtmxHttpRequest):
         collections = []
 
     context = update_context_data(context, collections=collections)
-    return render(request, 'a_daily/problem_list.html', context)
+    return render(request, 'a_weekly/problem_list.html', context)
 
 
-@permission_or_staff_required('a_daily.view_student', login_url='/')
+@permission_or_staff_required('a_weekly.view_student', login_url='/')
 def problem_detail_view(request: HtmxHttpRequest, pk: int):
     config = ProblemConfiguration()
     view_type = request.headers.get('View-Type', '')
     queryset = models.Problem.objects.filter(opened_at__lte=date.today()).order_by('-semester', 'id')
     problem: models.Problem = get_object_or_404(queryset, pk=pk)
-    config.url_admin = reverse_lazy(f'admin:a_daily_problem_change', args=[pk])
+    config.url_admin = reverse_lazy(f'admin:a_weekly_problem_change', args=[pk])
 
     context = update_context_data(config=config, problem_id=pk, problem=problem)
 
@@ -76,7 +76,7 @@ def problem_detail_view(request: HtmxHttpRequest, pk: int):
     prob_prev, prob_next = utils.get_prev_next_prob(pk, queryset)
     student: models.Student = models.Student.objects.filter(user=request.user, **exam_info).first()
 
-    template_nav = 'a_daily/snippets/navigation_container.html'
+    template_nav = 'a_weekly/snippets/navigation_container.html'
     template_nav_problem_list = f'{template_nav}#nav_problem_list'
     template_nav_other_list = f'{template_nav}#nav_other_list'
 
@@ -133,7 +133,7 @@ def problem_detail_view(request: HtmxHttpRequest, pk: int):
     context = update_context_data(
         context,
         # icons
-        icon_menu=icon_set.ICON_MENU['daily'],
+        icon_menu=icon_set.ICON_MENU['weekly'],
         icon_question=icon_set.ICON_QUESTION,
         icon_nav=icon_set.ICON_NAV,
         icon_board=icon_set.ICON_BOARD,
@@ -151,11 +151,11 @@ def problem_detail_view(request: HtmxHttpRequest, pk: int):
         # forms
         memo_form=memo_form,
     )
-    return render(request, 'a_daily/problem_detail.html', context)
+    return render(request, 'a_weekly/problem_detail.html', context)
 
 
 @require_POST
-@permission_or_staff_required('a_daily.view_student', login_url='/')
+@permission_or_staff_required('a_weekly.view_student', login_url='/')
 def like_problem(request: HtmxHttpRequest, pk: int):
     problem = get_object_or_404(models.Problem, pk=pk)
     problem_like, created = models.ProblemLike.objects.get_or_create(user=request.user, problem=problem)
@@ -169,7 +169,7 @@ def like_problem(request: HtmxHttpRequest, pk: int):
     return HttpResponse(f'{icon_like}')
 
 
-@permission_or_staff_required('a_daily.view_student', login_url='/')
+@permission_or_staff_required('a_weekly.view_student', login_url='/')
 def rate_problem(request: HtmxHttpRequest, pk: int):
     problem = get_object_or_404(models.Problem, pk=pk)
 
@@ -186,11 +186,11 @@ def rate_problem(request: HtmxHttpRequest, pk: int):
         return HttpResponse(icon_rate)
 
     context = update_context_data(problem=problem)
-    return render(request, 'a_daily/snippets/rate_modal.html', context)
+    return render(request, 'a_weekly/snippets/rate_modal.html', context)
 
 
 @require_POST
-@permission_or_staff_required('a_daily.view_student', login_url='/')
+@permission_or_staff_required('a_weekly.view_student', login_url='/')
 def solve_problem(request: HtmxHttpRequest, pk: int):
     answer = request.POST.get('answer')
     problem = get_object_or_404(models.Problem, pk=pk)
@@ -212,10 +212,10 @@ def solve_problem(request: HtmxHttpRequest, pk: int):
         problem=problem, answer=answer, is_correct=is_correct,
         icon_solve=icon_set.ICON_SOLVE[f'{is_correct}'])
 
-    return render(request, 'a_daily/snippets/solve_modal.html', context)
+    return render(request, 'a_weekly/snippets/solve_modal.html', context)
 
 
-@permission_or_staff_required('a_daily.view_student', login_url='/')
+@permission_or_staff_required('a_weekly.view_student', login_url='/')
 def memo_problem(request: HtmxHttpRequest, pk: int):
     view_type = request.headers.get('View-Type', '')
     problem = get_object_or_404(models.Problem, pk=pk)
@@ -231,7 +231,7 @@ def memo_problem(request: HtmxHttpRequest, pk: int):
             my_memo.user = request.user
             my_memo.save()
             context = update_context_data(context, my_memo=my_memo)
-            return render(request, 'a_daily/snippets/memo_container.html', context)
+            return render(request, 'a_weekly/snippets/memo_container.html', context)
 
     if view_type == 'update':
         if request.method == 'POST':
@@ -239,24 +239,24 @@ def memo_problem(request: HtmxHttpRequest, pk: int):
             if update_form.is_valid():
                 my_memo = update_form.save()
                 context = update_context_data(context, my_memo=my_memo)
-                return render(request, 'a_daily/snippets/memo_container.html', context)
+                return render(request, 'a_weekly/snippets/memo_container.html', context)
         else:
             update_base_form = forms.ProblemMemoForm(instance=instance)
             context = update_context_data(context, memo_form=update_base_form, my_memo=instance)
-            return render(request, 'a_daily/snippets/memo_update_form.html', context)
+            return render(request, 'a_weekly/snippets/memo_update_form.html', context)
 
     blank_form = forms.ProblemMemoForm()
     context = update_context_data(context, memo_form=blank_form)
     if view_type == 'delete' and request.method == 'POST':
         instance.delete()
-        return render(request, 'a_daily/snippets/memo_container.html', context)
+        return render(request, 'a_weekly/snippets/memo_container.html', context)
 
     context = update_context_data(context, my_memo=instance)
-    return render(request, 'a_daily/snippets/memo_container.html', context)
+    return render(request, 'a_weekly/snippets/memo_container.html', context)
 
 
 @require_POST
-@permission_or_staff_required('a_daily.view_student', login_url='/')
+@permission_or_staff_required('a_weekly.view_student', login_url='/')
 def tag_problem(request: HtmxHttpRequest, pk: int):
     view_type = request.headers.get('View-Type', '')
     problem = get_object_or_404(models.Problem, pk=pk)
@@ -279,11 +279,11 @@ def tag_problem(request: HtmxHttpRequest, pk: int):
     is_tagged = models.ProblemTaggedItem.objects.filter(
         user=request.user, content_object=problem, active=True).exists()
     icon_tag = icon_set.ICON_TAG[f'{is_tagged}']
-    html_code = f'<span hx-swap-oob="innerHTML:#dailyTag{problem.id}">{icon_tag}</span>'
+    html_code = f'<span hx-swap-oob="innerHTML:#weeklyTag{problem.id}">{icon_tag}</span>'
     return HttpResponse(html_code)
 
 
-@permission_or_staff_required('a_daily.view_student', login_url='/')
+@permission_or_staff_required('a_weekly.view_student', login_url='/')
 def collection_list_view(request: HtmxHttpRequest):
     collections = []
     collection_ids = request.POST.getlist('collection')
@@ -296,13 +296,13 @@ def collection_list_view(request: HtmxHttpRequest):
     else:
         collections = models.ProblemCollection.objects.filter(user=request.user)
     context = update_context_data(collections=collections)
-    return render(request, 'a_daily/collection_list.html', context)
+    return render(request, 'a_weekly/collection_list.html', context)
 
 
-@permission_or_staff_required('a_daily.view_student', login_url='/')
+@permission_or_staff_required('a_weekly.view_student', login_url='/')
 def collection_create(request: HtmxHttpRequest):
     view_type = request.headers.get('View-Type', '')
-    url_create = reverse_lazy('daily:collection-create')
+    url_create = reverse_lazy('weekly:collection-create')
 
     if view_type == 'create':
         if request.method == 'POST':
@@ -316,11 +316,11 @@ def collection_create(request: HtmxHttpRequest):
                 my_collection.user = request.user
                 my_collection.order = max_order
                 my_collection.save()
-                return redirect('daily:collection-list')
+                return redirect('weekly:collection-list')
         else:
             form = forms.ProblemCollectionForm()
             context = update_context_data(form=form, url=url_create, header='create')
-            return render(request, 'a_daily/snippets/collection_create.html', context)
+            return render(request, 'a_weekly/snippets/collection_create.html', context)
 
     if view_type == 'create_in_modal':
         if request.method == 'POST':
@@ -335,17 +335,17 @@ def collection_create(request: HtmxHttpRequest):
                 my_collection.user = request.user
                 my_collection.order = max_order
                 my_collection.save()
-                return redirect('daily:collect-problem', pk=problem_id)
+                return redirect('weekly:collect-problem', pk=problem_id)
         else:
             problem_id = request.GET.get('problem_id')
             form = forms.ProblemCollectionForm()
             context = update_context_data(
                 form=form, url=url_create, header='create_in_modal',
                 problem_id=problem_id, target='#modalContainer')
-            return render(request, 'a_daily/snippets/collection_create.html', context)
+            return render(request, 'a_weekly/snippets/collection_create.html', context)
 
 
-@permission_or_staff_required('a_daily.view_student', login_url='/')
+@permission_or_staff_required('a_weekly.view_student', login_url='/')
 def collection_detail_view(request: HtmxHttpRequest, pk: int):
     view_type = request.headers.get('View-Type', '')
     collection = get_object_or_404(models.ProblemCollection, pk=pk)
@@ -355,11 +355,11 @@ def collection_detail_view(request: HtmxHttpRequest, pk: int):
             form = forms.ProblemCollectionForm(request.POST, instance=collection)
             if form.is_valid():
                 form.save()
-                return redirect('daily:collection-list')
+                return redirect('weekly:collection-list')
         else:
             form = forms.ProblemCollectionForm(instance=collection)
             context = update_context_data(form=form, url=collection.get_detail_url(), header='update')
-            return render(request, 'a_daily/snippets/collection_create.html', context)
+            return render(request, 'a_weekly/snippets/collection_create.html', context)
 
     if view_type == 'delete':
         collection.delete()
@@ -368,7 +368,7 @@ def collection_detail_view(request: HtmxHttpRequest, pk: int):
             for idx, col in enumerate(collections, start=1):
                 col.order = idx
                 col.save()
-        return redirect('daily:collection-list')
+        return redirect('weekly:collection-list')
 
     item_ids = request.POST.getlist('item')
     if item_ids:
@@ -379,10 +379,10 @@ def collection_detail_view(request: HtmxHttpRequest, pk: int):
     items = models.ProblemCollectionItem.objects.filter(collection=collection)
     custom_data = utils.get_custom_data(request.user)
     context = update_context_data(collection=collection, items=items, custom_data=custom_data)
-    return render(request, 'a_daily/snippets/collection_item_card.html', context)
+    return render(request, 'a_weekly/snippets/collection_item_card.html', context)
 
 
-@permission_or_staff_required('a_daily.view_student', login_url='/')
+@permission_or_staff_required('a_weekly.view_student', login_url='/')
 def collect_problem(request: HtmxHttpRequest, pk: int):
     if request.method == 'POST':
         collection_id = request.POST.get('collection_id')
@@ -416,4 +416,4 @@ def collect_problem(request: HtmxHttpRequest, pk: int):
         collections = models.ProblemCollection.objects.filter(
             user_id=request.user.id).annotate(item_exists=item_exists_case)
         context = update_context_data(problem_id=pk, collections=collections)
-        return render(request, 'a_daily/snippets/collection_modal.html', context)
+        return render(request, 'a_weekly/snippets/collection_modal.html', context)

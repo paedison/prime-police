@@ -73,10 +73,10 @@ class ProblemCollectedItemAdmin(ModelAdmin):
 
 @admin.register(models.Exam)
 class ExamAdmin(ModelAdmin):
-    readonly_fields = ['id', 'participants', 'statistics', 'open_datetime']
+    readonly_fields = ['id', 'participants', 'statistics']
     common_fields = ['semester', 'circle', 'subject', 'round']
-    list_display = list_display_links = ['id'] + common_fields
-    fields = readonly_fields + common_fields
+    list_display = list_display_links = ['id'] + common_fields + ['open_datetime', 'participants']
+    fields = readonly_fields + common_fields + ['opened_at']
     list_filter = ['semester', 'circle', 'subject', 'round']
     show_facets = admin.ShowFacets.ALWAYS
     save_on_top = True
