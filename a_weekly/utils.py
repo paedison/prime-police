@@ -1,5 +1,6 @@
 from django.core.paginator import Paginator
 
+from a_common.models import User
 from . import models
 
 
@@ -20,5 +21,41 @@ def get_sub_title(exam_circle, exam_round, exam_subject, end_string='문제') ->
         title_parts.append(f'{exam_round}회차')
     if not exam_circle and not exam_round and not exam_subject:
         title_parts.append('전체')
-    sub_title = f'{" ".join(title_parts)} {end_string}'
-    return sub_title
+    return f'{" ".join(title_parts)} {end_string}'
+
+
+def get_prev_next_prob(pk, custom_data) -> tuple:
+    custom_list = list(custom_data.values_list('id', flat=True))
+    prev_prob = next_prob = None
+    if custom_list:
+        last_id = len(custom_list) - 1
+        q = custom_list.index(pk)
+        if q != 0:
+            prev_prob = custom_data[q - 1]
+        if q != last_id:
+            next_prob = custom_data[q + 1]
+    return prev_prob, next_prob
+
+
+def get_list_data(queryset, student) -> list:
+    list_data = []
+    for data in queryset:
+        if student and student.answer_student:
+            data.is_correct = data.answer == student.answer_student[data.number - 1]
+        list_data.append(data)
+    return list_data
+
+
+def get_custom_data(user: User) -> dict:
+    if user.is_authenticated:
+        return {
+            'like': models.ProblemLike.objects.filter(user=user).select_related('user', 'problem'),
+            'rate': models.ProblemRate.objects.filter(user=user).select_related('user', 'problem'),
+            'solve': models.ProblemSolve.objects.filter(user=user).select_related('user', 'problem'),
+            'memo': models.ProblemMemo.objects.filter(user=user).select_related('user', 'problem'),
+            'tag': models.ProblemTaggedItem.objects.filter(
+                user=user, active=True).select_related('user', 'content_object'),
+            'collection': models.ProblemCollectionItem.objects.filter(
+                collection__user=user).select_related('collection__user', 'problem'),
+        }
+    return {'like': [], 'rate': [], 'solve': [], 'memo': [], 'tag': [], 'collection': []}

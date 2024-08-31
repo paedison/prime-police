@@ -1,6 +1,3 @@
-from datetime import datetime
-
-import pytz
 from ckeditor.fields import RichTextField
 from ckeditor_uploader.fields import RichTextUploadingField
 from django.db import models
@@ -11,68 +8,7 @@ from taggit.models import TaggedItemBase, TagBase
 
 from a_common.constants import icon_set
 from a_common.models import User
-
-
-def semester_default():
-    return 75
-
-
-def answer_default():
-    return [0 for _ in range(10)]
-
-
-def statistics_default():
-    return {"max": 0, "t10": 0, "t20": 0, "avg": 0}
-
-
-def semester_choice() -> list:
-    choice = [(semester, f'{semester}기') for semester in range(75, semester_default() + 1)]
-    choice.reverse()
-    return choice
-
-
-def circle_choice() -> list:
-    return [(circle, f'{circle}순환') for circle in range(1, 4)]
-
-
-def round_choice() -> list:
-    return [(_round, f'제{_round}회') for _round in range(1, 31)]
-
-
-def subject_choice() -> dict:
-    return {
-        '형법': '형법', '경찰': '경찰학', '헌법': '헌법', '범죄': '범죄학',
-        '형소': '형사소송법', '민법': '민법총칙',
-    }
-
-
-def number_choice() -> list:
-    return [(number, f'{number}번') for number in range(1, 41)]
-
-
-def answer_choice() -> dict:
-    return {1: '①', 2: '②', 3: '③', 4: '④'}
-
-
-def rating_choice() -> dict:
-    return {1: '⭐️', 2: '⭐️⭐️', 3: '⭐️⭐️⭐️', 4: '⭐️⭐️⭐️⭐️', 5: '⭐️⭐️⭐️⭐️⭐️'}
-
-
-def subject_fields() -> dict:
-    return {
-        '형법': 'hyeongbeob', '경찰': 'gyeongchal', '헌법': 'heonbeob', '범죄': 'beomjoe',
-        '형소': 'hyeongso', '민법': 'minbeob',
-    }
-
-
-def get_remarks(message_type: str, remarks: str | None) -> str:
-    utc_now = datetime.now(pytz.UTC).strftime('%Y-%m-%d %H:%M')
-    separator = '|' if remarks else ''
-    if remarks:
-        remarks += f"{separator}{message_type}_at:{utc_now}"
-    else:
-        remarks = f"{message_type}_at:{utc_now}"
-    return remarks
+from a_common.model_settings import *
 
 
 class ProblemTag(TagBase):
@@ -166,10 +102,6 @@ class Problem(models.Model):
     @property
     def full_reference(self):
         return ' '.join([self.semester_circle_subject_round, self.get_number_display()])
-
-    @property
-    def subject_field(self):
-        return subject_fields()[self.subject]
 
     @property
     def icon(self):
@@ -511,6 +443,7 @@ class AnswerCount(models.Model):
     class Meta:
         verbose_name = verbose_name_plural = "13_답안개수"
         unique_together = ['semester', 'circle', 'subject', 'round', 'number']
+        db_table = 'a_daily_answer_count'
 
     def __str__(self):
         return f'[Daily]AnswerCount:{self.full_reference} {self.number:02}번'

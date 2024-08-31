@@ -1,6 +1,5 @@
 from datetime import datetime
 
-import pytz
 from ckeditor.fields import RichTextField
 from ckeditor_uploader.fields import RichTextUploadingField
 from django.db import models
@@ -10,6 +9,7 @@ from taggit.models import TaggedItemBase, TagBase
 
 from a_common.constants import icon_set
 from a_common.models import User
+from a_common.model_settings import number_choice, answer_choice, rating_choice, get_remarks
 
 
 def year_choice() -> list:
@@ -22,14 +22,6 @@ def exam_choice() -> dict:
     return {'경위': '경위공채'}
 
 
-def unit_choice() -> dict:
-    return {'경위': '경위공채'}
-
-
-def department_choice() -> dict:
-    return {'일반': '일반', '세무': '세무회계', '사이': '사이버'}
-
-
 def subject_choice() -> dict:
     return {
         '형사': '형사법', '헌법': '헌법', '경찰': '경찰학', '범죄': '범죄학',
@@ -37,33 +29,11 @@ def subject_choice() -> dict:
     }
 
 
-def number_choice() -> list:
-    return [(number, f'{number}번') for number in range(1, 41)]
-
-
-def answer_choice() -> dict:
-    return {1: '①', 2: '②', 3: '③', 4: '④'}
-
-
-def rating_choice() -> dict:
-    return {1: '⭐️', 2: '⭐️⭐️', 3: '⭐️⭐️⭐️', 4: '⭐️⭐️⭐️⭐️', 5: '⭐️⭐️⭐️⭐️⭐️'}
-
-
 def subject_fields() -> dict:
     return {
         '형사': 'hyeongsa', '헌법': 'heonbeob', '경찰': 'gyeongchal', '범죄': 'beomjoe',
         '민법': 'minbeob', '행법': 'haengbeob', '행학': 'haenghag',
     }
-
-
-def get_remarks(message_type: str, remarks: str | None) -> str:
-    utc_now = datetime.now(pytz.UTC).strftime('%Y-%m-%d %H:%M')
-    separator = '|' if remarks else ''
-    if remarks:
-        remarks += f"{separator}{message_type}_at:{utc_now}"
-    else:
-        remarks = f"{message_type}_at:{utc_now}"
-    return remarks
 
 
 class ProblemTag(TagBase):

@@ -62,10 +62,26 @@
 {% endpartialdef menu_daily %}
 
 {% partialdef menu_weekly %}
-    <li class="nav-item">
-        <a class="nav-link collapsed" data-menu="weekly" href="{% url 'weekly:answer-list' %}">
+    <li class="nav-item" role="menuitem" aria-label="주간모의고사">
+        <a class="nav-link collapsed" href="#weeklyNavContent" data-menu="weekly"
+           data-bs-toggle="collapse" aria-expanded="false" aria-controls="weeklyNavContent">
             <i class="fa-solid fa-fw fa-inbox"></i> 주간모의고사
+            <i class="fa-solid fa-fw fa-chevron-down ms-auto"></i>
         </a>
+        <ul id="weeklyNavContent" class="nav-content collapse" data-bs-parent="#sidebar">
+            <li>
+                <a class="aside-nav-icon" data-menu-parent="weekly" data-menu-self="answer"
+                   href="{% url 'weekly:answer-list' %}">
+                    <i class="fa-regular fa-fw fa-square"></i> 답안 제출
+                </a>
+            </li>
+            <li>
+                <a class="aside-nav-icon" data-menu-parent="weekly" data-menu-self="problem"
+                   href="{% url 'weekly:problem-list' %}">
+                    <i class="fa-regular fa-fw fa-square"></i> 오답 노트
+                </a>
+            </li>
+        </ul>
     </li>
 {% endpartialdef menu_weekly %}
 
