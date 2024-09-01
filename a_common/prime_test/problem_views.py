@@ -22,9 +22,9 @@ def problem_list_view(request: utils.HtmxHttpRequest, models, filters, config):
     sub_title = utils.get_sub_title(exam_circle, exam_round, exam_subject)
 
     if request.user.is_authenticated:
-        filterset = filters.DailyProblemFilter(data=request.GET, request=request)
+        filterset = filters.ProblemFilter(data=request.GET, request=request)
     else:
-        filterset = filters.AnonymousDailyProblemFilter(data=request.GET, request=request)
+        filterset = filters.AnonymousProblemFilter(data=request.GET, request=request)
 
     custom_data = utils.get_custom_data(request.user, models)
     page_obj, page_range = utils.get_page_obj_and_range(page, filterset.qs)

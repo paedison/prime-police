@@ -3,7 +3,7 @@ from django.views.decorators.http import require_POST
 
 from a_common import utils
 from a_common.decorators import permission_or_staff_required
-from a_common.prime_views import problem_views
+from a_common.prime_test import problem_views
 from .. import models, forms, filters
 
 

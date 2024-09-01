@@ -3,7 +3,7 @@ from django.urls import reverse_lazy
 from taggit.managers import TaggableManager
 from taggit.models import TaggedItemBase, TagBase
 
-from a_common.model_settings import *
+from a_common.prime_test.model_settings import *
 from a_common.models import User
 
 

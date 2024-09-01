@@ -9,7 +9,7 @@ from taggit.models import TaggedItemBase, TagBase
 
 from a_common.constants import icon_set
 from a_common.models import User
-from a_common.model_settings import number_choice, answer_choice, rating_choice, get_remarks
+from a_common.prime_test.model_settings import number_choice, answer_choice, rating_choice, get_remarks
 
 
 def year_choice() -> list:

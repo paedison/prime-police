@@ -15,7 +15,7 @@ def answer_list_view(request: utils.HtmxHttpRequest, models, filters, config):
     exam_round = request.GET.get('round', '')
     exam_subject = request.GET.get('subject', '')
     page = request.GET.get('page', '1')
-    filterset = filters.DailyExamFilter(data=request.GET, request=request)
+    filterset = filters.ExamFilter(data=request.GET, request=request)
 
     sub_title = utils.get_sub_title(exam_circle, exam_round, exam_subject, end_string='답안 제출 현황')
 

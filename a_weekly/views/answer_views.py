@@ -2,7 +2,7 @@ from django.urls import reverse_lazy
 
 from a_common import utils
 from a_common.decorators import permission_or_staff_required
-from a_common.prime_views import answer_views
+from a_common.prime_test import answer_views
 from .. import models, filters
 
 

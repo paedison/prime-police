@@ -2,8 +2,8 @@ from django.core.paginator import Paginator
 from django.http import HttpRequest
 from django_htmx.middleware import HtmxDetails
 
-from a_common.constants import icon_set
-from a_common.model_settings import subject_choice, semester_default
+from .constants import icon_set
+from .prime_test.model_settings import subject_choice, semester_default
 
 
 class HtmxHttpRequest(HttpRequest):
