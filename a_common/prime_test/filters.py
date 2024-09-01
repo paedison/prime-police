@@ -84,8 +84,8 @@ class ProblemFilter(AnonymousProblemFilter):
         students = self.models['Student'].objects.filter(user=self.request.user)
         ids = []
 
-        for student in students:
-            if student:
+        if students:
+            for student in students:
                 filtered_qs = self.models['Problem'].objects.filter(
                     semester=student.semester, circle=student.circle,
                     subject=student.subject, round=student.round)
@@ -106,6 +106,10 @@ class ProblemFilter(AnonymousProblemFilter):
                 else:
                     if value == 'none':
                         ids.extend(filtered_qs.values_list('id', flat=True))
+        else:
+            if value == 'none':
+                ids.extend(queryset.values_list('id', flat=True))
+
         return queryset.filter(id__in=ids)
 
     def filter_memos(self, queryset, _, value):
