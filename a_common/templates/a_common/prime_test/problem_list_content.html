@@ -53,6 +53,15 @@
        hx-get="{{ problem.get_absolute_url }}{% querystring %}">
         {{ problem.reference }}
     </a>
+    {% if user.is_staff %}
+        <span class="badge bg-warning-subtle border border-warning-subtle text-warning-emphasis rounded-pill">
+            정답 {{ problem.get_answer_display }}
+        </span>
+        <a class="badge bg-info-subtle border border-info-subtle text-info-emphasis rounded-pill"
+           target="#admin" href="{{ problem.get_admin_change_url }}">
+            수정
+        </a>
+    {% endif %}
 {% endpartialdef reference %}
 
 {% partialdef question %}

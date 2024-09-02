@@ -61,7 +61,12 @@ def number_choice() -> list:
 
 
 def answer_choice() -> dict:
-    return {1: '①', 2: '②', 3: '③', 4: '④'}
+    return {
+        1: '①', 2: '②', 3: '③', 4: '④',
+        12: '①②', 13: '①③', 14: '①④', 23: '②③', 24: '②④', 34: '③④',
+        123: '①②③', 124: '①②④', 134: '①③④', 234: '②③④',
+        1234: '①②③④',
+    }
 
 
 def rating_choice() -> dict:
@@ -348,7 +353,6 @@ class BaseExam(models.Model):
 
     class Meta:
         verbose_name = verbose_name_plural = "11_시험"
-        unique_together = ['semester', 'circle', 'subject', 'round']
         ordering = ['-semester', '-circle', 'subject', 'round']
         abstract = True
 

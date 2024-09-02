@@ -1,6 +1,6 @@
 from django.urls import path, include
 
-from .views import problem_views, answer_views
+from .views import problem_views, answer_views, staff_views
 
 app_name = 'daily'
 
@@ -10,7 +10,6 @@ problem_patterns = [
 
     path('like/<int:pk>/', problem_views.like_problem, name='like-problem'),
     path('rate/<int:pk>/', problem_views.rate_problem, name='rate-problem'),
-    # path('solve/<int:pk>/', problem_views.solve_problem, name='solve-problem'),
     path('memo/<int:pk>/', problem_views.memo_problem, name='memo-problem'),
     path('tag/<int:pk>/', problem_views.tag_problem, name='tag-problem'),
     path('collect/<int:pk>/', problem_views.collect_problem, name='collect-problem'),
@@ -27,8 +26,14 @@ answer_patterns = [
     path('confirm/<int:pk>/', answer_views.answer_confirm_view, name='answer-confirm'),
 ]
 
+staff_patterns = [
+    path('', staff_views.menu_list_view, name='staff-menu'),
+    path('create/exam/', staff_views.exam_create_view, name='staff-exam-create'),
+]
+
 urlpatterns = [
     path('problem/', include(problem_patterns)),
     path('answer/', include(answer_patterns)),
+    path('staff/', include(staff_patterns)),
     path('rank/<int:pk>/', answer_views.rank_verify, name='rank-verify'),
 ]

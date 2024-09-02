@@ -65,6 +65,9 @@ class Problem(BaseProblem):
     def get_collect_url(self):
         return reverse_lazy('weekly:collect-problem', args=[self.id])
 
+    def get_admin_change_url(self):
+        return reverse_lazy('admin:a_weekly_problem_change', args=[self.id])
+
 
 class ProblemOpen(BaseProblemOpen):
     problem = models.ForeignKey(Problem, on_delete=models.CASCADE, related_name='opens')
@@ -150,6 +153,12 @@ class ProblemCollectionItem(BaseProblemCollectionItem):
 class Exam(BaseExam):
     class Meta(BaseExam.Meta):
         db_table = 'a_weekly_exam'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['semester', 'circle', 'subject', 'round'],
+                name='unique_weekly_exam',
+            )
+        ]
 
     def __str__(self):
         return f'[Weekly]Exam:{self.full_reference}'

@@ -2,7 +2,7 @@ from functools import wraps
 
 from django.contrib.auth.decorators import user_passes_test
 from django.core.exceptions import PermissionDenied
-from django.http import HttpResponseForbidden
+from django.shortcuts import redirect
 
 
 def permission_or_staff_required(perm, login_url=None, raise_exception=False):
@@ -25,5 +25,5 @@ def staff_required(view_func):
         if request.user.is_staff:
             return view_func(request, *args, **kwargs)
         else:
-            return HttpResponseForbidden("You are not authorized to view this page.")
+            return redirect('index')
     return _wrapped_view

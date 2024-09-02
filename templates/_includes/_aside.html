@@ -5,7 +5,7 @@
 {#        {% partial menu_lecture %}#}
         {% partial menu_official %}
         {% if perms.a_daily or user.is_staff %}{% partial menu_daily %}{% endif %}
-        {% partial menu_weekly %}
+        {% if perms.a_weekly or user.is_staff %}{% partial menu_weekly %}{% endif %}
 {#        {% partial menu_infinite %}#}
 {#        {% partial menu_test_exam %}#}
 {#        {% partial menu_score %}#}
@@ -45,6 +45,14 @@
             <i class="fa-solid fa-fw fa-chevron-down ms-auto"></i>
         </a>
         <ul id="dailyNavContent" class="nav-content collapse" data-bs-parent="#sidebar">
+            {% if user.is_staff %}
+                <li>
+                    <a class="aside-nav-icon" data-menu-parent="daily" data-menu-self="staff"
+                       href="{% url 'daily:staff-menu' %}">
+                        <i class="fa-regular fa-fw fa-square"></i> 관리자 메뉴
+                    </a>
+                </li>
+            {% endif %}
             <li>
                 <a class="aside-nav-icon" data-menu-parent="daily" data-menu-self="answer"
                    href="{% url 'daily:answer-list' %}">
@@ -69,6 +77,14 @@
             <i class="fa-solid fa-fw fa-chevron-down ms-auto"></i>
         </a>
         <ul id="weeklyNavContent" class="nav-content collapse" data-bs-parent="#sidebar">
+            {% if user.is_staff %}
+                <li>
+                    <a class="aside-nav-icon" data-menu-parent="weekly" data-menu-self="staff"
+                       href="{% url 'weekly:staff-menu' %}">
+                        <i class="fa-regular fa-fw fa-square"></i> 관리자 메뉴
+                    </a>
+                </li>
+            {% endif %}
             <li>
                 <a class="aside-nav-icon" data-menu-parent="weekly" data-menu-self="answer"
                    href="{% url 'weekly:answer-list' %}">

@@ -3,12 +3,6 @@
     <h1>
         {{ icon_menu|safe }} {{ config.menu_title.kor }}
         <span class="fs-6 text-secondary">{{ config.submenu_title.kor }}</span>
-        {% if user.is_staff %}
-            <a class="btn btn-sm btn-outline-primary ms-1"
-               href="{{ config.url_admin }}" target="admin">
-                관리자 페이지
-            </a>
-        {% endif %}
     </h1>
     <nav>
         <ol class="breadcrumb" hx-target="#main" hx-swap="innerHTML swap:0.25s" hx-boost="true">

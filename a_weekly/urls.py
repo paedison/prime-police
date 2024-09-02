@@ -1,6 +1,6 @@
 from django.urls import path, include
 
-from .views import problem_views, answer_views
+from .views import problem_views, answer_views, staff_views
 
 app_name = 'weekly'
 
@@ -26,8 +26,14 @@ answer_patterns = [
     path('confirm/<int:pk>/', answer_views.answer_confirm_view, name='answer-confirm'),
 ]
 
+staff_patterns = [
+    path('', staff_views.menu_list_view, name='staff-menu'),
+    path('create/exam/', staff_views.exam_create_view, name='staff-exam-create'),
+]
+
 urlpatterns = [
     path('problem/', include(problem_patterns)),
     path('answer/', include(answer_patterns)),
+    path('staff/', include(staff_patterns)),
     path('rank/<int:pk>/', answer_views.rank_verify, name='rank-verify'),
 ]
