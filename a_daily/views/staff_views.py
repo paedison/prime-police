@@ -12,7 +12,7 @@ class AnswerConfiguration:
     submenu_title = {'kor': '관리자 메뉴', 'eng': submenu.capitalize()}
     url_admin = reverse_lazy('admin:a_daily_exam_changelist')
     url_admin_exam_list = reverse_lazy('admin:a_daily_exam_changelist')
-    url_admin_problem_list = reverse_lazy('admin:a_daily_exam_changelist')
+    url_admin_problem_list = reverse_lazy('admin:a_daily_problem_changelist')
     url_list = reverse_lazy('daily:staff-menu')
     url_exam_create = reverse_lazy('daily:staff-exam-create')
 
