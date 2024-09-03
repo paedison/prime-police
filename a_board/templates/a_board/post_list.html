@@ -5,13 +5,12 @@
 
     <section class="section">
         <div class="row">
-            <div class="col-12" aria-label="공지사항">
-                <div id="noticeCard" class="card htmx-fade-in"
-                     hx-target="#main" hx-swap="innerHTML swap:0.25s show:window:top">
-                    <div id="noticeCardHeader" class="card-header bg-warning-subtle text-black fw-bold">
+            <div class="col-12" aria-label="{{ config.title.kor }}">
+                <div class="card" hx-target="#main" hx-swap="innerHTML swap:0.25s show:window:top">
+                    <div class="card-header bg-warning-subtle text-black fw-bold">
                         {{ config.title.kor }}
                     </div>
-                    <div id="noticeCardContent" class="card-body htmx-fade-in htmx-fade-out">
+                    <div class="card-body htmx-fade-in htmx-fade-out">
                         {% include 'a_board/post_list_content.html' %}
                     </div>
                 </div>

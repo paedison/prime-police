@@ -31,8 +31,7 @@ def list_view(request: HtmxHttpRequest):
     top_fixed = utils.get_filtered_queryset(request, top_fixed=True)
     context = update_context_data(
         config=config, icon_menu=icon_set.ICON_MENU['notice'], icon_board=icon_set.ICON_BOARD,
-        page_obj=page_obj, page_range=page_range, top_fixed=top_fixed,
-    )
+        page_obj=page_obj, page_range=page_range, top_fixed=top_fixed)
     if view_type == 'pagination':
         return render(request, 'a_board/post_list_content.html', context)
     return render(request, 'a_board/post_list.html', context)
@@ -44,7 +43,7 @@ def detail_view(request: HtmxHttpRequest, pk: int):
     queryset = utils.get_queryset(request, models.Notice)
     post: models.Notice = get_object_or_404(queryset, pk=pk)
 
-    verified_list = json.loads(request.COOKIES.get('verified_list', '{}'))
+    verified_list = json.loads(request.COOKIES.get('prime_eroom_verified_list', '{}'))
     if 'notice' not in verified_list:
         verified_list['notice'] = []
     if pk not in verified_list['notice']:
@@ -58,7 +57,7 @@ def detail_view(request: HtmxHttpRequest, pk: int):
         post=post, prev_post=prev_post, next_post=next_post, comments=comments)
 
     response = render(request, 'a_board/post_detail.html', context)
-    response.set_cookie('verified_list', json.dumps(verified_list))
+    response.set_cookie('prime_eroom_verified_list', json.dumps(verified_list))
     return response
 
 
@@ -102,18 +101,29 @@ def delete_view(_, pk: int):
 
 
 @login_not_required
-def comment_list_view(request: HtmxHttpRequest):
-    post_id = request.GET.get('post_id')
+def comment_list_view(request: HtmxHttpRequest, post_id: int | None = None):
+    view_type = request.headers.get('View-Type', '')
+    page_number = request.GET.get('page', '1')
+    order_by = request.GET.get('order_by', 'newest')
+
+    if post_id is None:
+        post_id = request.GET.get('post_id')
     post = get_object_or_404(models.Notice, pk=post_id)
-    comments = models.NoticeComment.objects.filter(post=post)
 
-    order_by = request.GET.get('order_by')
-    if order_by == 'oldest':
-        comments = comments.order_by('created_at')
+    queryset = models.NoticeComment.objects.filter(post=post)
     if order_by == 'newest':
-        comments = comments.order_by('-created_at')
+        queryset = queryset.order_by('-created_at')
+    if order_by == 'oldest':
+        queryset = queryset.order_by('created_at')
+    comments, page_range = utils.get_paginator_info(queryset, page_number, per_page=5)
+    pagination_url = post.get_comment_list_url()
 
-    context = update_context_data(post=post, comments=comments, order_by=order_by)
+    context = update_context_data(
+        post=post, comments=comments, order_by=order_by,
+        pagination_url=pagination_url, page_range=page_range)
+    if view_type == 'pagination':
+        response = render(request, 'a_board/comment_container.html#comment_box', context)
+        return reswap(retarget(response, '#commentBox'), 'innerHTML swap:0.25s')
     return render(request, 'a_board/comment_container.html', context)
 
 
@@ -127,8 +137,8 @@ def comment_create_view(request: HtmxHttpRequest):
             comment.user = request.user
             comment.post = form.cleaned_data['post']
             comment.save()
-            context = update_context_data(comment=comment, make_form_blank=True)
-            return render(request, 'a_board/snippets/comment_item.html', context)
+            url = f"{reverse_lazy('board:notice-comment-list')}?post_id={comment.post.id}"
+            return redirect(url)
         else:
             context = update_context_data(form=form)
             response = render(request, 'a_board/snippets/comment_form.html', context)
@@ -140,19 +150,18 @@ def comment_create_view(request: HtmxHttpRequest):
 
 def comment_update_view(request: HtmxHttpRequest, pk: int):
     instance = get_object_or_404(models.NoticeComment, pk=pk)
+    context = update_context_data(comment=instance)
 
     if request.method == 'POST':
         form = forms.NoticeCommentUpdateForm(data=request.POST, instance=instance)
         if form.is_valid():
-            form.save()
-            context = update_context_data(comment=instance)
-            return render(request, 'a_board/snippets/comment_item_content.html', context)
-        else:
-            context = update_context_data(form=form, comment=instance)
-            return render(request, 'a_board/snippets/comment_form.html', context)
+            comment = form.save()
+            url = f"{reverse_lazy('board:notice-comment-list')}?post_id={comment.post.id}"
+            return redirect(url)
+    else:
+        form = forms.NoticeCommentUpdateForm(instance=instance)
 
-    form = forms.NoticeCommentUpdateForm(instance=instance)
-    context = update_context_data(form=form, comment=instance)
+    context = update_context_data(context, form=form)
     return render(request, 'a_board/snippets/comment_form.html', context)
 
 

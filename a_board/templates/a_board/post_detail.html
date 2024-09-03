@@ -5,44 +5,27 @@
 
     <section class="section">
         <div class="row">
-            <div class="col-12">
-                <div class="card htmx-fade-in"
-                     hx-target="#main" hx-swap="innerHTML swap:0.25s show:window:top">
-                    <div id="cardHeader" class="card-header mb-0 bg-warning-subtle text-black fw-bold">
+            <div class="col-12" aria-label="{{ config.title.kor }}">
+                <div class="card" hx-target="#main" hx-swap="innerHTML swap:0.25s show:window:top">
+                    <div class="card-header mb-0 bg-warning-subtle text-black fw-bold">
                         {{ config.title.kor }}
                     </div>
-                    <div id="cardContent" class="card-body htmx-fade-in htmx-fade-out">
+                    <div class="card-body htmx-fade-in htmx-fade-out">
                         <div class="card-title d-flex justify-content-between mb-0" hx-target="#main"
-                             hx-boost="true" hx-swap="innerHTML swap:0.25s">
+                             hx-swap="innerHTML swap:0.25s">
                             <div aria-label="left-button">
-                                <a class="btn btn-circle btn-outline-secondary"
-                                   title="목록" href="{{ post.get_list_url }}">
+                                <a class="btn btn-circle btn-outline-secondary" title="목록"
+                                   hx-boost="true" href="{{ post.get_list_url }}">
                                     {{ icon_board.list|safe }}
                                 </a>
-
-                                {% if next_post %}
-                                    <a class="btn btn-circle btn-outline-secondary"
-                                       title="다음 글" href="{{ next_post.get_absolute_url }}">
-                                        {{ icon_board.next|safe }}
-                                    </a>
-                                {% else %}
-                                    <button class="btn btn-circle btn-outline-secondary"
-                                            title="다음 글" disabled>
-                                        {{ icon_board.next|safe }}
-                                    </button>
-                                {%  endif %}
-
-                                {% if prev_post %}
-                                    <a class="btn btn-circle btn-outline-secondary"
-                                       title="이전 글" href="{{ prev_post.get_absolute_url }}">
-                                        {{ icon_board.prev|safe }}
-                                    </a>
-                                {% else %}
-                                    <button class="btn btn-circle btn-outline-secondary"
-                                            title="이전 글" disabled>
-                                        {{ icon_board.prev|safe }}
-                                    </button>
-                                {%  endif %}
+                                <button class="btn btn-circle btn-outline-secondary" title="다음 글"
+                                        {% if next_post %}hx-get="{{ next_post.get_absolute_url }}"
+                                        {% else %}disabled{% endif %}
+                                >{{ icon_board.next|safe }}</button>
+                                <button class="btn btn-circle btn-outline-secondary" title="이전 글"
+                                        {% if prev_post %}hx-get="{{ prev_post.get_absolute_url }}"
+                                        {% else %}disabled{% endif %}
+                                >{{ icon_board.prev|safe }}</button>
                             </div>
 
                             <div aria-label="right-button">
@@ -71,7 +54,7 @@
                         </h6>
 
                         <div class="border-bottom pb-2 small text-secondary">
-                            <span class="me-1">{{ post.user.username }}</span>
+                            <span class="me-1">{{ post.user.name }}</span>
                             <span class="me-1">조회
                                 <span class="text-danger fw-bold">{{ post.hit }}</span>
                             </span>
@@ -90,7 +73,10 @@
                             {{ post.content|safe }}
                         </div>
 
-                        {% include 'a_board/comment_container.html' %}
+                        <div class="htmx-fade-in htmx-fade-out"
+                             hx-target="this" hx-swap="outerHTML swap:0.25s" hx-trigger="load once"
+                             hx-get="{{ post.get_comment_list_url }}?post_id={{ post.id }}">
+                        </div>
                     </div>
                 </div>
             </div>
