@@ -54,6 +54,24 @@ class PasswordChangeView(allauth_views.PasswordChangeView):
     success_url = reverse_lazy('changed_password')
 
 
-def changed_password_view(request):
+def changed_password_view(request: HtmxHttpRequest):
     context = update_context_data(changed=True)
     return render(request, 'account/password_change.html', context)
+
+
+@login_not_required
+def search_view(request: HtmxHttpRequest):
+    exam_type = request.POST.get('exam_type')
+    keyword = request.POST.get('keyword')
+
+    if exam_type == '1':
+        url = reverse_lazy('official:base')
+        return redirect(f'{url}?keyword={keyword}')
+
+    if exam_type == '2':
+        url = reverse_lazy('daily:problem-list')
+        return redirect(f'{url}?keyword={keyword}')
+
+    if exam_type == '3':
+        url = reverse_lazy('weekly:problem-list')
+        return redirect(f'{url}?keyword={keyword}')

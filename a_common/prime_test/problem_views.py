@@ -18,6 +18,7 @@ def problem_list_view(request: utils.HtmxHttpRequest, models, filters, config):
     exam_round = request.GET.get('round', '')
     exam_subject = request.GET.get('subject', '')
     page = request.GET.get('page', '1')
+    keyword = request.GET.get('keyword') or request.POST.get('keyword')
 
     sub_title = utils.get_sub_title(exam_circle, exam_round, exam_subject)
 
@@ -31,7 +32,7 @@ def problem_list_view(request: utils.HtmxHttpRequest, models, filters, config):
     for problem in page_obj:
         utils.get_custom_icons(request.user, models, problem, custom_data)
     context = utils.update_context_data(
-        config=config, sub_title=sub_title, form=filterset.form,
+        config=config, sub_title=sub_title, form=filterset.form, keyword=keyword,
         icon_menu=icon_set.ICON_MENU[f'{menu}'], icon_image=icon_set.ICON_IMAGE,
         custom_data=custom_data, page_obj=page_obj, page_range=page_range,
     )

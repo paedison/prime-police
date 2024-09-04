@@ -14,14 +14,19 @@
     </div>
 
     <div class="search-bar">
-        <form class="search-form d-flex align-items-center"
-              hx-target="#main" hx-swap="innerHtml swap:0.25s"
-              hx-post="{% url 'official:base' %}">
-            <input id="id_data" type="text" name="keyword"
-                   placeholder="키워드를 입력해주세요" title="키워드를 입력해주세요">
-            <button type="submit" title="Search">
-                <i class="fa-solid fa-magnifying-glass fa-fw"></i>
-            </button>
+        <form hx-target="#main" hx-swap="innerHtml swap:0.25s" hx-post="{% url 'search' %}">
+            <div class="input-group justify-content-center">
+                <select name="exam_type" class="form-select" aria-label="검색 대상 문제" style="flex: 0 0 30%">
+                    <option value="1">기출문제</option>
+                    {% if perms.daily %}<option value="2">데일리테스트</option>{% endif %}
+                    {% if perms.weekly %}<option value="3">주간모의고사</option>{% endif %}
+                </select>
+                <input id="id_data" type="text" name="keyword" class="form-control" style="flex: 0 0 55%"
+                       placeholder="키워드를 입력해주세요" title="키워드">
+                <button class="btn btn-outline-secondary" type="submit" title="검색" style="flex: 0 0 10%">
+                    <i class="fa-solid fa-magnifying-glass fa-fw"></i>
+                </button>
+            </div>
         </form>
     </div>
 

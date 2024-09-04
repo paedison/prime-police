@@ -15,5 +15,6 @@ account_urlpatterns = [
 urlpatterns = [
     path('404/', views.page_404, name='404'),
     path('privacy/', views.privacy, name='privacy_policy'),
+    path('search/', views.search_view, name='search'),
     path('account/', include(account_urlpatterns)),
 ]
