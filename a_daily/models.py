@@ -23,6 +23,9 @@ class ProblemTaggedItem(BaseProblemTaggedItem):
     class Meta(BaseProblemTaggedItem.Meta):
         db_table = 'a_daily_problem_tagged_item'
 
+    def __str__(self):
+        return f'[Daily]ProblemTaggedItem(#{self.id}):{self.content_object.reference}-{self.tag.name}({self.user.name})'
+
 
 class Problem(BaseProblem):
     tags = TaggableManager(through=ProblemTaggedItem, blank=True)

@@ -108,14 +108,14 @@ class BaseProblemTaggedItem(TaggedItemBase):
     def tag_name(self):
         return self.tag.name
 
+    @property
+    def reference(self):
+        return self.content_object.reference
+
     def save(self, *args, **kwargs):
         message_type = kwargs.pop('message_type', 'tagged')
         self.remarks = get_remarks(message_type, self.remarks)
         super().save(*args, **kwargs)
-
-    @property
-    def reference(self):
-        return self.content_object.reference
 
 
 class BaseProblem(models.Model):
