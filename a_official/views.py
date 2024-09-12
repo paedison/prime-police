@@ -27,7 +27,7 @@ def problem_list_view(request: HtmxHttpRequest):
     exam_year = request.GET.get('year', '')
     exam_subject = request.GET.get('subject', '')
     page = request.GET.get('page', '1')
-    keyword = request.GET.get('keyword') or request.POST.get('keyword')
+    keyword = request.GET.get('keyword', '') or request.POST.get('keyword', '')
 
     sub_title = utils.get_sub_title(exam_year, exam_subject)
 
