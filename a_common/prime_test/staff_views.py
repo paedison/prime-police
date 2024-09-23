@@ -19,6 +19,7 @@ def exam_create_view(request: utils.HtmxHttpRequest, models, forms, config):
     if request.method == 'POST':
         form = forms.ExamForm(request.POST, request.FILES)
         if form.is_valid():
+            opened_at = form.cleaned_data['opened_at']
             exam = form.save()
             exam_info = {
                 'semester': exam.semester, 'circle': exam.circle,
@@ -44,7 +45,7 @@ def exam_create_view(request: utils.HtmxHttpRequest, models, forms, config):
             df.fillna(value=0, inplace=True)
             answer_list = df.get('정답')
             for number, answer in answer_list.items():
-                models.Problem.objects.get_or_create(number=number, answer=answer, **exam_info)
+                models.Problem.objects.get_or_create(number=number, answer=answer, opened_at=opened_at, **exam_info)
 
             response = redirect('daily:staff-menu')
             return replace_url(response, config.url_list)

@@ -1,17 +1,25 @@
 from django.contrib import admin
+from django.utils import timezone
 from unfold.admin import ModelAdmin
 
 
 class ProblemAdmin(ModelAdmin):
     readonly_fields = ['id']
     common_fields = ['semester', 'circle', 'subject', 'round', 'number', 'answer', 'question']
-    list_display = list_display_links = readonly_fields + common_fields
-    fields = readonly_fields + common_fields + ['data']
+    list_display = list_display_links = readonly_fields + ['open_datetime'] + common_fields
+    fields = readonly_fields + ['opened_at'] + common_fields + ['data']
     list_filter = ['semester', 'circle', 'subject', 'round']
     show_facets = admin.ShowFacets.ALWAYS
     save_on_top = True
     search_fields = ['question', 'data']
     show_full_result_count = True
+
+    def open_datetime(self, obj):
+        if obj.opened_at:
+            return timezone.localtime(obj.opened_at).strftime('%Y/%m/%d %H:%M')
+        return '-'
+
+    open_datetime.short_description = '공개일시'
 
 
 class ProblemOpenAdmin(ModelAdmin):
@@ -71,7 +79,7 @@ class ExamAdmin(ModelAdmin):
 
     def open_datetime(self, obj):
         if obj.opened_at:
-            return obj.opened_at.strftime('%Y/%m/%d %H:%I')
+            return timezone.localtime(obj.opened_at).strftime('%Y/%m/%d %H:%M')
         return '-'
 
     open_datetime.short_description = '공개일시'

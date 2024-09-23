@@ -6,6 +6,7 @@ from django.db.models.functions import Coalesce
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
+from django.utils import timezone
 
 from .. import utils
 from ..constants import icon_set
@@ -18,7 +19,7 @@ def problem_list_view(request: utils.HtmxHttpRequest, models, filters, config):
     exam_round = request.GET.get('round', '')
     exam_subject = request.GET.get('subject', '')
     page = request.GET.get('page', '1')
-    keyword = request.GET.get('keyword') or request.POST.get('keyword')
+    keyword = request.GET.get('keyword', '') or request.POST.get('keyword', '')
 
     sub_title = utils.get_sub_title(exam_circle, exam_round, exam_subject)
 

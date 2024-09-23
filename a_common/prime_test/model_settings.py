@@ -127,7 +127,7 @@ class BaseProblem(models.Model):
     answer = models.IntegerField(choices=answer_choice, default=1, verbose_name='정답')
     question = models.TextField(default='', verbose_name='발문')
     data = RichTextUploadingField(config_name='problem', default='', verbose_name='문제 내용')
-    opened_at = models.DateField(default=timezone.now, verbose_name='공개일')
+    opened_at = models.DateTimeField(default=timezone.now, verbose_name='공개일시')
 
     tags = TaggableManager()
 

@@ -34,10 +34,11 @@ class AnonymousProblemFilter(django_filters.FilterSet):
     @property
     def qs(self):
         keyword = self.request.GET.get('keyword', '') or self.request.POST.get('keyword', '')
-        queryset = super().qs.filter(semester=semester_default()).prefetch_related(
+        queryset = super().qs.filter(
+            semester=semester_default(), opened_at__lte=timezone.now()
+        ).prefetch_related(
             'like_users', 'rate_users', 'solve_users', 'memo_users',
-            'likes', 'rates', 'solves', 'memos', 'tagged_problems', 'collected_problems',
-        )
+            'likes', 'rates', 'solves', 'memos', 'tagged_problems', 'collected_problems')
         if keyword:
             return queryset.filter(data__icontains=keyword)
         return queryset
