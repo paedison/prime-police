@@ -25,9 +25,15 @@
                 <li class="breadcrumb-item">
                     <a href="{{ config.url_list }}">{{ config.submenu_title.eng }}</a>
                 </li>
-                <li class="breadcrumb-item">
-                    <a href="{{ exam.get_absolute_url }}" class="active">{{ exam.reference }}</a>
-                </li>
+                {% if config.answer_input %}
+                    <li class="breadcrumb-item">
+                        <a href="{{ exam.get_answer_input_url }}" class="active">{{ exam.reference }}</a>
+                    </li>
+                {% else %}
+                    <li class="breadcrumb-item">
+                        <a href="{{ exam.get_answer_detail_url }}" class="active">{{ exam.reference }}</a>
+                    </li>
+                {% endif %}
             {% endif %}
         </ol>
     </nav>

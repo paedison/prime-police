@@ -3,6 +3,7 @@ import json
 from django.db.models import F
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
+from django.utils import timezone
 from django_htmx.http import reswap
 
 from a_common import utils
@@ -72,6 +73,8 @@ def answer_detail_view(request: utils.HtmxHttpRequest, pk: int, models, config):
 def answer_input_view(request: utils.HtmxHttpRequest, pk: int, models, config):
     menu = config.menu
     exam = get_object_or_404(models.Exam, pk=pk)
+    if exam.opened_at > timezone.now():
+        return redirect('daily:answer-list')
     exam_info = utils.get_exam_info(exam)
     student = utils.get_student(request, models, exam_info)
     if not student:

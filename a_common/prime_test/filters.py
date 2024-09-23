@@ -1,5 +1,6 @@
 import django_filters
 from django.apps import apps
+from django.utils import timezone
 
 from a_common.prime_test.model_settings import *
 
@@ -152,4 +153,4 @@ class ExamFilter(django_filters.FilterSet):
 
     @property
     def qs(self):
-        return super().qs.filter(semester=semester_default())
+        return super().qs.filter(semester=semester_default(), opened_at__lte=timezone.now())

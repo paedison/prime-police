@@ -15,6 +15,9 @@ class AnswerConfiguration:
     url_admin = reverse_lazy(f'admin:a_weekly_exam_changelist')
     url_list = reverse_lazy(f'weekly:answer-list')
 
+    def __init__(self, answer_input=False):
+        self.answer_input = answer_input
+
 
 @permission_or_staff_required('a_weekly.view_student', login_url='/')
 def answer_list_view(request: utils.HtmxHttpRequest):
@@ -30,7 +33,7 @@ def answer_detail_view(request: utils.HtmxHttpRequest, pk: int):
 
 @permission_or_staff_required('a_weekly.view_student', login_url='/')
 def answer_input_view(request: utils.HtmxHttpRequest, pk: int):
-    config = AnswerConfiguration()
+    config = AnswerConfiguration(answer_input=True)
     return answer_views.answer_input_view(request, pk, models, config)
 
 
