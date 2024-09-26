@@ -98,7 +98,7 @@ def get_custom_icons(user, models, problem, custom_data: dict):
     student: models.Student | None = models.Student.objects.filter(
         user=user, semester=problem.semester, circle=problem.circle,
         subject=problem.subject, round=problem.round).first()
-    if student and student.answer_student:
+    if student and student.answer_confirmed:
         is_correct = problem.answer == student.answer_student[problem.number - 1]
 
     problem.icon_like=icon_set.ICON_LIKE[f'{is_liked}']
