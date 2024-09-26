@@ -51,7 +51,7 @@ def problem_list_view(request: utils.HtmxHttpRequest, models, filters, config):
 
 def problem_detail_view(request: utils.HtmxHttpRequest, pk: int, models, forms, config):
     view_type = request.headers.get('View-Type', '')
-    queryset = models.Problem.objects.filter(opened_at__lte=date.today()).order_by('-semester', 'id')
+    queryset = models.Problem.objects.filter(opened_at__lte=timezone.now()).order_by('-semester', 'id')
     problem: models.Problem = get_object_or_404(queryset, pk=pk)
     config.url_admin = reverse_lazy(f'admin:a_daily_problem_change', args=[pk])
 
