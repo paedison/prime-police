@@ -278,7 +278,10 @@ div.django-ckeditor-widget {
         margin: auto;
         width: 80vw;
         max-width: 800px;
-        height: 100vh;
+        height: 60vh;
+    }
+    .chart-container.h40vh {
+        height: 40vh;
     }
 }
 @media screen and (min-width: 768px) {
