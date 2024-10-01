@@ -1,0 +1,119 @@
+{% extends '_base.html' %}
+
+{% block main %}
+    {% include 'a_common/prime_test/page_title.html' %}
+
+    <section class="section htmx-fade-in htmx-fade-out"
+             hx-target="#main" hx-swap="innerHTML swap:0.25s">
+        <div class="row">
+            <div class="col-12" aria-label="시험 통계">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        {{ exam.full_reference }} 시험 통계
+                        <a class="btn btn-sm btn-outline-secondary" title="이전 메뉴로"
+                           href="{{ exam.get_staff_menu_url }}" hx-boost="true">
+                            이전 메뉴로
+                        </a>
+                    </div>
+
+                    <div class="card-body">
+                        <ul class="grid list-group list-group-horizontal mb-3 text-center fw-bold">
+                            <li class="col-6 list-group-item">응시생수 : {{ exam.participants }}명</li>
+                            <li class="col-6 list-group-item">평균 점수 : {{ exam.statistics.avg }}점</li>
+                        </ul>
+
+                        <ul class="grid-sm list-group list-group-horizontal-sm text-center fw-bold">
+                            <li class="col-sm-4 list-group-item">최고 점수 : {{ exam.statistics.max }}점</li>
+                            <li class="col-sm-4 list-group-item">상위 10% : {{ exam.statistics.t10 }}점</li>
+                            <li class="col-sm-4 list-group-item">상위 20% : {{ exam.statistics.t20 }}점</li>
+                        </ul>
+
+                        {% include 'a_common/prime_test/answer_chart.html' %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12" aria-label="성적 확인">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        {{ exam.full_reference }} 문항 분석표
+                    </div>
+                    <div class="card-body htmx-fade-in htmx-fade-out">
+                        {% partial answer_statistics %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock main %}
+
+{% partialdef answer_statistics %}
+    <article class="table-responsive">
+        <table class="table table-bordered table-striped small align-middle m-0">
+            <thead>
+                <tr class="text-center table-warning align-middle">
+                    <th class="text-primary text-nowrap p-2" rowspan="2">문제<br/>번호</th>
+                    <th class="text-primary text-nowrap p-2" rowspan="2">정답</th>
+                    <th class="text-primary text-nowrap p-2" rowspan="2">전체<br/>정답률(%)</th>
+                    <th class="text-primary text-nowrap p-2" rowspan="2">상위권<br/>정답률(%)</th>
+                    <th class="text-primary text-nowrap p-2" rowspan="2">중위권<br/>정답률(%)</th>
+                    <th class="text-primary text-nowrap p-2" rowspan="2">하위권<br/>정답률(%)</th>
+                    <th class="text-primary text-nowrap p-2" rowspan="2">변별도</th>
+                    <th class="text-primary text-nowrap p-2" colspan="4">답안 선택수(명)-전체</th>
+                    <th class="text-primary text-nowrap p-2" colspan="4">답안 선택률(%)-전체</th>
+                    <th class="text-primary text-nowrap p-2" colspan="4">답안 선택수(명)-상위권</th>
+                    <th class="text-primary text-nowrap p-2" colspan="4">답안 선택률(%)-상위권</th>
+                    <th class="text-primary text-nowrap p-2" colspan="4">답안 선택수(명)-중위권</th>
+                    <th class="text-primary text-nowrap p-2" colspan="4">답안 선택률(%)-중위권</th>
+                    <th class="text-primary text-nowrap p-2" colspan="4">답안 선택수(명)-하위권</th>
+                    <th class="text-primary text-nowrap p-2" colspan="4">답안 선택률(%)-하위권</th>
+                </tr>
+                <tr class="text-center table-warning align-middle">
+                    {% for _ in '12345678' %}
+                        <th class="text-primary text-nowrap p-2 td-right-no-border">①</th>
+                        <th class="text-primary text-nowrap p-2 td-left-no-border td-right-no-border">②</th>
+                        <th class="text-primary text-nowrap p-2 td-left-no-border td-right-no-border">③</th>
+                        <th class="text-primary text-nowrap p-2 td-left-no-border">④</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for problem in page_obj %}
+                    <tr class="text-center">
+                        <td>{{ problem.no }}</td>
+                        <td>
+                            <button class="btn btn-circle btn-sm fs-6 btn-success">
+                                {{ problem.ans_official }}
+                            </button>
+                        </td>
+                        {% for _ in '12345' %}
+                            {% cycle problem.rate_all_rank problem.rate_top_rank problem.rate_mid_rank problem.rate_low_rank problem.rate_gap as rate_correct silent %}
+                            <td>{% if rate_correct %}{{ rate_correct|floatformat:1 }}{% endif %}</td>
+                        {% endfor %}
+
+                        {% for _ in '1234' %}
+                            {% cycle problem.count_1 problem.top_rank.1 problem.mid_rank.1 problem.low_rank.1 as count_1 silent %}
+                            {% cycle problem.count_2 problem.top_rank.2 problem.mid_rank.2 problem.low_rank.2 as count_2 silent %}
+                            {% cycle problem.count_3 problem.top_rank.3 problem.mid_rank.3 problem.low_rank.3 as count_3 silent %}
+                            {% cycle problem.count_4 problem.top_rank.4 problem.mid_rank.4 problem.low_rank.4 as count_4 silent %}
+                            {% cycle problem.count_total problem.top_rank|last problem.mid_rank|last problem.low_rank|last as count_total silent %}
+
+                            <td class="td-right-no-border">{{ count_1|default:'' }}</td>
+                            <td class="td-left-no-border td-right-no-border">{{ count_2|default:'' }}</td>
+                            <td class="td-left-no-border td-right-no-border">{{ count_3|default:'' }}</td>
+                            <td class="td-left-no-border">{{ count_4|default:'' }}</td>
+
+                            <td class="td-right-no-border">{{ count_1|percentageby:count_total|floatformat:1|default:'' }}</td>
+                            <td class="td-left-no-border td-right-no-border">{{ count_2|percentageby:count_total|floatformat:1|default:'' }}</td>
+                            <td class="td-left-no-border td-right-no-border">{{ count_3|percentageby:count_total|floatformat:1|default:'' }}</td>
+                            <td class="td-left-no-border">{{ count_4|percentageby:count_total|floatformat:1|default:'' }}</td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </article>
+    {% include 'a_common/prime_test/pagination.html' with header='answer_statistics' pagination_url=exam.get_staff_answer_detail_url %}
+{% endpartialdef answer_statistics %}

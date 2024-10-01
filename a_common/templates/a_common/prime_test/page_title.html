@@ -29,6 +29,10 @@
                     <li class="breadcrumb-item">
                         <a href="{{ exam.get_answer_input_url }}" class="active">{{ exam.reference }}</a>
                     </li>
+                {% elif config.staff_answer_detail %}
+                    <li class="breadcrumb-item">
+                        <a href="{{ exam.get_staff_answer_detail_url }}" class="active">{{ exam.reference }}</a>
+                    </li>
                 {% else %}
                     <li class="breadcrumb-item">
                         <a href="{{ exam.get_answer_detail_url }}" class="active">{{ exam.reference }}</a>

@@ -7,64 +7,72 @@
              hx-target="#main" hx-swap="innerHTML swap:0.25s show:window:top">
         <div class="row">
             <div class="col-12" aria-label="성적 확인">
-                {% partial score_sheet %}
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        {{ exam.full_reference }} 시험 통계
+                        <a class="btn btn-sm btn-outline-secondary" title="시험 목록으로"
+                           href="{{ exam.get_answer_list_url }}" hx-boost="true">
+                            시험 목록으로
+                        </a>
+                    </div>
+
+                    <div class="card-body">
+                        <ul class="grid list-group list-group-horizontal text-center fw-bold">
+                            <li class="col-6 list-group-item list-group-item-warning">
+                                점수 : <span class="text-primary">{{ student.score }}</span>점
+                            </li>
+                            <li class="col-6 list-group-item list-group-item-warning">
+                                석차 : <span class="text-primary">{{ student.rank }}</span>등(<span class="text-primary">{{ student.rank_ratio|default:0 }}</span>%)
+                            </li>
+                        </ul>
+
+                        <ul class="grid list-group list-group-horizontal my-3 text-center fw-bold">
+                            <li class="col-6 list-group-item">응시생수 : {{ exam.participants }}명</li>
+                            <li class="col-6 list-group-item">평균 점수 : {{ exam.statistics.avg }}점</li>
+                        </ul>
+
+                        <ul class="grid-sm list-group list-group-horizontal-sm text-center fw-bold">
+                            <li class="col-sm-4 list-group-item">최고 점수 : {{ exam.statistics.max }}점</li>
+                            <li class="col-sm-4 list-group-item">상위 10% : {{ exam.statistics.t10 }}점</li>
+                            <li class="col-sm-4 list-group-item">상위 20% : {{ exam.statistics.t20 }}점</li>
+                        </ul>
+
+                        {% include 'a_common/prime_test/answer_chart.html' %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12" aria-label="성적 확인">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        {{ exam.full_reference }} 문항 분석표
+                    </div>
+                    <div class="card-body htmx-fade-in htmx-fade-out">
+                        <article class="table-responsive">
+                            <table class="table align-middle">
+                                <tbody>
+                                    {% if answer_student|length == 10  %}
+                                        {% with loop_counter=10 loop_min=0 %}
+                                            {% partial answer_table_tr %}
+                                        {% endwith %}
+                                    {% else %}
+                                        {% for _ in '0123' %}
+                                            {% cycle 10 10 10 10 as loop_counter silent %}
+                                            {% cycle 0 10 20 30 as loop_min silent %}
+                                            {% partial answer_table_tr %}
+                                        {% endfor %}
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                        </article>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
 {% endblock main %}
-
-{% partialdef score_sheet %}
-    <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            {{ exam.full_reference }} {{ sub_title|safe }}
-            <a class="btn btn-sm btn-outline-secondary" title="시험 목록으로"
-               href="{{ exam.get_answer_list_url }}" hx-boost="true">
-                시험 목록으로
-            </a>
-        </div>
-
-        <div class="card-body">
-            <ul class="grid list-group list-group-horizontal text-center fw-bold">
-                <li class="col-6 list-group-item list-group-item-warning">
-                    점수 : <span class="text-primary">{{ student.score }}</span>점
-                </li>
-                <li class="col-6 list-group-item list-group-item-warning">
-                    석차 : <span class="text-primary">{{ student.rank }}</span>등(<span class="text-primary">{{ student.rank_ratio|default:0 }}</span>%)
-                </li>
-            </ul>
-
-            <ul class="grid list-group list-group-horizontal my-3 text-center fw-bold">
-                <li class="col-6 list-group-item">응시생수 : {{ exam.participants }}명</li>
-                <li class="col-6 list-group-item">평균 점수 : {{ exam.statistics.avg }}점</li>
-            </ul>
-
-            <ul class="grid-sm list-group list-group-horizontal-sm text-center fw-bold">
-                <li class="col-sm-4 list-group-item">최고 점수 : {{ exam.statistics.max }}점</li>
-                <li class="col-sm-4 list-group-item">상위 10% : {{ exam.statistics.t10 }}점</li>
-                <li class="col-sm-4 list-group-item">상위 20% : {{ exam.statistics.t20 }}점</li>
-            </ul>
-
-            <article class="table-responsive mt-3">
-                <table class="table align-middle">
-                    <tbody>
-                        {% if answer_student|length == 10  %}
-                            {% with loop_counter=10 loop_min=0 %}
-                                {% partial answer_table_tr %}
-                            {% endwith %}
-                        {% else %}
-                            {% for _ in '0123' %}
-                                {% cycle 10 10 10 10 as loop_counter silent %}
-                                {% cycle 0 10 20 30 as loop_min silent %}
-                                {% partial answer_table_tr %}
-                            {% endfor %}
-                        {% endif %}
-                    </tbody>
-                </table>
-            </article>
-
-        </div>
-    </div>
-{% endpartialdef score_sheet %}
 
 {% partialdef answer_table_tr %}
     <tr class="text-center table-warning" aria-label="문제 번호">

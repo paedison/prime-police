@@ -176,6 +176,16 @@ class Exam(BaseExam):
     def get_answer_confirm_url(self):
         return reverse_lazy('weekly:answer-confirm', args=[self.id])
 
+    @staticmethod
+    def get_staff_menu_url():
+        return reverse_lazy('weekly:staff-menu')
+
+    def get_staff_answer_detail_url(self):
+        return reverse_lazy('weekly:staff-answer-detail', args=[self.id])
+
+    def get_staff_answer_count_update_url(self):
+        return reverse_lazy('weekly:staff-answer-count-update', args=[self.id])
+
 
 class Student(BaseStudent):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='weekly_students')

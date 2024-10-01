@@ -1,4 +1,10 @@
+import traceback
+from collections import Counter
+
+import django
 from django.core.paginator import Paginator
+from django.db import transaction
+from django.db.models import F
 from django.http import HttpRequest
 from django_htmx.middleware import HtmxDetails
 
@@ -137,3 +143,117 @@ def get_statistics(score_list: list, score: float) -> dict:
         'participants': participants, 'rank': rank,
         'max': max_score, 't10': top_score_10, 't20': top_score_20, 'avg': avg_score,
     }
+
+
+def get_answer_lists_by_rank(models, exam_info, rank_list, exam):
+    top_rank_threshold = 0.27
+    mid_rank_threshold = 0.73
+    answer_lists_by_rank: dict[str, list] = {rnk: [] for rnk in rank_list}
+
+    qs_student = models.Student.objects.filter(answer_confirmed=True, **exam_info)
+    for student in qs_student:
+        rank_ratio = student.rank / exam.participants if student.rank and exam.participants else None
+        answer_lists_by_rank['all_rank'].append(student.answer_student)
+        if rank_ratio:
+            if 0 <= rank_ratio <= top_rank_threshold:
+                answer_lists_by_rank['top_rank'].append(student.answer_student)
+            elif top_rank_threshold < rank_ratio <= mid_rank_threshold:
+                answer_lists_by_rank['mid_rank'].append(student.answer_student)
+            elif mid_rank_threshold < rank_ratio <= 1:
+                answer_lists_by_rank['low_rank'].append(student.answer_student)
+
+    return answer_lists_by_rank
+
+
+def get_answer_count_list(models, exam_info, rank_list, answer_lists_by_rank):
+    problem_count = models.Problem.objects.filter(**exam_info).count()
+    answer_count = []
+    for number in range(1, problem_count + 1):
+        problem_info = dict(exam_info, **{'number': number})
+        problem_info.update({
+            'data': {rnk: [] for rnk in rank_list}
+        })
+        answer_count.append(problem_info)
+
+    for rnk, answer_lists in answer_lists_by_rank.items():
+        distributions = [Counter() for _ in range(problem_count)]
+        for lst in answer_lists:
+            for i, value in enumerate(lst):
+                if value > 4:
+                    distributions[i]['count_multiple'] += 1
+                else:
+                    distributions[i][value] += 1
+
+        for idx, counter in enumerate(distributions):
+            count_list = [counter.get(i, 0) for i in range(5)]
+            count_total = sum(count_list[1:])
+            count_list.extend([counter.get('count_multiple', 0), count_total])
+            answer_count[idx]['data'][rnk] = count_list
+
+    return answer_count
+
+
+def update_answer_count_model(models, exam_info, answer_count):
+    update_list = []
+    update_count = 0
+    for answer_cnt in answer_count:
+        try:
+            obj = models.AnswerCount.objects.get(**exam_info, **{'number': answer_cnt['number']})
+            obj.data = answer_cnt['data']
+            update_list.append(obj)
+            update_count += 1
+        except models.AnswerCount.DoesNotExist:
+            print(f'Instance is not created.')
+        except models.AnswerCount.MultipleObjectsReturned:
+            print(f'Instance is duplicated.')
+
+    try:
+        with transaction.atomic():
+            if update_list:
+                models.AnswerCount.objects.bulk_update(update_list, ['data'])
+                message = f'문항 분석표가<br/>업데이트되었습니다.'
+            else:
+                message = f'No changes.'
+    except django.db.utils.IntegrityError:
+        traceback_message = traceback.format_exc()
+        print(traceback_message)
+        message = '에러가 발생했습니다.'
+
+    return message
+
+
+def get_qs_answer_count_for_staff_answer_detail(models, exam_info, answer_official):
+    qs_answer_count = models.AnswerCount.objects.filter(**exam_info).order_by('number').annotate(no=F('number'))
+
+    for idx, answer_cnt in enumerate(qs_answer_count):
+        ans_official = answer_official[idx]['ans']
+        if 1 <= ans_official <= 5:
+            rate_all_rank = getattr(answer_cnt, f'rate_{ans_official}')
+        else:
+            ans_official_list = [int(ans) for ans in str(ans_official)]
+            rate_all_rank = sum(getattr(answer_cnt, f'rate_{ans}') for ans in ans_official_list)
+
+        rank_list = ['all_rank', 'top_rank', 'mid_rank', 'low_rank']
+        for rnk in rank_list:
+            ans_cnt = answer_cnt.data[rnk] if rnk in answer_cnt.data else []
+            rate = 0
+            try:
+                if ans_cnt[-1]:
+                    rate = round(ans_cnt[ans_official] * 100 / ans_cnt[-1], 1)
+            except IndexError:
+                pass
+            setattr(answer_cnt, rnk, ans_cnt)
+            setattr(answer_cnt, f'rate_{rnk}', rate)
+        setattr(answer_cnt, 'rate_gap', answer_cnt.rate_top_rank - answer_cnt.rate_low_rank)
+
+        answer_cnt.ans_official = ans_official
+        answer_cnt.rate_all_rank = rate_all_rank
+
+    return qs_answer_count
+
+
+def get_score_points(models, exam_info):
+    score_points_list = list(models.Student.objects.filter(
+        score__isnull=False, **exam_info).values_list('score', flat=True))
+    score_points_list.sort()
+    return Counter(score_points_list)
