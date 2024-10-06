@@ -7,6 +7,7 @@ import a_common.views as common_views
 urlpatterns = [
     path('', common_views.index_view, name='index'),
     path('', include('a_common.urls')),
+    path('robots.txt', common_views.robots_txt, name='robots_txt'),
 
     path('admin/', include('admin_honeypot.urls', namespace='admin_honeypot')),
     path('check_in_as_admin/', admin.site.urls),

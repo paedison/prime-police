@@ -1,9 +1,13 @@
+import os
+
 from allauth.account import views as allauth_views
 from django.contrib.auth.decorators import login_not_required
+from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.utils.decorators import method_decorator
 
+from _config import settings
 from .utils import HtmxHttpRequest, update_context_data
 
 
@@ -22,6 +26,14 @@ def privacy(request):
     info = {'menu': 'privacy'}
     context = update_context_data(site_name='<PRIME 경위공채>', info=info)
     return render(request, 'a_common/privacy.html', context)
+
+
+@login_not_required
+def robots_txt(request):
+    file_path = os.path.join(settings.BASE_DIR, 'robots.txt')
+    with open(file_path, 'r') as file:
+        content = file.read()
+    return HttpResponse(content, content_type="text/plain")
 
 
 @method_decorator(login_not_required, name='dispatch')
