@@ -35,13 +35,26 @@
         </div>
 
         <div class="row">
-            <div class="col-12" aria-label="성적 확인">
+            <div class="col-12" aria-label="성적 일람표">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        {{ exam.full_reference }} 성적 일람표
+                    </div>
+                    <div class="card-body htmx-fade-in htmx-fade-out">
+                        {% partial student_catalog %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12" aria-label="문항 분석표">
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         {{ exam.full_reference }} 문항 분석표
                     </div>
                     <div class="card-body htmx-fade-in htmx-fade-out">
-                        {% partial answer_statistics %}
+                        {% partial problem_statistics %}
                     </div>
                 </div>
             </div>
@@ -49,7 +62,39 @@
     </section>
 {% endblock main %}
 
-{% partialdef answer_statistics %}
+{% partialdef student_catalog %}
+    <article class="table-responsive">
+        <table class="table table-bordered table-striped small align-middle m-0">
+            <thead>
+                <tr class="text-center table-warning align-middle">
+                    <th class="col-1 text-primary text-nowrap p-2">석차(등)</th>
+                    <th class="col-1 text-primary text-nowrap p-2">석차(%)</th>
+                    <th class="col-1 text-primary text-nowrap p-2">이름</th>
+                    <th class="col-1 text-primary text-nowrap p-2">Prime ID</th>
+                    <th class="col-1 text-primary text-nowrap p-2">점수(점)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in page_obj_student %}
+                    <tr class="text-center">
+                        <td class="text-nowrap p-2">{{ student.rank }}</td>
+                        <td class="text-nowrap p-2">{{ student.rank|percentageby:exam.participants|floatformat:1|default:'' }}</td>
+                        <td class="text-nowrap p-2">{{ student.student_name }}</td>
+                        <td class="text-nowrap p-2">{{ student.student_id }}</td>
+                        <td class="text-nowrap p-2">{{ student.score }}</td>
+                    </tr>
+                {% empty %}
+                    <tr class="text-center">
+                        <td class="text-nowrap p-2" colspan="5">자료가 없습니다.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </article>
+    {% include 'a_common/prime_test/pagination.html' with header='student_catalog' page_obj=page_obj_student page_range=page_range_student pagination_url=exam.get_staff_answer_detail_url %}
+{% endpartialdef student_catalog %}
+
+{% partialdef problem_statistics %}
     <article class="table-responsive">
         <table class="table table-bordered table-striped small align-middle m-0">
             <thead>
@@ -80,7 +125,7 @@
                 </tr>
             </thead>
             <tbody>
-                {% for problem in page_obj %}
+                {% for problem in page_obj_problem %}
                     <tr class="text-center">
                         <td>{{ problem.no }}</td>
                         <td>
@@ -115,5 +160,5 @@
             </tbody>
         </table>
     </article>
-    {% include 'a_common/prime_test/pagination.html' with header='answer_statistics' pagination_url=exam.get_staff_answer_detail_url %}
-{% endpartialdef answer_statistics %}
+    {% include 'a_common/prime_test/pagination.html' with header='problem_statistics' page_obj=page_obj_problem page_range=page_range_problem pagination_url=exam.get_staff_answer_detail_url %}
+{% endpartialdef problem_statistics %}

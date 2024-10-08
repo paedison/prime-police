@@ -97,26 +97,43 @@ def answer_count_update_view(request: utils.HtmxHttpRequest, pk: int, models):
 def answer_detail_view(request: utils.HtmxHttpRequest, pk: int, models, config):
     view_type = request.headers.get('View-Type', '')
     page = request.GET.get('page', '1')
-
     exam = get_object_or_404(models.Exam, pk=pk)
     exam_info = utils.get_exam_info(exam)
+    context = utils.update_context_data(config=config, exam=exam)
 
-    answer_official = models.Problem.objects.filter(
-        **exam_info).order_by('number').values(no=F('number'), ans=F('answer'))
-    qs_answer_count = utils.get_qs_answer_count_for_staff_answer_detail(models, exam_info, answer_official)
-    page_obj, page_range = utils.get_page_obj_and_range(page, qs_answer_count, 20)
+    def get_context_for_student_catalog():
+        qs_student = models.Student.objects.filter(rank__isnull=False, **exam_info).order_by('rank').annotate(
+            student_name=F('user__name'), student_id=F('user__prime_id'))
+        return utils.get_page_obj_and_range(page, qs_student, 20)
 
+    def get_context_for_problem_statistics():
+        answer_official = models.Problem.objects.filter(**exam_info).order_by('number').values(no=F('number'), ans=F('answer'))
+        qs_answer_count = utils.get_qs_answer_count_for_staff_answer_detail(models, exam_info, answer_official)
+        return utils.get_page_obj_and_range(page, qs_answer_count, 20)
+
+    if view_type == 'student_catalog':
+        page_obj_student, page_range_student = get_context_for_student_catalog()
+        context = utils.update_context_data(context, page_obj_student=page_obj_student, page_range_student=page_range_student)
+        template_name = 'a_common/prime_test/staff_answer_detail.html#student_catalog'
+        return render(request, template_name, context)
+
+    if view_type == 'problem_statistics':
+        page_obj_problem, page_range_problem = get_context_for_problem_statistics()
+        context = utils.update_context_data(context, page_obj_problem=page_obj_problem, page_range_problem=page_range_problem)
+        template_name = 'a_common/prime_test/staff_answer_detail.html#problem_statistics'
+        return render(request, template_name, context)
+
+    page_obj_student, page_range_student = get_context_for_student_catalog()
+    page_obj_problem, page_range_problem = get_context_for_problem_statistics()
     score_points = utils.get_score_points(models, exam_info)
     score_colors = ['white' for _ in score_points.keys()]
 
     context = utils.update_context_data(
         config=config, exam=exam,
-        page_obj=page_obj, page_range=page_range,
+        page_obj_student=page_obj_student, page_range_student=page_range_student,
+        page_obj_problem=page_obj_problem, page_range_problem=page_range_problem,
         score_points=score_points, score_colors=score_colors,
         icon_menu=icon_set.ICON_MENU['daily'], icon_question=icon_set.ICON_QUESTION,
         icon_nav=icon_set.ICON_NAV, icon_board=icon_set.ICON_BOARD,
     )
-    if view_type == 'answer_statistics':
-        template_name = 'a_common/prime_test/staff_answer_detail.html#answer_statistics'
-        return render(request, template_name, context)
     return render(request, 'a_common/prime_test/staff_answer_detail.html', context)
