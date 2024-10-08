@@ -87,9 +87,12 @@ def answer_count_update_view(request: utils.HtmxHttpRequest, pk: int, models):
 
     answer_lists_by_rank = utils.get_answer_lists_by_rank(models, exam_info, rank_list, exam)
     answer_count = utils.get_answer_count_list(models, exam_info, rank_list, answer_lists_by_rank)
-    message = utils.update_answer_count_model(models, exam_info, answer_count)
 
-    context = utils.update_context_data(header='문항 분석표 업데이트', message=message)
+    answer_message = utils.update_answer_count_model(models, exam_info, answer_count)
+    rank_message = utils.update_student_model_for_rank(models, exam_info)
+    messages = [answer_message, rank_message]
+
+    context = utils.update_context_data(header='통계 업데이트', messages=messages)
     return render(request, 'a_common/prime_test/staff_update_modal.html', context)
 
 

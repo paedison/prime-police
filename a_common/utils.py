@@ -211,9 +211,9 @@ def update_answer_count_model(models, exam_info, answer_count):
         with transaction.atomic():
             if update_list:
                 models.AnswerCount.objects.bulk_update(update_list, ['data'])
-                message = f'문항 분석표가<br/>업데이트되었습니다.'
+                message = f'문항 분석표가 업데이트되었습니다.'
             else:
-                message = f'No changes.'
+                message = f'기존 문항 분석표와 동일합니다.'
     except django.db.utils.IntegrityError:
         traceback_message = traceback.format_exc()
         print(traceback_message)
@@ -250,6 +250,36 @@ def get_qs_answer_count_for_staff_answer_detail(models, exam_info, answer_offici
         answer_cnt.rate_all_rank = rate_all_rank
 
     return qs_answer_count
+
+
+def update_student_model_for_rank(models, exam_info):
+    update_list = []
+    update_count = 0
+
+    qs_student = models.Student.objects.filter(rank__isnull=False, **exam_info)
+    score_list = qs_student.values_list('score', flat=True)
+    sorted_scores = sorted(score_list, reverse=True)
+
+    for student in qs_student:
+        rank = sorted_scores.index(student.score) + 1
+        if student.rank != rank:
+            student.rank = rank
+            update_list.append(student)
+            update_count += 1
+
+    try:
+        with transaction.atomic():
+            if update_list:
+                models.Student.objects.bulk_update(update_list, ['rank'])
+                message = f'석차 데이터가 업데이트되었습니다.'
+            else:
+                message = f'기존 석차 데이터와 동일합니다.'
+    except django.db.utils.IntegrityError:
+        traceback_message = traceback.format_exc()
+        print(traceback_message)
+        message = '에러가 발생했습니다.'
+
+    return message
 
 
 def get_score_points(models, exam_info):
