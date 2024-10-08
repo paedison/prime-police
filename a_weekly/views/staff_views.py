@@ -30,8 +30,8 @@ def exam_create_view(request):
     return staff_views.exam_create_view(request, models, forms, config)
 
 
-def answer_count_update_view(request, pk: int):
-    return staff_views.answer_count_update_view(request, pk, models)
+def answer_update_view(request, pk: int):
+    return staff_views.answer_update_view(request, pk, models)
 
 
 def answer_detail_view(request, pk: int):

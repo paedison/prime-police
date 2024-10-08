@@ -252,13 +252,52 @@ def get_qs_answer_count_for_staff_answer_detail(models, exam_info, answer_offici
     return qs_answer_count
 
 
-def update_student_model_for_rank(models, exam_info):
+def update_student_model_for_score(models, exam_info):
     update_list = []
     update_count = 0
 
-    qs_student = models.Student.objects.filter(rank__isnull=False, **exam_info)
+    answer_official = models.Problem.objects.filter(**exam_info).order_by('number').values_list('answer', flat=True)
+    qs_student = models.Student.objects.filter(answer_confirmed=True, **exam_info)
+
+    for student in qs_student:
+        correct_cnt = sum(1 for x, y in zip(answer_official, student.answer_student) if x == y)
+        score = round(correct_cnt * 100 / len(answer_official), 1)
+        if student.score != score:
+            student.score = score
+            update_list.append(student)
+            update_count += 1
+
+    try:
+        with transaction.atomic():
+            if update_list:
+                models.Student.objects.bulk_update(update_list, ['score'])
+                message = f'{update_count}명의 점수가 업데이트되었습니다.'
+            else:
+                message = f'기존 점수 데이터와 동일합니다.'
+    except django.db.utils.IntegrityError:
+        traceback_message = traceback.format_exc()
+        print(traceback_message)
+        message = '에러가 발생했습니다.'
+
+    return message
+
+
+def update_student_model_for_rank(models, exam, exam_info):
+    update_list = []
+    update_count = 0
+
+    qs_student = models.Student.objects.filter(answer_confirmed=True, **exam_info)
     score_list = qs_student.values_list('score', flat=True)
     sorted_scores = sorted(score_list, reverse=True)
+
+    if score_list:
+        stat = get_statistics(score_list, score_list[0])
+        stat.pop('rank')
+        participants = stat.pop('participants')
+
+        exam.participants = participants
+        exam.statistics = stat
+        exam.save()
 
     for student in qs_student:
         rank = sorted_scores.index(student.score) + 1
@@ -271,7 +310,7 @@ def update_student_model_for_rank(models, exam_info):
         with transaction.atomic():
             if update_list:
                 models.Student.objects.bulk_update(update_list, ['rank'])
-                message = f'석차 데이터가 업데이트되었습니다.'
+                message = f'{update_count}명의 석차가 업데이트되었습니다.'
             else:
                 message = f'기존 석차 데이터와 동일합니다.'
     except django.db.utils.IntegrityError:

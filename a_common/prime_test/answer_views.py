@@ -163,7 +163,7 @@ def rank_verify(_: utils.HtmxHttpRequest, pk: int, models):
     student = get_object_or_404(models.Student, pk=pk)
     exam_info = utils.get_exam_info(student)
     exam = get_object_or_404(models.Exam, **exam_info)
-    score_list = models.Student.objects.filter(score__isnull=False, **exam_info).values_list('score', flat=True)
+    score_list = models.Student.objects.filter(answer_confirmed=True, **exam_info).values_list('score', flat=True)
 
     stat = utils.get_statistics(score_list, student.score)
     rank = stat.pop('rank')

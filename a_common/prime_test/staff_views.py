@@ -80,7 +80,7 @@ def exam_create_view(request: utils.HtmxHttpRequest, models, forms, config):
 
 
 @staff_required
-def answer_count_update_view(request: utils.HtmxHttpRequest, pk: int, models):
+def answer_update_view(request: utils.HtmxHttpRequest, pk: int, models):
     exam = get_object_or_404(models.Exam, pk=pk)
     exam_info = utils.get_exam_info(exam)
     rank_list = ['all_rank', 'top_rank', 'mid_rank', 'low_rank']
@@ -89,8 +89,9 @@ def answer_count_update_view(request: utils.HtmxHttpRequest, pk: int, models):
     answer_count = utils.get_answer_count_list(models, exam_info, rank_list, answer_lists_by_rank)
 
     answer_message = utils.update_answer_count_model(models, exam_info, answer_count)
-    rank_message = utils.update_student_model_for_rank(models, exam_info)
-    messages = [answer_message, rank_message]
+    score_message = utils.update_student_model_for_score(models, exam_info)
+    rank_message = utils.update_student_model_for_rank(models, exam, exam_info)
+    messages = [answer_message, score_message, rank_message]
 
     context = utils.update_context_data(header='통계 업데이트', messages=messages)
     return render(request, 'a_common/prime_test/staff_update_modal.html', context)

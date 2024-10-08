@@ -387,7 +387,7 @@ class BaseStudent(models.Model):
     round = models.IntegerField(choices=round_choice, default=1, verbose_name='회차')
     answer_student = models.JSONField(default=answer_default, verbose_name='제출 답안')
     answer_confirmed = models.BooleanField(default=False, verbose_name='답안 확정')
-    score = models.IntegerField(null=True, blank=True, verbose_name='점수')
+    score = models.FloatField(null=True, blank=True, verbose_name='점수')
     rank = models.IntegerField(null=True, blank=True, verbose_name='등수')
     remarks = models.TextField(null=True, blank=True, verbose_name='주석')
 

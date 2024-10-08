@@ -30,7 +30,7 @@ staff_patterns = [
     path('', staff_views.menu_list_view, name='staff-menu'),
     path('create/exam/', staff_views.exam_create_view, name='staff-exam-create'),
     path('answer/<int:pk>/', staff_views.answer_detail_view, name='staff-answer-detail'),
-    path('answer/count/<int:pk>/', staff_views.answer_count_update_view, name='staff-answer-count-update'),
+    path('answer/update/<int:pk>/', staff_views.answer_update_view, name='staff-answer-update'),
 ]
 
 urlpatterns = [

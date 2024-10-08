@@ -183,8 +183,8 @@ class Exam(BaseExam):
     def get_staff_answer_detail_url(self):
         return reverse_lazy('weekly:staff-answer-detail', args=[self.id])
 
-    def get_staff_answer_count_update_url(self):
-        return reverse_lazy('weekly:staff-answer-count-update', args=[self.id])
+    def get_staff_answer_update_url(self):
+        return reverse_lazy('weekly:staff-answer-update', args=[self.id])
 
 
 class Student(BaseStudent):
