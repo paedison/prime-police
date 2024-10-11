@@ -154,4 +154,5 @@ class ExamFilter(django_filters.FilterSet):
 
     @property
     def qs(self):
-        return super().qs.filter(semester=semester_default(), opened_at__lte=timezone.now())
+        return super().qs.filter(
+            semester=semester_default(), opened_at__lte=timezone.now()).order_by('-id')
