@@ -1,5 +1,6 @@
 from allauth.account.adapter import DefaultAccountAdapter
 from allauth.account.utils import user_email
+from django.urls import reverse_lazy
 
 
 class AccountAdapter(DefaultAccountAdapter):
@@ -13,3 +14,6 @@ class AccountAdapter(DefaultAccountAdapter):
         if commit:
             user.save()
         return user
+
+    def get_password_change_redirect_url(self, request):
+        return reverse_lazy('changed_password')

@@ -1,11 +1,9 @@
 import os
 
-from allauth.account import views as allauth_views
 from django.contrib.auth.decorators import login_not_required
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
-from django.utils.decorators import method_decorator
 
 from _config import settings
 from .utils import HtmxHttpRequest, update_context_data
@@ -36,21 +34,6 @@ def robots_txt(request):
     return HttpResponse(content, content_type="text/plain")
 
 
-@method_decorator(login_not_required, name='dispatch')
-class SignupView(allauth_views.SignupView):
-    pass
-
-
-@method_decorator(login_not_required, name='dispatch')
-class LoginView(allauth_views.LoginView):
-    pass
-
-
-@method_decorator(login_not_required, name='dispatch')
-class AccountInactiveView(allauth_views.AccountInactiveView):
-    pass
-
-
 @login_not_required
 def login_modal_view(request: HtmxHttpRequest):
     context = update_context_data(next=request.htmx.current_url)
@@ -62,13 +45,14 @@ def logout_modal_view(request: HtmxHttpRequest):
     return render(request, 'a_common/snippets/modal_logout.html', context)
 
 
-class PasswordChangeView(allauth_views.PasswordChangeView):
-    success_url = reverse_lazy('changed_password')
-
-
 def changed_password_view(request: HtmxHttpRequest):
     context = update_context_data(changed=True)
     return render(request, 'account/password_change.html', context)
+
+
+@login_not_required
+def password_reset_done(request):
+    return render(request, 'account/password_reset_done.html', {})
 
 
 @login_not_required
