@@ -175,11 +175,11 @@
             </tbody>
         </table>
     </article>
-{% endpartialdef list_content %}
 
-{% if page_obj.has_next or page_obj.has_previous %}
-    {% include 'a_common/prime_test/pagination.html' with header='exam_list' %}
-{% endif %}
+    {% if page_obj.has_next or page_obj.has_previous %}
+        {% include 'a_common/prime_test/pagination.html' with header='exam_list' %}
+    {% endif %}
+{% endpartialdef list_content %}
 
 {% partialdef reference %}
     <a class="text-decoration-none fw-bold cursor-pointer"
