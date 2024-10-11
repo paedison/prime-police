@@ -28,7 +28,7 @@ def answer_list_view(request: utils.HtmxHttpRequest, models, filters, config):
     context = utils.update_context_data(
         config=config, sub_title=sub_title, form=filterset.form,
         icon_menu=icon_set.ICON_MENU['daily'], page_obj=page_obj, page_range=page_range)
-    if view_type == 'problem_list':
+    if view_type == 'exam_list':
         template_name = 'a_common/prime_test/answer_list.html#list_content'
         return render(request, template_name, context)
     return render(request, 'a_common/prime_test/answer_list.html', context)
