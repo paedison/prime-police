@@ -86,7 +86,7 @@ def get_custom_data(user, models) -> dict:
     return {'like': [], 'rate': [], 'solve': [], 'memo': [], 'tag': [], 'collection': []}
 
 
-def get_custom_icons(user, models, problem, custom_data: dict):
+def get_custom_icons(user, models, problem, exam_info, custom_data: dict):
     def get_status(status_type, field=None, default: bool | int | None = False):
         for dt in custom_data[status_type]:
             problem_id = getattr(dt, 'problem_id', getattr(dt, 'content_object_id', ''))
@@ -101,9 +101,7 @@ def get_custom_icons(user, models, problem, custom_data: dict):
     is_collected = get_status('collection')
 
     is_correct = None
-    student: models.Student | None = models.Student.objects.filter(
-        user=user, semester=problem.semester, circle=problem.circle,
-        subject=problem.subject, round=problem.round).first()
+    student: models.Student | None = models.Student.objects.filter(user=user, **exam_info).first()
     if student and student.answer_confirmed:
         is_correct = problem.answer == student.answer_student[problem.number - 1]
 
@@ -113,6 +111,18 @@ def get_custom_icons(user, models, problem, custom_data: dict):
     problem.icon_memo=icon_set.ICON_MEMO[f'{is_memoed}']
     problem.icon_tag=icon_set.ICON_TAG[f'{is_tagged}']
     problem.icon_collection=icon_set.ICON_COLLECTION[f'{is_collected}']
+
+
+def get_answer_rate(models, problem, exam_info):
+    answer_count = models.AnswerCount.objects.filter(number=problem.number, **exam_info).first()
+    rate_correct = getattr(answer_count, f'count_{problem.answer}') * 100 / answer_count.count_total
+    difficulty = 'success'
+    if 75 <= rate_correct < 90:
+        difficulty = 'warning'
+    if rate_correct < 75:
+        difficulty = 'danger'
+    problem.rate_correct = rate_correct
+    problem.difficulty = difficulty
 
 
 def get_exam_info(instance):

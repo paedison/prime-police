@@ -53,6 +53,9 @@
        hx-get="{{ problem.get_absolute_url }}{% querystring %}">
         {{ problem.reference }}
     </a>
+    <span class="badge bg-{{ problem.difficulty }}-subtle border border-{{ problem.difficulty }}-subtle text-{{ problem.difficulty }}-emphasis rounded-pill">
+        {{ problem.rate_correct|floatformat:1 }}%
+    </span>
     {% if user.is_staff %}
         <span class="badge bg-warning-subtle border border-warning-subtle text-warning-emphasis rounded-pill">
             정답 {{ problem.get_answer_display }}

@@ -31,7 +31,9 @@ def problem_list_view(request: utils.HtmxHttpRequest, models, filters, config):
     custom_data = utils.get_custom_data(request.user, models)
     page_obj, page_range = utils.get_page_obj_and_range(page, filterset.qs)
     for problem in page_obj:
-        utils.get_custom_icons(request.user, models, problem, custom_data)
+        exam_info = utils.get_exam_info(problem)
+        utils.get_custom_icons(request.user, models, problem, exam_info, custom_data)
+        utils.get_answer_rate(models, problem, exam_info)
     context = utils.update_context_data(
         config=config, sub_title=sub_title, form=filterset.form, keyword=keyword,
         icon_menu=icon_set.ICON_MENU[f'{menu}'], icon_image=icon_set.ICON_IMAGE,
@@ -57,10 +59,7 @@ def problem_detail_view(request: utils.HtmxHttpRequest, pk: int, models, forms, 
 
     context = utils.update_context_data(config=config, problem_id=pk, problem=problem)
 
-    exam_info = {
-        'semester': models.semester_default(), 'circle': problem.circle,
-        'subject': problem.subject, 'round': problem.round,
-    }
+    exam_info = utils.get_exam_info(problem)
     queryset = queryset.filter(**exam_info)
     prob_prev, prob_next = utils.get_prev_next_prob(pk, queryset)
     student: models.Student = models.Student.objects.filter(user=request.user, **exam_info).first()
@@ -104,7 +103,7 @@ def problem_detail_view(request: utils.HtmxHttpRequest, pk: int, models, forms, 
 
     memo_form = forms.ProblemMemoForm()
     custom_data = utils.get_custom_data(request.user, models)
-    utils.get_custom_icons(request.user, models, problem, custom_data)
+    utils.get_custom_icons(request.user, models, problem, exam_info, custom_data)
 
     my_memo = None
     for dt in custom_data['memo']:
@@ -334,7 +333,8 @@ def collection_detail_view(request: utils.HtmxHttpRequest, pk: int, models, form
     items = models.ProblemCollectionItem.objects.filter(collection=collection)
     custom_data = utils.get_custom_data(request.user, models)
     for item in items:
-        utils.get_custom_icons(request.user, models, item.problem, custom_data)
+        exam_info = utils.get_exam_info(item.problem)
+        utils.get_custom_icons(request.user, models, item.problem, exam_info, custom_data)
     context = utils.update_context_data(collection=collection, items=items, custom_data=custom_data)
     return render(request, 'a_common/prime_test/collection_item_card.html', context)
 
