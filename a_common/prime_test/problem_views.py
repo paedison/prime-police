@@ -104,6 +104,7 @@ def problem_detail_view(request: utils.HtmxHttpRequest, pk: int, models, forms, 
     memo_form = forms.ProblemMemoForm()
     custom_data = utils.get_custom_data(request.user, models)
     utils.get_custom_icons(request.user, models, problem, exam_info, custom_data)
+    utils.get_answer_rate(models, problem, exam_info)
 
     my_memo = None
     for dt in custom_data['memo']:
