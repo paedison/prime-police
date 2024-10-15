@@ -115,12 +115,18 @@ def get_custom_icons(user, models, problem, exam_info, custom_data: dict):
 
 def get_answer_rate(models, problem, exam_info):
     answer_count = models.AnswerCount.objects.filter(number=problem.number, **exam_info).first()
-    rate_correct = getattr(answer_count, f'count_{problem.answer}') * 100 / answer_count.count_total
-    difficulty = 'success'
-    if 75 <= rate_correct < 90:
-        difficulty = 'warning'
-    if rate_correct < 75:
-        difficulty = 'danger'
+
+    if answer_count:
+        rate_correct = getattr(answer_count, f'count_{problem.answer}') * 100 / answer_count.count_total
+        if rate_correct >= 90:
+            difficulty = 'success'
+        elif 75 <= rate_correct < 90:
+            difficulty = 'warning'
+        else:
+            difficulty = 'danger'
+    else:
+        rate_correct = 0
+        difficulty = 'n/a'
     problem.rate_correct = rate_correct
     problem.difficulty = difficulty
 
