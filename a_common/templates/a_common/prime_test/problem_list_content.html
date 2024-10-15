@@ -53,7 +53,7 @@
        hx-get="{{ problem.get_absolute_url }}{% querystring %}">
         {{ problem.reference }}
     </a>
-    {% if problem.difficult != 'n/a' %}
+    {% if problem.difficulty != 'n/a' %}
         <span class="badge bg-{{ problem.difficulty }}-subtle border border-{{ problem.difficulty }}-subtle text-{{ problem.difficulty }}-emphasis rounded-pill">
             {{ problem.rate_correct|floatformat:1 }}%
         </span>
