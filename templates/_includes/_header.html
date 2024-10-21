@@ -69,8 +69,9 @@
 
                 {% if user.is_authenticated %}
                     <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile"
-                        hx-push-url="true" hx-target="#main" hx-swap="innerHTML swap:0.25s">
+                        hx-swap="innerHTML swap:0.25s">
                         <li class="dropdown-item d-flex align-items-center cursor-pointer"
+                            hx-push-url="true" hx-target="body"
                             hx-get="{% url 'account_change_password' %}">
                             <i class="fa-solid fa-fw fa-user"></i> <span>비밀번호 변경</span>
                         </li>
@@ -82,7 +83,7 @@
 {#                        <li><hr class="dropdown-divider"></li>#}
                         <li class="dropdown-item d-flex align-items-center cursor-pointer"
                             data-bs-toggle="modal" data-bs-target="#modalContainer"
-                            hx-push-url="false" hx-target="#modalContainer" hx-swap="innerHTML"
+                            hx-push-url="false" hx-target="#modalContainer"
                             hx-get="{% url 'account_logout_modal' %}">
                             <i class="fa-solid fa-fw fa-sign-out-alt"></i> 로그아웃
                         </li>
