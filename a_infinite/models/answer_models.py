@@ -67,7 +67,7 @@ class Score(abstract_models.Score):
         verbose_name = verbose_name_plural = f'{verbose_name_prefix}04_점수'
 
     def __str__(self):
-        return self.student
+        return f'{self.student.exam.reference}-{self.student.user.name}'
 
 
 class Rank(abstract_models.Rank):
@@ -78,7 +78,7 @@ class Rank(abstract_models.Rank):
         verbose_name = verbose_name_plural = f'{verbose_name_prefix}05_등수'
 
     def __str__(self):
-        return self.student
+        return f'{self.student.exam.reference}-{self.student.user.name}'
 
 
 class AnswerCountTopRank(abstract_models.AnswerCount):

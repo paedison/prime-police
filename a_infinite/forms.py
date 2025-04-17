@@ -75,6 +75,16 @@ class ExamForm(forms.ModelForm):
         cleaned_data['exam_finished_at'] = get_local_time(exam_date, exam_finish_time)
         return cleaned_data
 
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        cleaned_data = self.clean()
+        instance.page_opened_at = cleaned_data['page_opened_at']
+        instance.exam_started_at = cleaned_data['exam_started_at']
+        instance.exam_finished_at = cleaned_data['exam_finished_at']
+        if commit:
+            instance.save()
+        return instance
+
 
 def get_local_time(target_date, target_time):
     if not target_date:
