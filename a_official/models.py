@@ -12,6 +12,10 @@ from a_common.models import User
 from a_common.prime_test.model_settings import number_choice, answer_choice, rating_choice, get_remarks
 
 
+def default_year():
+    return datetime.now().year + 1
+
+
 def year_choice() -> list:
     choice = [(year, f'{year}년') for year in range(2023, datetime.now().year + 2)]
     choice.reverse()
@@ -75,7 +79,7 @@ class ProblemTaggedItem(TaggedItemBase):
 
 
 class Problem(models.Model):
-    year = models.IntegerField(choices=year_choice, default=datetime.now().year+1, verbose_name='연도')
+    year = models.IntegerField(choices=year_choice, default=default_year, verbose_name='연도')
     exam = models.CharField(max_length=2, choices=exam_choice, default='경위', verbose_name='시험')
     subject = models.CharField(max_length=2, choices=subject_choice, default='형사', verbose_name='과목')
     number = models.IntegerField(choices=number_choice, default=1, verbose_name='문제 번호')

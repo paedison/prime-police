@@ -1,7 +1,8 @@
 __all__ = [
     'semester_default', 'answer_default', 'statistics_default',
     'semester_choice', 'circle_choice', 'round_choice',
-    'subject_choice', 'number_choice', 'answer_choice',
+    'subject_choice', 'infinite_subject_choice', 'infinite_subject_tuple',
+    'number_choice', 'answer_choice',
     'rating_choice', 'get_remarks',
     'BaseProblem', 'BaseProblemOpen', 'BaseProblemLike', 'BaseProblemRate',
     'BaseProblemSolve', 'BaseProblemMemo', 'BaseProblemTag', 'BaseProblemTaggedItem',
@@ -54,6 +55,14 @@ def subject_choice() -> dict:
         '형법': '형법', '경찰': '경찰학', '헌법': '헌법', '범죄': '범죄학',
         '형소': '형사소송법', '민법': '민법총칙',
     }
+
+
+def infinite_subject_choice() -> dict:
+    return {'형사': '형사법', '헌법': '헌법', '경찰': '경찰학', '범죄': '범죄학', '민법': '민법총칙'}
+
+
+def infinite_subject_tuple() -> tuple:
+    return '형사', '헌법', '경찰', '범죄', '민법'
 
 
 def number_choice() -> list:

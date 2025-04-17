@@ -86,6 +86,7 @@ INSTALLED_APPS = [
     'a_daily',
     'a_board',
     'a_weekly',
+    'a_infinite',
 
     'django_cleanup.apps.CleanupConfig',
 ]

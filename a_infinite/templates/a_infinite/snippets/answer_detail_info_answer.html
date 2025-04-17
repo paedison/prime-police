@@ -1,0 +1,77 @@
+{% load humanize %}
+
+<article class="table-responsive">
+    <table class="table align-middle" hx-boost="true" hx-push-url="true">
+        <thead>
+            <tr class="text-center align-middle table-warning">
+                <th>과목</th>
+                <th class="text-nowrap">총 참여자수</th>
+                <th class="text-nowrap">선택 답안수</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for stat_tot in stat_data_total %}
+                {% partial sub_answer_line %}
+            {% endfor %}
+        </tbody>
+    </table>
+</article>
+
+{% partialdef sub_answer_line %}
+    {% if current_time < stat_tot.end_time %}
+        <tr class="text-center{% if stat_tot.field == 'sum' %} table-warning{% endif %}">
+            <th class="text-nowrap" aria-label="과목">{{ stat_tot.subject }}</th>
+            {% if current_time < stat_tot.start_time %}
+                <td colspan="2">
+                    <span class="badge rounded-pill text-bg-primary">시험 시작 전입니다.</span>
+                </td>
+            {% else %}
+                <td colspan="2">
+                    <span class="badge rounded-pill text-bg-primary">시험 진행 중입니다.</span>
+                </td>
+            {% endif %}
+        </tr>
+    {% else %}
+        {% if not stat_tot.is_confirmed %}
+            <tr class="text-center{% if stat_tot.field == 'sum' %} table-warning{% else %} cursor-pointer{% endif %}"
+                {% if stat_tot.field != 'sum' %}hx-get="{{ stat_tot.url_answer_input }}"{% endif %}>
+                <th class="text-nowrap" aria-label="과목">
+                    {% if stat_tot.field == 'sum' %}
+                        {{ stat_tot.subject }}
+                    {% else %}
+                        <a class="text-decoration-none" href="{{ stat_tot.url_answer_input }}">
+                            {{ stat_tot.subject }}
+                        </a>
+                    {% endif %}
+                </th>
+
+                <td aria-label="총 참여자수">
+                    <div id="{{ stat_tot.field }}Participants" class="htmx-fade-up-in delay-2 fw-bold">
+                        {{ stat_tot.participants|default:0 }}
+                    </div>
+                </td>
+
+                <td class="text-nowrap fw-bold" aria-label="선택 답안수">
+                    {% if stat_tot.field == 'sum' %}
+                        {{ stat_tot.answer_count|default:0 }} / {{ stat_tot.problem_count }}
+                        <span class="badge rounded-pill text-bg-danger">미제출</span>
+                    {% else %}
+                        <a class="text-decoration-none fw-bold" href="{{ stat_tot.url_answer_input }}">
+                            {{ stat_tot.answer_count|default:0 }} / {{ stat_tot.problem_count }}
+                            <span class="badge rounded-pill text-bg-danger">미제출</span>
+                        </a>
+                    {% endif %}
+                </td>
+            </tr>
+        {% else %}
+            <tr class="text-center{% if stat_tot.field == 'sum' %} table-warning{% endif %}">
+                <th class="text-nowrap" aria-label="과목">{{ stat_tot.subject }}</th>
+                <td class="fw-bold" aria-label="총 참여자수">{{ stat_tot.participants|default:0 }}</td>
+                <td class="text-nowrap fw-bold" aria-label="선택 답안수">
+                    {{ stat_tot.answer_count|default:0 }} / {{ stat_tot.problem_count }}
+                    <span class="badge rounded-pill text-bg-success">제출 완료</span>
+                </td>
+            </tr>
+        {% endif %}
+    {% endif %}
+{% endpartialdef sub_answer_line %}

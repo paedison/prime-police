@@ -49,3 +49,8 @@ def percentageby(content, arg: int) -> float | str:
 def to_kor_day(value: str):
     days = ['일', '월', '화', '수', '목', '금', '토']
     return days[int(value)]
+
+
+@register.filter
+def divide(content, base) -> float:  # Divide content by base
+    return content / base

@@ -1,0 +1,76 @@
+{% load humanize %}
+
+<article class="table-responsive htmx-fade-in htmx-fade-out">
+    <table class="table table-bordered table-striped align-middle m-0">
+        <thead>
+            <tr class="text-center table-warning align-middle">
+                <th class="text-primary text-nowrap td-left-no-border" rowspan="2">ID</th>
+                {% partialdef table_head_1 inline=True %}
+                    <th class="text-primary text-nowrap" rowspan="2">등수</th>
+                    <th class="text-primary text-nowrap" rowspan="2">이름</th>
+                    <th class="text-primary text-nowrap" rowspan="2">성적 확인</th>
+
+                    <th class="text-primary text-nowrap" colspan="2">총점</th>
+                    <th class="text-primary text-nowrap" colspan="2">평균</th>
+                    <th class="text-primary text-nowrap" colspan="2">형사법</th>
+                    <th class="text-primary text-nowrap" colspan="2">헌법</th>
+                    <th class="text-primary text-nowrap" colspan="2">경찰학</th>
+                    <th class="text-primary text-nowrap" colspan="2">범죄학</th>
+                    <th class="text-primary text-nowrap td-right-no-border" colspan="2">민법총칙</th>
+                {% endpartialdef table_head_1 %}
+            </tr>
+
+            {% partialdef table_head_2 inline=True %}
+                <tr class="text-center table-warning align-middle">
+                    {% for _ in '0123456' %}
+                        <th class="text-primary text-nowrap td-right-no-border">점수</th>
+                        <th class="text-primary text-nowrap td-left-no-border td-right-no-border">등수</th>
+                    {% endfor %}
+                </tr>
+            {% endpartialdef table_head_2 %}
+        </thead>
+        <tbody>
+            {% for obj in catalog_page_obj %}
+                <tr class="text-center small">
+                    <td class="text-nowrap td-left-no-border">{{ obj.id }}</td>
+                    {% partialdef table_body inline=True %}
+                        <td class="text-nowrap">{{ obj.rank_sum }}</td>
+                        <td class="text-nowrap">{{ obj.name }}<br/>{{ obj.serial }}</td>
+                        <td class="text-nowrap">
+                            <div class="btn-group">
+                                <a target="result" class="btn btn-sm btn-outline-primary"
+                                   href="{{ obj.get_admin_detail_student_url }}">화면
+                                </a>
+                                <a target="result_print" class="btn btn-sm btn-outline-primary"
+                                   href="{{ obj.get_admin_detail_student_print_url }}">인쇄
+                                </a>
+                            </div>
+                        </td>
+
+                        {% for _ in '0123456' %}
+                            {% cycle obj.score_sum obj.score_avg obj.score_0 obj.score_1 obj.score_2 obj.score_3 obj.score_4 as score silent %}
+                            {% cycle obj.rank_sum obj.rank_avg obj.rank_0 obj.rank_1 obj.rank_2 obj.rank_3 obj.rank_4 as rank silent %}
+                            <td class="text-nowrap td-right-no-border">{{ score|floatformat:1 }}</td>
+                            <td class="text-nowrap td-left-no-border td-right-no-border">
+                                <span class="text-primary">{{ rank|default_if_none:'' }}</span>
+                                {% if rank and obj.rank_num %}
+                                    <br/>{{ rank|divide:obj.rank_num|percentage|floatformat:1 }}
+                                {% endif %}
+                            </td>
+                        {% endfor %}
+                    {% endpartialdef table_body %}
+                </tr>
+            {% empty %}
+                <tr class="text-center">
+                    <td class="text-nowrap" colspan="34">자료가 없습니다.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</article>
+
+{% with page_obj=catalog_page_obj page_range=catalog_page_range %}
+    {% if page_obj.has_next or page_obj.has_previous %}
+        {% include 'a_infinite/snippets/pagination.html' with header='catalog_list' %}
+    {% endif %}
+{% endwith %}

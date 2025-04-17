@@ -25,6 +25,7 @@ ICON_MENU = {
     'official': '<i class="fa-solid fa-fw fa-layer-group"></i>',
     'daily': '<i class="fa-solid fa-fw fa-inbox"></i>',
     'weekly': '<i class="fa-solid fa-fw fa-inbox"></i>',
+    'infinite': '<i class="fa-solid fa-fw fa-inbox"></i>',
     'problem': '<i class="fa-solid fa-fw fa-file-lines"></i>',
     'like': '<i class="fa-solid fa-fw fa-heart"></i>',
     'rate': '<i class="fa-solid fa-fw fa-star"></i>',

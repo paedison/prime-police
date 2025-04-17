@@ -1,0 +1,89 @@
+{% load humanize %}
+
+<article class="table-responsive">
+    <table class="table table-bordered table-striped align-middle m-0">
+        <thead>
+            <tr class="text-center table-warning align-middle">
+                <th class="text-primary text-nowrap td-left-no-border" rowspan="2">문제<br/>번호</th>
+                <th class="text-primary text-nowrap" rowspan="2">공식<br/>정답</th>
+                <th class="text-primary text-nowrap" rowspan="2">예상<br/>정답</th>
+                <th class="text-primary text-nowrap" colspan="2">정답률(%)</th>
+                <th class="text-primary text-nowrap" colspan="5">[전체] 답안 선택 현황</th>
+                <th class="text-primary text-nowrap" colspan="5">[상위권] 답안 선택 현황</th>
+                <th class="text-primary text-nowrap" colspan="5">[중위권] 답안 선택 현황</th>
+                <th class="text-primary text-nowrap td-right-no-border" colspan="5">[하위권] 답안 선택 현황</th>
+            </tr>
+            <tr class="text-center table-warning align-middle">
+                <th class="text-primary text-nowrap">전체[상/중/하]</th>
+                <th class="text-primary text-nowrap">변별도</th>
+                {% for _ in '1234' %}
+                    <th class="text-primary td-right-no-border">①</th>
+                    <th class="text-primary td-left-no-border td-right-no-border">②</th>
+                    <th class="text-primary td-left-no-border td-right-no-border">③</th>
+                    <th class="text-primary td-left-no-border td-right-no-border">④</th>
+                    <th class="text-primary td-left-no-border td-right-no-border">⑤</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for obj in answers %}
+                <tr class="text-center small">
+                    <th class="td-left-no-border">{{ obj.no }}</th>
+                    <th class="text-success">{{ obj.ans_official_circle }}</th>
+                    <th class="text-{% if obj.ans_predict == obj.ans_official %}success{% else %}danger{% endif %}">
+                        {{ obj.ans_predict_circle }}
+                    </th>
+                    <td class="text-nowrap">
+                        {% if obj.rate_correct %}
+                            <span class="fw-bold text-primary">{{ obj.rate_correct|floatformat:1 }}</span><br/>[
+                            {{ obj.rate_correct_top|floatformat:1|default:'-' }} /
+                            {{ obj.rate_correct_mid|floatformat:1|default:'-' }} /
+                            {{ obj.rate_correct_low|floatformat:1|default:'-' }} ]
+                        {% endif %}
+                    </td>
+                    <td>{{ obj.rate_gap|floatformat:1 }}</td>
+
+                    {% for _ in '1234' %}
+                        {% cycle obj.count_1 obj.count_1_top obj.count_1_mid obj.count_1_low as count_1 silent %}
+                        {% cycle obj.count_2 obj.count_2_top obj.count_2_mid obj.count_2_low as count_2 silent %}
+                        {% cycle obj.count_3 obj.count_3_top obj.count_3_mid obj.count_3_low as count_3 silent %}
+                        {% cycle obj.count_4 obj.count_4_top obj.count_4_mid obj.count_4_low as count_4 silent %}
+                        {% cycle obj.count_5 obj.count_5_top obj.count_5_mid obj.count_5_low as count_5 silent %}
+                        {% cycle obj.count_sum obj.count_sum_top obj.count_sum_mid obj.count_sum_low as count_sum silent %}
+
+                        <td class="td-right-no-border">
+                            {{ count_1|default:'' }}<br/>
+                            <span class="text-primary">{{ count_1|percentageby:count_sum|floatformat:1 }}</span>
+                        </td>
+                        <td class="td-left-no-border td-right-no-border">
+                            {{ count_2|default:'' }}<br/>
+                            <span class="text-primary">{{ count_2|percentageby:count_sum|floatformat:1 }}</span>
+                        </td>
+                        <td class="td-left-no-border td-right-no-border">
+                            {{ count_3|default:'' }}<br/>
+                            <span class="text-primary">{{ count_3|percentageby:count_sum|floatformat:1 }}</span>
+                        </td>
+                        <td class="td-left-no-border td-right-no-border">
+                            {{ count_4|default:'' }}<br/>
+                            <span class="text-primary">{{ count_4|percentageby:count_sum|floatformat:1 }}</span>
+                        </td>
+                        <td class="td-left-no-border td-right-no-border">
+                            {{ count_5|default:'' }}<br/>
+                            <span class="text-primary">{{ count_5|percentageby:count_sum|floatformat:1 }}</span>
+                        </td>
+                    {% endfor %}
+                </tr>
+            {% empty %}
+                <tr class="text-center">
+                    <td class="text-nowrap" colspan="40">자료가 없습니다.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</article>
+
+{% with page_obj=answers page_range=answers_page_range %}
+    {% if page_obj.has_next or page_obj.has_previous %}
+        {% include 'a_infinite/snippets/pagination.html' with header='answer_list' %}
+    {% endif %}
+{% endwith %}

@@ -6,7 +6,7 @@
         {% partial menu_official %}
         {% if perms.a_daily or user.is_staff %}{% partial menu_daily %}{% endif %}
         {% if perms.a_weekly or user.is_staff %}{% partial menu_weekly %}{% endif %}
-{#        {% partial menu_infinite %}#}
+        {% if perms.a_infinite or user.is_staff %}{% partial menu_infinite %}{% endif %}
 {#        {% partial menu_test_exam %}#}
 {#        {% partial menu_score %}#}
     </ul>
@@ -102,10 +102,34 @@
 {% endpartialdef menu_weekly %}
 
 {% partialdef menu_infinite %}
-    <li class="nav-item">
-        <a class="nav-link collapsed" data-menu="infinite" href="{% url 'official:base' %}">
-            <i class="fa-solid fa-fw fa-inbox"></i> 무한반복반
+    <li class="nav-item" role="menuitem" aria-label="무한반">
+        <a class="nav-link collapsed" href="#infiniteNavContent" data-menu="infinite"
+           data-bs-toggle="collapse" aria-expanded="false" aria-controls="infiniteNavContent">
+            <i class="fa-solid fa-fw fa-inbox"></i> 무한반
+            <i class="fa-solid fa-fw fa-chevron-down ms-auto"></i>
         </a>
+        <ul id="infiniteNavContent" class="nav-content collapse" data-bs-parent="#sidebar">
+            {% if user.is_staff %}
+                <li>
+                    <a class="aside-nav-icon" data-menu-parent="infinite" data-menu-self="staff"
+                       href="{% url 'infinite:staff-menu' %}">
+                        <i class="fa-regular fa-fw fa-square"></i> 관리자 메뉴
+                    </a>
+                </li>
+            {% endif %}
+            <li>
+                <a class="aside-nav-icon" data-menu-parent="infinite" data-menu-self="answer"
+                   href="{% url 'infinite:answer-list' %}">
+                    <i class="fa-regular fa-fw fa-square"></i> 답안 제출
+                </a>
+            </li>
+            <li>
+                <a class="aside-nav-icon" data-menu-parent="infinite" data-menu-self="problem"
+                   href="{% url 'infinite:problem-list' %}">
+                    <i class="fa-regular fa-fw fa-square"></i> 오답 노트
+                </a>
+            </li>
+        </ul>
     </li>
 {% endpartialdef menu_infinite %}
 

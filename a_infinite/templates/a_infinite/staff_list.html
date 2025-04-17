@@ -1,0 +1,142 @@
+{% extends '_base.html' %}
+
+{% block main %}
+    {% include 'a_common/prime_test/page_title.html' %}
+
+    <section class="section htmx-fade-in htmx-fade-out"
+             hx-target="#main" hx-swap="innerHTML swap:0.25s show:window:top">
+        <div class="row">
+            <div class="col-12" aria-label="{{ config.menu_title.kor }} 시험">
+                <div class="card">
+                    <div class="card-header">{{ config.menu_title.kor }} 시험</div>
+
+                    <div class="card-body htmx-fade-in htmx-fade-out">
+                        <a class="btn btn-primary" target="#admin" href="{{ config.url_admin_exam_list }}">시험 목록</a>
+                        <button class="btn btn-primary" hx-get="{{ config.url_exam_create  }}">새 시험 추가</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section htmx-fade-in htmx-fade-out"
+             hx-target="#main" hx-swap="innerHTML swap:0.25s show:window:top">
+        <div class="row">
+            <div class="col-12" aria-label="{{ config.menu_title.kor }} 문제">
+                <div class="card">
+                    <div class="card-header">{{ config.menu_title.kor }} 문제</div>
+
+                    <div class="card-body htmx-fade-in htmx-fade-out">
+                        <div class="row flex-column flex-md-row-reverse">
+                            <div id="examFilter"
+                                 class="col-12 col-md-4 accordion htmx-fade-in htmx-fade-out">
+                            </div>
+
+                            <div id="examContent" class="col-12 col-md-8 htmx-fade-in htmx-fade-out">
+                                <a class="btn btn-primary" target="#admin" href="{{ config.url_admin_problem_list }}">문제 목록</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" hx-swap="innerHTML swap:0.25s">
+        <div class="row">
+            <div class="col-12" aria-label="시험 목록">
+                <div class="card" hx-target="#main" hx-push-url="true">
+                    <div class="card-header">시험 목록</div>
+                    <div class="card-body htmx-fade-in htmx-fade-out">
+                        {% partial exam_list %}
+                    </div>
+                </div>
+            </div>
+
+            {% if request.user.is_admin %}
+                <div class="col-12" aria-label="참여자 목록">
+                    <div class="card">
+                        <div class="card-header">참여자 목록</div>
+                        <div class="card-body htmx-fade-in htmx-fade-out">
+                            {% partial student_list %}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+{% endblock main %}
+
+{% partialdef exam_list %}
+    <article class="table-responsive">
+        <table class="table table-bordered table-striped align-middle">
+            <thead>
+                <tr class="text-center table-warning align-middle">
+                    <th class="text-primary text-nowrap">회차</th>
+                    <th class="text-primary text-nowrap">성적 결과</th>
+                    <th class="text-primary text-nowrap">시험일</th>
+                    <th class="text-primary text-nowrap">시험 시간</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if exam_page_obj %}
+                    {% for obj in exam_page_obj %}
+                        <tr class="text-center">
+                            <td class="text-nowrap">{{ obj.get_round_display }}</td>
+                            <td class="text-nowrap">
+                                <a class="btn btn-sm btn-outline-primary" hx-boost="true"
+                                   href="{{ obj.get_staff_detail_url }}">
+                                    클릭
+                                </a>
+                            </td>
+                            <td class="text-nowrap">{{ obj.exam_started_at|date:'Y.n.d(D)' }}</td>
+                            <td class="text-nowrap">
+                                {{ obj.exam_started_at|date:'H:i' }}~{{ obj.exam_finished_at|date:'H:i' }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% endif %}
+            </tbody>
+        </table>
+    </article>
+{% endpartialdef exam_list %}
+
+{% partialdef student_list %}
+    <article class="table-responsive">
+        <table class="table table-bordered table-striped align-middle">
+            <thead>
+                <tr class="text-center table-warning align-middle">
+                    <th class="text-primary text-nowrap" rowspan="2">ID</th>
+                    <th class="text-primary text-nowrap" rowspan="2">사용자 정보</th>
+                    <th class="text-primary text-nowrap" rowspan="2">시험명</th>
+                    <th class="text-primary text-nowrap" rowspan="2">수험번호</th>
+                    <th class="text-primary text-nowrap" rowspan="2">이름</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if student_page_obj %}
+                    {% for obj in student_page_obj %}
+                        <tr class="text-center small">
+                            <td class="text-nowrap">{{ obj.id }}</td>
+                            <td class="text-nowrap">
+                                <div class="d-flex justify-content-between">
+                                    <div>{{ obj.user.username }}</div>
+                                    <div class="ms-2">[{{ obj.user_id }}]</div>
+                                </div>
+                            </td>
+                            <td class="text-nowrap">
+                                <div class="text-start">{{ obj.student.leet.name }}</div>
+                            </td>
+                            <td class="text-nowrap">{{ obj.student.serial }}</td>
+                            <td class="text-nowrap">{{ obj.student.name }}</td>
+                        </tr>
+                    {% endfor %}
+                {% endif %}
+            </tbody>
+        </table>
+    </article>
+
+    {% with page_obj=student_page_obj page_range=student_page_range %}
+        {% include 'a_prime/snippets/pagination.html' with header='student_list' %}
+    {% endwith %}
+{% endpartialdef student_list %}

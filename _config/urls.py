@@ -18,4 +18,5 @@ urlpatterns = [
     path('daily/', include('a_daily.urls')),
     path('board/', include('a_board.urls')),
     path('weekly/', include('a_weekly.urls')),
+    path('infinite/', include('a_infinite.urls')),
 ] + debug_toolbar_urls()
