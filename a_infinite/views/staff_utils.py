@@ -1,16 +1,15 @@
 import io
 import traceback
-import zipfile
 from collections import defaultdict
 from urllib.parse import quote
 
 import django.db.utils
-import numpy as np
 import pandas as pd
 from django.db import transaction
 from django.db.models import Count, F, Window
 from django.db.models.functions import Rank
 from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
 
 from a_common.prime_test import model_settings
 from .. import models, utils
@@ -38,7 +37,6 @@ def get_subject_vars() -> dict[str, tuple[str, str, int]]:
         '범죄': ('범죄학', 'subject_3', 3),
         '민법': ('민법총칙', 'subject_4', 4),
         '총점': ('총점', 'sum', 5),
-        '평균': ('평균', 'average', 6),
     }
 
 
@@ -50,7 +48,6 @@ def get_field_vars() -> dict[str, tuple[str, str, int]]:
         'subject_3': ('범죄', '범죄학', 3),
         'subject_4': ('민법', '민법총칙', 4),
         'sum': ('총점', '총점', 5),
-        'average': ('평균', '평균', 6),
     }
 
 
@@ -283,7 +280,6 @@ def get_data_statistics(exam):
             subject_3=F('score__subject_3'),
             subject_4=F('score__subject_4'),
             sum=F('score__sum'),
-            average=F('score__average'),
         )
     )
     for qs_s in qs_students:
@@ -523,77 +519,39 @@ def bulk_create_or_update(model, list_create, list_update, update_fields):
 
 
 def get_statistics_response(exam):
-    qs_statistics = models.Statistics.objects.filter(exam=exam).order_by('id')
-    df = pd.DataFrame.from_records(qs_statistics.values())
+    field_vars = get_field_vars()
+    qs_statistics = get_object_or_404(models.Statistics, exam=exam)
+    data_statistics = []
+    for fld in field_vars:
+        data_statistics.append(getattr(qs_statistics, fld))
+    df = pd.DataFrame(data_statistics)
 
     filename = f'무한반_{exam.get_round_display()}_성적통계.xlsx'
-    drop_columns = ['id', 'exam_id']
-    column_label = [('지망 대학', '')]
-    field_vars = get_field_vars()
+    column_label = [
+        ('과목',), ('응시 인원',), ('최고 점수',), ('상위 10%',), ('상위 25%',), ('상위 50%',), ('평균',)
+    ]
 
-    for fld, (_, subject, _) in field_vars.items():
-        drop_columns.append(fld)
-        subject += ' (원점수)' if fld[:3] == 'raw' else ' (표준점수)'
-        column_label.extend([
-            (subject, '총 인원'), (subject, '최고'),
-            (subject, '상위10%'), (subject, '상위25%'),
-            (subject, '상위50%'), (subject, '평균'),
-        ])
-        df_subject = pd.json_normalize(df[fld])
-        df = pd.concat([df, df_subject], axis=1)
-
-    return get_response_for_excel_file(df, drop_columns, column_label, filename)
+    return get_response_for_excel_file(df, [], column_label, filename)
 
 
 def get_catalog_response(exam):
     student_list = models.Student.objects.infinite_qs_student_list_by_exam(exam)
-    df1, filename1 = get_catalog_dataframe_and_file_name(student_list, exam)
-
-    zip_buffer = io.BytesIO()
-    with zipfile.ZipFile(zip_buffer, 'w') as zip_file:
-        excel_buffer1 = io.BytesIO()
-        df1.to_excel(excel_buffer1, engine='xlsxwriter')
-        zip_file.writestr(filename1, excel_buffer1.getvalue())
-
-    response = HttpResponse(zip_buffer.getvalue(), content_type='application/zip')
-    response['Content-Disposition'] = 'attachment; filename="catalog_files.zip"'
-    return response
-
-
-def get_catalog_dataframe_and_file_name(student_list, exam):
-    filename = f'{exam.name}_성적일람표.xlsx'
-
     df = pd.DataFrame.from_records(student_list.values())
     df['created_at'] = df['created_at'].dt.tz_convert('Asia/Seoul').dt.tz_localize(None)
     df['latest_answer_time'] = df['latest_answer_time'].dt.tz_convert('Asia/Seoul').dt.tz_localize(None)
 
-    drop_columns = []
-
+    filename = f'무한반_{exam.get_round_display()}_성적일람표.xlsx'
     column_label = [
-        ('ID', ''), ('등록일시', ''), ('수험번호', ''), ('이름', ''), ('비밀번호', ''), ('1지망', ''), ('2지망', ''),
-        ('출신대학', ''), ('전공', ''), ('학점 종류', ''), ('학점', ''), ('영어 종류', ''), ('영어 성적', ''),
-        ('LEET ID', ''), ('최종답안 등록일시', ''), ('제출 답안수', ''),
-        ('참여자 수', '전체'), ('참여자 수', '1지망'), ('참여자 수', '2지망'),
+        ('ID', ''), ('등록일시', ''), ('Exam ID', ''), ('User ID', ''), ('이름', ''),
+        ('최종답안 등록일시', ''), ('제출 답안수', ''), ('참여자 수', ''),
     ]
-    field_vars = {
-        'subject_0': ('언어', '언어이해', 0),
-        'subject_1': ('추리', '추리논증', 1),
-        'sum': ('총점', '총점', 2),
-    }
+    field_vars = get_field_vars()
     for _, (_, subject, _) in field_vars.items():
         column_label.extend([
-            (subject, '원점수'),
-            (subject, '표준점수'),
-            (subject, '전체 등수'),
-            (subject, '1지망 등수'),
-            (subject, '2지망 등수'),
+            (subject, '점수'),
+            (subject, '등수'),
         ])
-
-    df.drop(columns=drop_columns, inplace=True)
-    df.columns = pd.MultiIndex.from_tuples(column_label)
-    df.reset_index(inplace=True)
-
-    return df, filename
+    return get_response_for_excel_file(df, [], column_label, filename)
 
 
 def get_answer_response(exam):
@@ -610,10 +568,9 @@ def get_answer_response(exam):
     move_column('ans_official', 4)
     move_column('ans_predict', 5)
 
-    filename = f'{exam.name}_문항분석표.xlsx'
+    filename = f'무한반_{exam.get_round_display()}_문항분석표.xlsx'
     drop_columns = [
-        'answer_predict',
-        'count_1', 'count_2', 'count_3', 'count_4', 'count_5', 'count_0', 'count_multiple', 'count_sum',
+        'answer_predict', 'count_1', 'count_2', 'count_3', 'count_4', 'count_0', 'count_multiple', 'count_sum',
     ]
 
     column_label = [
@@ -624,8 +581,7 @@ def get_answer_response(exam):
     for top in top_field:
         for mid in ['전체', '상위권', '중위권', '하위권']:
             column_label.extend([
-                (top, mid, '①'), (top, mid, '②'), (top, mid, '③'),
-                (top, mid, '④'), (top, mid, '⑤'), (top, mid, '합계'),
+                (top, mid, '①'), (top, mid, '②'), (top, mid, '③'), (top, mid, '④'), (top, mid, '합계'),
             ])
 
     return get_response_for_excel_file(df, drop_columns, column_label, filename)

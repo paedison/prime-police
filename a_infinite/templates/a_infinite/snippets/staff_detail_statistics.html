@@ -15,8 +15,8 @@
         </thead>
         <tbody>
             {% for obj in statistics_page_obj %}
-                {% for _ in '0123456' %}
-                    {% cycle obj.sum obj.average obj.subject_0 obj.subject_1 obj.subject_2 obj.subject_3 obj.subject_4 as data_stat silent %}
+                {% for _ in '012345' %}
+                    {% cycle obj.sum obj.subject_0 obj.subject_1 obj.subject_2 obj.subject_3 obj.subject_4 as data_stat silent %}
                     <tr class="text-center small">
                         <td class="text-nowrap td-left-no-border">{{ data_stat.subject }}</td>
                         <td class="text-nowrap">{{ data_stat.participants|intcomma }}</td>

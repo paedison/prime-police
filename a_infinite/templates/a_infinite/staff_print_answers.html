@@ -1,16 +1,13 @@
-{% extends 'base.html' %}
+{% extends '_base.html' %}
 {% load static %}
-{% load psat_filter %}
 {% load humanize %}
 
-{% block head_title %}{{ leet.name }}_문항분석표{% endblock head_title %}
-{% block page_image %}<meta property="og:image" content="{% static 'image/prime/2024/exam/message-1.jpg' %}"/>{% endblock %}
-{% block google_adsense %}{% endblock %}
+{% block head_title %}무한반_{{ exam.get_round_display }}_문항분석표{% endblock head_title %}
 
 {% block html_body %}
 <body class="bg-white">
     {{ info|json_script:'info' }}
-    <h2 class="fw-bold text-center mb-4">{{ leet.name }} 문항분석표</h2>
+    <h2 class="fw-bold text-center mb-4">무한반 {{ exam.get_round_display }} 문항분석표</h2>
     <div class="mb-2">
         <table class="table table-sm table-bordered small align-middle">
             <thead>
@@ -48,9 +45,9 @@
             </thead>
             <tbody>
                 {% for _ in answers_page_obj_group %}
-                    {% cycle answers_page_obj_group.언어 answers_page_obj_group.추리 as answers silent %}
+                    {% cycle answers_page_obj_group.형사 answers_page_obj_group.헌법 answers_page_obj_group.경찰 answers_page_obj_group.범죄 answers_page_obj_group.민법 as answers silent %}
                     {% for answer in answers %}
-                        <tr class="text-center">
+                        <tr class="text-center small">
                             <td class="text-nowrap">{{ answer.subject }}</td>
                             <td class="text-nowrap">{{ answer.no }}</td>
                             <td class="text-nowrap">

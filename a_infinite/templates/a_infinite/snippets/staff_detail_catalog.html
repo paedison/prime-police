@@ -11,7 +11,6 @@
                     <th class="text-primary text-nowrap" rowspan="2">성적 확인</th>
 
                     <th class="text-primary text-nowrap" colspan="2">총점</th>
-                    <th class="text-primary text-nowrap" colspan="2">평균</th>
                     <th class="text-primary text-nowrap" colspan="2">형사법</th>
                     <th class="text-primary text-nowrap" colspan="2">헌법</th>
                     <th class="text-primary text-nowrap" colspan="2">경찰학</th>
@@ -22,7 +21,7 @@
 
             {% partialdef table_head_2 inline=True %}
                 <tr class="text-center table-warning align-middle">
-                    {% for _ in '0123456' %}
+                    {% for _ in '012345' %}
                         <th class="text-primary text-nowrap td-right-no-border">점수</th>
                         <th class="text-primary text-nowrap td-left-no-border td-right-no-border">등수</th>
                     {% endfor %}
@@ -35,7 +34,7 @@
                     <td class="text-nowrap td-left-no-border">{{ obj.id }}</td>
                     {% partialdef table_body inline=True %}
                         <td class="text-nowrap">{{ obj.rank_sum }}</td>
-                        <td class="text-nowrap">{{ obj.name }}<br/>{{ obj.serial }}</td>
+                        <td class="text-nowrap">{{ obj.name }}</td>
                         <td class="text-nowrap">
                             <div class="btn-group">
                                 <a target="result" class="btn btn-sm btn-outline-primary"
@@ -47,9 +46,9 @@
                             </div>
                         </td>
 
-                        {% for _ in '0123456' %}
-                            {% cycle obj.score_sum obj.score_avg obj.score_0 obj.score_1 obj.score_2 obj.score_3 obj.score_4 as score silent %}
-                            {% cycle obj.rank_sum obj.rank_avg obj.rank_0 obj.rank_1 obj.rank_2 obj.rank_3 obj.rank_4 as rank silent %}
+                        {% for _ in '012345' %}
+                            {% cycle obj.score_sum obj.score_0 obj.score_1 obj.score_2 obj.score_3 obj.score_4 as score silent %}
+                            {% cycle obj.rank_sum obj.rank_0 obj.rank_1 obj.rank_2 obj.rank_3 obj.rank_4 as rank silent %}
                             <td class="text-nowrap td-right-no-border">{{ score|floatformat:1 }}</td>
                             <td class="text-nowrap td-left-no-border td-right-no-border">
                                 <span class="text-primary">{{ rank|default_if_none:'' }}</span>
