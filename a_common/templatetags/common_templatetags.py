@@ -42,7 +42,7 @@ def percentage(content) -> float:
 def percentageby(content, arg: int) -> float | str:
     if content:
         return content * 100 / arg
-    return '-'
+    return 100
 
 
 @register.filter()
