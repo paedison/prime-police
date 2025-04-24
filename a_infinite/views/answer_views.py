@@ -26,7 +26,7 @@ class ViewConfiguration:
         self.answer_input = answer_input
 
 
-@permission_or_staff_required('a_weekly.view_student', login_url='/')
+@permission_or_staff_required('a_infinite.view_student', login_url='/')
 def list_view(request: HtmxHttpRequest):
     config = ViewConfiguration()
     current_time = timezone.now()
@@ -44,14 +44,13 @@ def list_view(request: HtmxHttpRequest):
 
     context = update_context_data(
         config=config, current_time=current_time,
-        icon_menu=icon_set.ICON_MENU['daily'], students=qs_student,
+        icon_menu=icon_set.ICON_MENU['infinite'], students=qs_student,
         exams=qs_exam,
     )
     return render(request, 'a_infinite/answer_list.html', context)
 
 
-@permission_or_staff_required('a_weekly.view_student', login_url='/')
-def detail_view(request: HtmxHttpRequest, pk: int, student=None, is_for_print=False):
+def get_context_or_redirect(request: HtmxHttpRequest, pk: int) -> tuple[dict, HttpResponse | None]:
     config = ViewConfiguration()
     current_time = timezone.now()
     context = update_context_data(current_time=current_time, config=config)
@@ -59,32 +58,33 @@ def detail_view(request: HtmxHttpRequest, pk: int, student=None, is_for_print=Fa
     exam = models.Exam.objects.filter(pk=pk).first()
     if not exam:
         context = update_context_data(context, message='답안 제출 대상 시험이 아닙니다.', next_url=config.url_list)
-        return render(request, 'a_infinite/redirect.html', context)
+        return context, render(request, 'a_infinite/redirect.html', context)
+
     if current_time < exam.page_opened_at:
         context = update_context_data(context, message='답안 제출 기간이 아닙니다.', next_url=config.url_list)
-        return render(request, 'a_infinite/redirect.html', context)
+        return context, render(request, 'a_infinite/redirect.html', context)
+
+    context = update_context_data(context, exam=exam)
+    return context, None
+
+
+@permission_or_staff_required('a_infinite.view_student', login_url='/')
+def detail_view(request: HtmxHttpRequest, pk: int, student=None, is_for_print=False):
+    context, response = get_context_or_redirect(request, pk)
+    exam = context['exam']
+    if response:
+        return response
 
     if student is None:
-        student = models.Student.objects.infinite_qs_student_by_user_and_exam_with_answer_count(request.user, exam)
+        student = models.Student.objects.infinite_student_with_answer_count(user=request.user, exam=exam)
     if not student:
         student = models.Student.objects.create(exam=exam, user=request.user)
         models.Score.objects.create(student=student)
         models.Rank.objects.create(student=student)
-        student = models.Student.objects.infinite_qs_student_by_user_and_exam_with_answer_count(request.user, exam)
+        student = models.Student.objects.infinite_student_with_answer_count(user=request.user, exam=exam)
 
     is_confirmed_data = answer_utils.get_is_confirmed_data(student)
-    qs_student_answer = models.Answer.objects.infinite_qs_answer_by_student_with_predict_result(student)
-    answer_data_set = answer_utils.get_input_answer_data_set(request)
-
-    stat_data_total = answer_utils.get_dict_stat_data(student, is_confirmed_data, answer_data_set)
-    # if current_time > exam.answer_official_opened_at:
-    #     answer_utils.update_score_real(stat_data, qs_student_answer)
-
-    stat_chart = answer_utils.get_dict_stat_chart(student, stat_data_total)
-    score_frequency_list = models.Student.objects.filter(exam=exam).values_list('score__sum', flat=True)
-    stat_frequency = answer_utils.get_dict_stat_frequency(student, score_frequency_list)
-
-    data_answers = answer_utils.get_data_answers(qs_student_answer)
+    stat_data_total = answer_utils.get_dict_stat_data(request, student, is_confirmed_data)
 
     context = update_context_data(
         context, exam=exam, head_title=f'{exam.get_round_display()} 성적표',
@@ -100,10 +100,13 @@ def detail_view(request: HtmxHttpRequest, pk: int, student=None, is_for_print=Fa
         stat_data_total=stat_data_total,
 
         # sheet_answer: 답안 확인
-        data_answers=data_answers, is_confirmed_data=is_confirmed_data,
+        is_confirmed_data=is_confirmed_data,
+        data_answers=answer_utils.get_data_answers(student),
 
         # chart: 성적 분포 차트
-        stat_chart=stat_chart, stat_frequency=stat_frequency, all_confirmed=is_confirmed_data[-1],
+        stat_chart=answer_utils.get_dict_stat_chart(stat_data_total),
+        stat_frequency=answer_utils.get_dict_stat_frequency(student),
+        all_confirmed=is_confirmed_data[-1],
     )
     if is_for_print:
         return render(request, 'a_infinite/answer_print.html', context)
@@ -114,21 +117,20 @@ def print_view(request: HtmxHttpRequest, pk: int, student=None):
     return detail_view(request, pk, student, True)
 
 
-@permission_or_staff_required('a_weekly.view_student', login_url='/')
+@permission_or_staff_required('a_infinite.view_student', login_url='/')
 def answer_input_view(request: HtmxHttpRequest, pk: int, subject_field: str):
-    config = ViewConfiguration()
-    current_time = timezone.now()
-    exam = models.Exam.objects.filter(pk=pk).first()
-    # if not exam or not exam.is_active:
-    #     return redirect('prime:predict-list')
+    context, response = get_context_or_redirect(request, pk)
+    exam = context['exam']
+    if response:
+        return response
 
-    config.url_detail = exam.get_answer_detail_url()
-    student = models.Student.objects.infinite_qs_student_by_user_and_exam_with_answer_count(request.user, exam)
+    student = models.Student.objects.infinite_student_with_answer_count(user=request.user, exam=exam)
     sub, subject, field_idx = answer_utils.get_field_vars()[subject_field]
 
-    # time_schedule = answer_utils.get_time_schedule(exam).get(sub)
-    # if current_time < time_schedule[0]:
-    #     return redirect('prime:predict-detail', pk=pk)
+    time_schedule = answer_utils.get_time_schedule(exam).get(sub)
+    if context['current_time'] < time_schedule[0]:
+        context = update_context_data(context, message='시험 시작 전입니다.', next_url=exam.get_answer_list_url())
+        return render(request, 'a_infinite/redirect.html', context)
 
     answer_data_set = answer_utils.get_input_answer_data_set(request)
     answer_data = answer_data_set[subject_field]
@@ -143,7 +145,7 @@ def answer_input_view(request: HtmxHttpRequest, pk: int, subject_field: str):
             return reswap(HttpResponse(''), 'none')
 
         answer_temporary = {'no': no, 'ans': ans}
-        context = update_context_data(subject=subject, answer=answer_temporary, exam=exam)
+        context = update_context_data(context, subject=subject, answer=answer_temporary)
         response = render(request, 'a_infinite/snippets/answer_button.html', context)
 
         if 1 <= no <= answer_utils.PROBLEM_COUNT and 1 <= ans <= 5:
@@ -158,20 +160,20 @@ def answer_input_view(request: HtmxHttpRequest, pk: int, subject_field: str):
         {'no': no, 'ans': ans} for no, ans in enumerate(answer_data, start=1)
     ]
     context = update_context_data(
-        leet=exam, config=config, subject=subject,
-        student=student, answer_student=answer_student,
+        context, subject=subject, student=student, answer_student=answer_student,
         url_answer_confirm=exam.get_answer_confirm_url(subject_field),
     )
     return render(request, 'a_infinite/answer_input.html', context)
 
 
-@permission_or_staff_required('a_weekly.view_student', login_url='/')
+@permission_or_staff_required('a_infinite.view_student', login_url='/')
 def answer_confirm_view(request: HtmxHttpRequest, pk: int, subject_field: str):
-    exam = models.Exam.objects.filter(pk=pk).first()
-    # if not exam or not exam.is_active:
-    #     return redirect('prime:predict-list')
+    context, response = get_context_or_redirect(request, pk)
+    exam = context['exam']
+    if response:
+        return response
 
-    student = models.Student.objects.infinite_qs_student_by_user_and_exam_with_answer_count(request.user, exam)
+    student = models.Student.objects.infinite_student_with_answer_count(user=request.user, exam=exam)
     sub, subject, field_idx = answer_utils.get_field_vars()[subject_field]
 
     if request.method == 'POST':
@@ -189,13 +191,14 @@ def answer_confirm_view(request: HtmxHttpRequest, pk: int, subject_field: str):
             answer_utils.update_statistics_after_confirm(student, subject_field)  # Statistics 모델 수정
 
         # Load student instance after save
-        student = models.Student.objects.infinite_qs_student_by_user_and_exam_with_answer_count(request.user, exam)
+        student = models.Student.objects.infinite_student_with_answer_count(user=request.user, exam=exam)
         next_url = answer_utils.get_next_url_for_answer_input(student)
 
-        context = update_context_data(header=f'{subject} 답안 제출', is_confirmed=is_confirmed, next_url=next_url)
+        context = update_context_data(
+            context, header=f'{subject} 답안 제출', is_confirmed=is_confirmed, next_url=next_url)
         return render(request, 'a_infinite/snippets/modal_answer_confirmed.html', context)
 
     context = update_context_data(
-        url_answer_confirm=exam.get_answer_confirm_url(subject_field),
+        context, url_answer_confirm=exam.get_answer_confirm_url(subject_field),
         header=f'{subject} 답안을 제출하시겠습니까?', verifying=True)
     return render(request, 'a_infinite/snippets/modal_answer_confirmed.html', context)

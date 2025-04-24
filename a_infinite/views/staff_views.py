@@ -28,11 +28,11 @@ def menu_list_view(request: HtmxHttpRequest):
     view_type = request.headers.get('View-Type', '')
     page_number = request.GET.get('page', 1)
 
-    exam_list = models.Exam.objects.order_by('-round')
+    exam_list = models.Exam.objects.infinite_qs_exam_list()
     config = ViewConfiguration()
     exam_page_obj, exam_page_range = utils.get_paginator_data(exam_list, page_number)
 
-    student_list = models.Student.objects.select_related('user', 'exam').order_by('-id')
+    student_list = models.Student.objects.infinite_qs_student_list()
     student_page_obj, student_page_range = utils.get_paginator_data(student_list, page_number)
 
     context = update_context_data(
@@ -123,13 +123,13 @@ def detail_view(request: HtmxHttpRequest, pk: int):
 
 @staff_required
 def detail_student_view(request: HtmxHttpRequest, pk: int):
-    student = get_object_or_404(models.Student, pk=pk)
+    student = models.Student.objects.infinite_student_with_answer_count(pk=pk)
     return answer_views.detail_view(request, student.exam.pk, student=student)
 
 
 @staff_required
 def detail_student_print_view(request: HtmxHttpRequest, pk: int):
-    student = get_object_or_404(models.Student, pk=pk)
+    student = models.Student.objects.infinite_student_with_answer_count(pk=pk)
     return answer_views.print_view(request, student.exam.pk, student=student)
 
 

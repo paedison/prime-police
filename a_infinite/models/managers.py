@@ -3,7 +3,8 @@ from django.db import models
 
 
 class ExamManager(models.Manager):
-    pass
+    def infinite_qs_exam_list(self):
+        return self.select_related('statistics').order_by('-round')
 
 
 class ProblemManager(models.Manager):
@@ -29,10 +30,21 @@ class StudentManager(models.Manager):
             annotate_dict[f'rank_{key}'] = models.F(f'rank__{fld}')
         return annotate_dict
 
-    def infinite_qs_student_list_by_exam(self, exam):
+    @staticmethod
+    def get_answer_count(student):
+        answer_count_model = apps.get_model('a_infinite', 'Answer')
+        return answer_count_model.objects.filter(student=student).aggregate(
+            subject_0=models.Count('id', filter=models.Q(problem__subject='형사')),
+            subject_1=models.Count('id', filter=models.Q(problem__subject='헌법')),
+            subject_2=models.Count('id', filter=models.Q(problem__subject='경찰')),
+            subject_3=models.Count('id', filter=models.Q(problem__subject='범죄')),
+            subject_4=models.Count('id', filter=models.Q(problem__subject='민법')),
+        )
+
+    def infinite_qs_student_list(self, **kwargs):
         annotate_dict = self.get_annotate_dict_for_score_and_rank()
         return (
-            self.with_select_related().filter(exam=exam).order_by('exam__round')
+            self.with_select_related().filter(**kwargs).order_by('-exam__round', '-id')
             .annotate(
                 name=models.F('user__name'),
                 latest_answer_time=models.Max('answers__created_at'),
@@ -41,23 +53,27 @@ class StudentManager(models.Manager):
             )
         )
 
-    def infinite_qs_student_by_user_and_exam_with_answer_count(self, user, exam):
+    def infinite_qs_student_list_by_exam(self, exam):
         annotate_dict = self.get_annotate_dict_for_score_and_rank()
-        qs_student = (
-            self.with_select_related().filter(user=user, exam=exam).prefetch_related('answers')
-            .annotate(**annotate_dict).order_by('-id').last()
+        return (
+            self.with_select_related().filter(exam=exam)
+            .annotate(
+                name=models.F('user__name'),
+                latest_answer_time=models.Max('answers__created_at'),
+                answer_count=models.Count('answers'),
+                **annotate_dict
+            ).order_by('exam__round', 'rank_sum')
         )
-        if qs_student:
-            answer_count_model = apps.get_model('a_infinite', 'Answer')
-            answer_count = answer_count_model.objects.filter(student=qs_student).aggregate(
-                subject_0=models.Count('id', filter=models.Q(problem__subject='형사')),
-                subject_1=models.Count('id', filter=models.Q(problem__subject='헌법')),
-                subject_2=models.Count('id', filter=models.Q(problem__subject='경찰')),
-                subject_3=models.Count('id', filter=models.Q(problem__subject='범죄')),
-                subject_4=models.Count('id', filter=models.Q(problem__subject='민법')),
-            )
-            qs_student.answer_count = answer_count
-        return qs_student
+
+    def infinite_student_with_answer_count(self, **kwargs):
+        annotate_dict = self.get_annotate_dict_for_score_and_rank()
+        student = (
+            self.with_select_related().filter(**kwargs).prefetch_related('answers')
+            .annotate(**annotate_dict).first()
+        )
+        if student:
+            student.answer_count = self.get_answer_count(student)
+        return student
 
 
 class AnswerManager(models.Manager):

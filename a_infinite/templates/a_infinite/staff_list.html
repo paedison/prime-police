@@ -53,16 +53,14 @@
                 </div>
             </div>
 
-            {% if request.user.is_admin %}
-                <div class="col-12" aria-label="참여자 목록">
-                    <div class="card">
-                        <div class="card-header">참여자 목록</div>
-                        <div class="card-body htmx-fade-in htmx-fade-out">
-                            {% partial student_list %}
-                        </div>
+            <div class="col-12" aria-label="참여자 목록">
+                <div class="card">
+                    <div class="card-header">참여자 목록</div>
+                    <div class="card-body htmx-fade-in htmx-fade-out">
+                        {% partial student_list %}
                     </div>
                 </div>
-            {% endif %}
+            </div>
         </div>
     </section>
 {% endblock main %}
@@ -72,27 +70,34 @@
         <table class="table table-bordered table-striped align-middle">
             <thead>
                 <tr class="text-center table-warning align-middle">
-                    <th class="text-primary text-nowrap">회차</th>
+                    <th class="text-primary text-nowrap td-left-no-border">회차</th>
                     <th class="text-primary text-nowrap">성적 결과</th>
-                    <th class="text-primary text-nowrap">시험일</th>
-                    <th class="text-primary text-nowrap">시험 시간</th>
+                    <th class="text-primary text-nowrap">시험 일정</th>
+                    <th class="text-primary text-nowrap">응시생 수</th>
+                    <th class="text-primary text-nowrap">최고 점수</th>
+                    <th class="text-primary text-nowrap">상위 10%</th>
+                    <th class="text-primary text-nowrap">상위 25%</th>
+                    <th class="text-primary text-nowrap">상위 50%</th>
+                    <th class="text-primary text-nowrap td-right-no-border">평균 점수</th>
                 </tr>
             </thead>
             <tbody>
                 {% if exam_page_obj %}
                     {% for obj in exam_page_obj %}
                         <tr class="text-center">
-                            <td class="text-nowrap">{{ obj.get_round_display }}</td>
+                            <td class="text-nowrap td-left-no-border">{{ obj.get_round_display }}</td>
                             <td class="text-nowrap">
-                                <a class="btn btn-sm btn-outline-primary" hx-boost="true"
-                                   href="{{ obj.get_staff_detail_url }}">
+                                <a class="btn btn-sm btn-outline-primary" hx-boost="true" href="{{ obj.get_staff_detail_url }}">
                                     클릭
                                 </a>
                             </td>
-                            <td class="text-nowrap">{{ obj.exam_started_at|date:'Y.n.d(D)' }}</td>
-                            <td class="text-nowrap">
-                                {{ obj.exam_started_at|date:'H:i' }}~{{ obj.exam_finished_at|date:'H:i' }}
-                            </td>
+                            <td class="text-nowrap">{{ obj.exam_started_at|date:'Y.n.d(D) H:i~' }}{{ obj.exam_finished_at|date:'H:i' }}</td>
+                            <td class="text-nowrap">{{ obj.statistics.sum.participants|default:'' }}</td>
+                            <td class="text-nowrap">{{ obj.statistics.sum.max|default:'' }}</td>
+                            <td class="text-nowrap">{{ obj.statistics.sum.t10|default:'' }}</td>
+                            <td class="text-nowrap">{{ obj.statistics.sum.t25|default:'' }}</td>
+                            <td class="text-nowrap">{{ obj.statistics.sum.t50|default:'' }}</td>
+                            <td class="text-nowrap td-right-no-border">{{ obj.statistics.sum.avg|default:'' }}</td>
                         </tr>
                     {% endfor %}
                 {% endif %}
@@ -106,29 +111,28 @@
         <table class="table table-bordered table-striped align-middle">
             <thead>
                 <tr class="text-center table-warning align-middle">
-                    <th class="text-primary text-nowrap" rowspan="2">ID</th>
-                    <th class="text-primary text-nowrap" rowspan="2">사용자 정보</th>
-                    <th class="text-primary text-nowrap" rowspan="2">시험명</th>
-                    <th class="text-primary text-nowrap" rowspan="2">수험번호</th>
-                    <th class="text-primary text-nowrap" rowspan="2">이름</th>
+                    <th class="text-primary text-nowrap td-left-no-border">ID</th>
+                    <th class="text-primary text-nowrap">성적 확인</th>
+                    <th class="text-primary text-nowrap">사용자 정보</th>
+                    <th class="text-primary text-nowrap">회차</th>
+                    <th class="text-primary text-nowrap">최종 답안 제출 일시</th>
+                    <th class="text-primary text-nowrap">제출 답안수</th>
+                    <th class="text-primary text-nowrap">총점</th>
+                    <th class="text-primary text-nowrap td-right-no-border">등수</th>
                 </tr>
             </thead>
             <tbody>
                 {% if student_page_obj %}
                     {% for obj in student_page_obj %}
-                        <tr class="text-center small">
-                            <td class="text-nowrap">{{ obj.id }}</td>
-                            <td class="text-nowrap">
-                                <div class="d-flex justify-content-between">
-                                    <div>{{ obj.user.username }}</div>
-                                    <div class="ms-2">[{{ obj.user_id }}]</div>
-                                </div>
-                            </td>
-                            <td class="text-nowrap">
-                                <div class="text-start">{{ obj.student.leet.name }}</div>
-                            </td>
-                            <td class="text-nowrap">{{ obj.student.serial }}</td>
-                            <td class="text-nowrap">{{ obj.student.name }}</td>
+                        <tr class="text-center">
+                            <td class="text-nowrap td-left-no-border">{{ obj.id }}</td>
+                            {% include 'a_infinite/snippets/staff_detail_catalog.html#detail_student' %}
+                            <td class="text-nowrap">{{ obj.user.name }} [{{ obj.user_id }}]</td>
+                            <td class="text-nowrap">{{ obj.exam.get_round_display }}</td>
+                            <td class="text-nowrap">{{ obj.latest_answer_time|default_if_none:''|date:'Y.n.d(D)' }}</td>
+                            <td class="text-nowrap">{{ obj.answer_count|default:'' }}</td>
+                            <td class="text-nowrap">{{ obj.score.sum|default:'' }}</td>
+                            <td class="text-nowrap td-right-no-border">{{ obj.rank.sum|default_if_none:'' }}</td>
                         </tr>
                     {% endfor %}
                 {% endif %}
@@ -137,6 +141,6 @@
     </article>
 
     {% with page_obj=student_page_obj page_range=student_page_range %}
-        {% include 'a_prime/snippets/pagination.html' with header='student_list' %}
+        {% include 'a_infinite/snippets/pagination.html' with header='student_list' %}
     {% endwith %}
 {% endpartialdef student_list %}

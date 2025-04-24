@@ -1,34 +1,45 @@
-{% extends 'base.html' %}
+{% extends '_base.html' %}
 {% load static %}
-{% load i18n %}
-{% load psat_filter %}
 
-{% block head_title %}{{ student.serial }}_{{ student.name }}_{{ exam.name }}_성적표{% endblock head_title %}
-{% block page_image %}<meta property="og:image" content="{% static 'image/prime/2024/exam/message-1.jpg' %}"/>{% endblock %}
-{% block google_adsense %}{% endblock %}
+{% block head_title %}무한반_{{ exam.get_round_display }}_성적표_{{ student.name }}{% endblock head_title %}
 
 {% block html_body %}
 <body class="bg-white">
     {{ info|json_script:'info' }}
-    <h2 class="fw-bold text-center mb-4">{{ sub_title }}</h2>
+    <h2 class="fw-bold text-center mb-4">무한반 {{ exam.get_round_display }} 성적표</h2>
+
     <div class="mb-2">
         <table class="table table-sm table-bordered small align-middle">
-            <tbody>
-                <tr class="text-center">
-                    <td class="text-nowrap">수험번호 : {{ student.serial }}</td>
-                    <td class="text-nowrap">이름 : {{ student.name }}</td>
-                    <td class="text-nowrap">출신대학 및 전공 : {{ student.school }} / {{ student.major }}</td>
-                    <td class="text-nowrap">지망대학 : {{ student.aspiration_1 }} / {{ student.aspiration_2 }}</td>
-                    <td class="text-nowrap">학점(GPA) : {{ student.gpa }} / {{ student.gpa_type }}</td>
-                    <td class="text-nowrap">영어성적 : {{ student.english }} / {{ student.english_type }}</td>
+            <thead>
+                <tr class="text-center small align-middle">
+                    <th>과목</th>
+                    <th>점수</th>
+                    <th>석차(등)</th>
+                    <th>석차(%)</th>
+                    <th>최고 점수</th>
+                    <th>상위 10%</th>
+                    <th>상위 25%</th>
+                    <th>상위 50%</th>
+                    <th>평균 점수</th>
                 </tr>
+            </thead>
+            <tbody>
+                {% for stat in stat_data_total %}
+                    <tr class="text-center small">
+                        <th>{{ stat.subject }}</th>
+                        <td>{{ stat.score|floatformat:1 }}</td>
+                        <td>{{ stat.rank }}</td>
+                        <td>{{ stat.rank|percentageby:stat.participants|floatformat:1 }}</td>
+                        <td>{{ stat.max_score|floatformat:1 }}</td>
+                        <td>{{ stat.top_score_10|floatformat:1 }}</td>
+                        <td>{{ stat.top_score_25|floatformat:1 }}</td>
+                        <td>{{ stat.top_score_50|floatformat:1 }}</td>
+                        <td>{{ stat.avg_score|floatformat:1 }}</td>
+                    </tr>
+                {% endfor %}
             </tbody>
         </table>
     </div>
-
-    {% with stat_data=stat_data_total table_title='응시자 전체' %}{% partial statistics_table %}{% endwith %}
-    {% with stat_data=stat_data_1 table_title='1지망대학' %}{% partial statistics_table %}{% endwith %}
-    {% with stat_data=stat_data_2 table_title='2지망대학' %}{% partial statistics_table %}{% endwith %}
 
     <div class="mb-2">
         <table class="table table-sm table-bordered small align-middle">
@@ -43,7 +54,7 @@
             <tbody>
                 {% for answers in data_answers %}
                     <tr class="text-center small">
-                        <th class="text-nowrap align-center" rowspan="5">{{ answers.0.sub }}</th>
+                        <th rowspan="5">{{ answers.0.subject }}</th>
                         <th class="text-nowrap">정답</th>
                         {% for answer in answers %}
                             <td data-number="{{ answer.no }}">
@@ -90,7 +101,7 @@
         </table>
     </div>
     <div class="table-responsive">
-        {% include 'a_prime_leet/snippets/answer_detail_chart.html#chart_canvas' with print_class='print' %}
+        {% include 'a_infinite/snippets/answer_detail_chart.html#chart_canvas' with print_class='print' %}
     </div>
 
     <script>

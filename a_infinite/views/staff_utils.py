@@ -528,7 +528,7 @@ def get_statistics_response(exam):
 
     filename = f'무한반_{exam.get_round_display()}_성적통계.xlsx'
     column_label = [
-        ('과목',), ('응시 인원',), ('최고 점수',), ('상위 10%',), ('상위 25%',), ('상위 50%',), ('평균',)
+        ('과목',), ('응시생 수',), ('최고 점수',), ('상위 10%',), ('상위 25%',), ('상위 50%',), ('평균',)
     ]
 
     return get_response_for_excel_file(df, [], column_label, filename)

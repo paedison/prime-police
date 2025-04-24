@@ -13,7 +13,7 @@
                             <div class="d-flex">
                                 <div class="btn-group ms-auto">
                                     <a class="btn btn-outline-secondary" title="목록"
-                                       href="{{ exam.get_predict_list_url }}" hx-boost="true">
+                                       href="{{ exam.get_answer_list_url }}" hx-boost="true">
                                         목록
                                     </a>
                                 </div>
@@ -36,10 +36,6 @@
                         <div>
                             <span class="badge bg-success"><i class="fa-regular fa-circle-check"></i> 참고</span>
                             <ol class="text-success small fw-bold m-0">
-                                {% if exam.is_not_finished %}
-                                    <li>예상 점수는 시험이 종료된 후에 공개됩니다.</li>
-                                {% endif %}
-                                <li>총 참여자수는 과목별로 답안 제출을 완료한 응시생수입니다.</li>
                                 <li>선택 답안수는 과목별로 답안을 선택한 문제수 및 총 문제수입니다.</li>
                                 <li>최종 제출한 답안만 통계에 포함되니 답안 제출을 완료해주세요.</li>
                                 <li>최종 제출한 답안은 변경 및 삭제가 불가하니 주의하시기 바랍니다.</li>
@@ -66,13 +62,6 @@
                                 모든 과목의 답안을 제출해주세요.
                             </div>
                         {% endif %}
-                        <div>
-                            <span class="badge bg-success"><i class="fa-regular fa-circle-check"></i> 참고</span>
-                            <ol class="text-success small fw-bold m-0">
-                                <li>답안 제출을 완료한 응시생들의 <span class="text-danger">전체 답안</span>을
-                                    대상으로 분석한 자료입니다.</li>
-                            </ol>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -83,17 +72,7 @@
         <div class="row">
             <div class="col-12" hx-target="#main" hx-swap="innerHTML swap:0.25s">
                 <div id="sheetAnswerSubmit" class="card htmx-fade-in htmx-fade-out">
-                    <div class="card-header">
-                        정답 확인
-                        <a class="text-decoration-none ms-2" href="" hx-swap="none" hx-indicator="#sheet_answer_spinner"
-                           hx-headers='{"View-Type":"answer_submit"}' hx-get="">
-                            <span class="badge rounded-pill text-bg-warning">업데이트</span>
-                        </a>
-                        <div id="sheetAnswerSubmitSpinner" role="status"
-                             class="htmx-indicator spinner-border text-warning spinner-border-sm">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                    </div>
+                    <div class="card-header">정답 확인</div>
 
                     <div class="card-body">
                         <nav>
@@ -107,9 +86,6 @@
                         <div class="tab-content" id="sheetAnswerSubmitContent">
                             {% for tab in answer_tab %}
                                 {% cycle data_answers.0 data_answers.1 data_answers.2 data_answers.3 data_answers.4 as answers silent %}
-                                {% cycle data_answer_official.0 data_answer_official.1 data_answer_official.2 data_answer_official.3 data_answer_official.4 as answer_official silent %}
-                                {% cycle data_answer_student.0 data_answer_student.1 data_answer_student.2 data_answer_student.3 data_answer_student.4 as answer_student silent %}
-                                {% cycle answer_confirmed.0 answer_confirmed.1 answer_confirmed.2 answer_confirmed.3 answer_confirmed.4 as is_confirmed silent %}
                                 {% #nav_content prefix='AnswerSubmit' id=tab.id %}
                                     {% include 'a_infinite/snippets/answer_detail_sheet_answer_submit.html' %}
                                 {% /nav_content %}

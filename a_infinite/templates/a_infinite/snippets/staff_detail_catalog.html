@@ -35,21 +35,24 @@
                     {% partialdef table_body inline=True %}
                         <td class="text-nowrap">{{ obj.rank_sum }}</td>
                         <td class="text-nowrap">{{ obj.name }}</td>
-                        <td class="text-nowrap">
-                            <div class="btn-group">
-                                <a target="result" class="btn btn-sm btn-outline-primary"
-                                   href="{{ obj.get_admin_detail_student_url }}">화면
-                                </a>
-                                <a target="result_print" class="btn btn-sm btn-outline-primary"
-                                   href="{{ obj.get_admin_detail_student_print_url }}">인쇄
-                                </a>
-                            </div>
-                        </td>
+
+                        {% partialdef detail_student inline %}
+                            <td class="text-nowrap">
+                                <div class="btn-group">
+                                    <a target="result" class="btn btn-sm btn-outline-primary"
+                                       href="{{ obj.get_staff_detail_student_url }}">화면
+                                    </a>
+                                    <a target="result_print" class="btn btn-sm btn-outline-primary"
+                                       href="{{ obj.get_staff_detail_student_print_url }}">인쇄
+                                    </a>
+                                </div>
+                            </td>
+                        {% endpartialdef %}
 
                         {% for _ in '012345' %}
                             {% cycle obj.score_sum obj.score_0 obj.score_1 obj.score_2 obj.score_3 obj.score_4 as score silent %}
                             {% cycle obj.rank_sum obj.rank_0 obj.rank_1 obj.rank_2 obj.rank_3 obj.rank_4 as rank silent %}
-                            <td class="text-nowrap td-right-no-border">{{ score|floatformat:1 }}</td>
+                            <td class="text-nowrap td-right-no-border">{{ score|default:''|floatformat:1 }}</td>
                             <td class="text-nowrap td-left-no-border td-right-no-border">
                                 <span class="text-primary">{{ rank|default_if_none:'' }}</span>
                                 {% if rank and obj.rank_num %}

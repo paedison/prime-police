@@ -1,4 +1,5 @@
 from django.db import models
+from django.urls import reverse_lazy
 
 from . import managers
 from a_common.models import User
@@ -8,7 +9,7 @@ verbose_name_prefix = '[성적결과] '
 
 
 class Statistics(abstract_models.Statistics):
-    objects = managers.StudentManager()
+    objects = managers.StatisticsManager()
     exam = models.OneToOneField(Exam, on_delete=models.CASCADE, related_name='statistics', verbose_name='시험')
 
     class Meta:
@@ -31,6 +32,12 @@ class Student(abstract_models.Student):
 
     def __str__(self):
         return f'{self.exam.reference}-{self.user.name}'
+
+    def get_staff_detail_student_url(self):
+        return reverse_lazy('infinite:staff-detail-student', args=[self.id])
+
+    def get_staff_detail_student_print_url(self):
+        return reverse_lazy('infinite:staff-detail-student-print', args=[self.id])
 
 
 class Answer(abstract_models.Answer):

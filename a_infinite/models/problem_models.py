@@ -9,11 +9,14 @@ from taggit.managers import TaggableManager
 from a_common.constants import icon_set
 from a_common.models import User
 from a_common.prime_test.model_settings import *
+from a_infinite.models import managers
 
 verbose_name_prefix = '[문제은행] '
 
 
 class Exam(models.Model):
+    objects = managers.ExamManager()
+
     semester = models.IntegerField(
         choices=semester_choice, default=semester_default, verbose_name='기수')
     round = models.IntegerField(choices=round_choice, default=1, verbose_name='회차')
@@ -96,6 +99,8 @@ class ProblemTaggedItem(BaseProblemTaggedItem):
 
 
 class Problem(models.Model):
+    objects = managers.ProblemManager()
+
     exam = models.ForeignKey(Exam, on_delete=models.CASCADE, related_name='problems')
     subject = models.CharField(max_length=2, choices=infinite_subject_choice, default='형사', verbose_name='과목')
     number = models.IntegerField(choices=number_choice, default=1, verbose_name='문제 번호')
