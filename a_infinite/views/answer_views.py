@@ -91,7 +91,7 @@ def detail_view(request: HtmxHttpRequest, pk: int, student=None, is_for_print=Fa
         icon_menu=icon_set.ICON_MENU['infinite'], icon_nav=icon_set.ICON_NAV,
 
         # tab variables for templates
-        answer_tab=answer_utils.get_answer_tab(),
+        answer_tab=answer_utils.get_answer_tab(exam),
 
         # info_student: 수험 정보
         student=student,

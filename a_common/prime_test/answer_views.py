@@ -42,31 +42,18 @@ def answer_detail_view(request: utils.HtmxHttpRequest, pk: int, models, config):
         return redirect('daily:answer-list')
     student.rank_ratio = student.get_rank_ratio(exam.participants)
 
-    answer_official: list[dict] = list(models.Problem.objects.filter(
-        **exam_info).order_by('number').values(no=F('number'), ans=F('answer')))
-    answer_student = [{'no': no, 'ans': ans} for no, ans in enumerate(student.answer_student, start=1)]
-
+    qs_problem = models.Problem.objects.filter(**exam_info).order_by('number')
     qs_answer_count = models.AnswerCount.objects.filter(**exam_info).order_by('number')
-    for idx, answer_cnt in enumerate(qs_answer_count):
-        ans_official = answer_official[idx]['ans']
-        if 1 <= ans_official <= 5:
-            rate_correct = getattr(answer_cnt, f'rate_{ans_official}')
-        else:
-            ans_official_list = [int(ans) for ans in str(ans_official)]
-            rate_correct = sum(getattr(answer_cnt, f'rate_{ans}') for ans in ans_official_list)
-        answer_official[idx]['rate_correct'] = rate_correct
+    answer_analysis = utils.get_answer_analysis(qs_problem, qs_answer_count, student)
 
-        ans_student = student.answer_student[idx]
-        answer_student[idx]['rate_selection'] = getattr(answer_cnt, f'rate_{ans_student}')
-        answer_student[idx]['result'] = ans_student == ans_official
-
-    score_points = utils.get_score_points(models, exam_info)
-    score_colors = ['blue' if score == student.score else 'white' for score in score_points.keys()]
+    stat_chart = utils.get_dict_stat_chart(exam, student)
+    scores = models.Student.objects.filter(score__isnull=False, **exam_info).values_list('score', flat=True)
+    stat_frequency = utils.get_dict_stat_frequency(scores, student)
 
     context = utils.update_context_data(
         config=config, exam=exam, student=student,
-        score_points=score_points, score_colors=score_colors,
-        answer_official=answer_official, answer_student=answer_student,
+        stat_chart=stat_chart, stat_frequency=stat_frequency,
+        loop_list=utils.get_loop_list(qs_problem), answer_analysis=answer_analysis,
         icon_menu=icon_set.ICON_MENU['daily'], icon_question=icon_set.ICON_QUESTION,
         icon_nav=icon_set.ICON_NAV, icon_board=icon_set.ICON_BOARD,
     )

@@ -1,5 +1,5 @@
 import traceback
-from collections import Counter
+from collections import Counter, defaultdict
 
 import django
 from django.core.paginator import Paginator
@@ -9,7 +9,7 @@ from django.http import HttpRequest
 from django_htmx.middleware import HtmxDetails
 
 from .constants import icon_set
-from .prime_test.model_settings import subject_choice, semester_default
+from .prime_test.model_settings import subject_choice, semester_default, answer_choice
 
 
 class HtmxHttpRequest(HttpRequest):
@@ -140,6 +140,88 @@ def get_exam_info(instance):
 
 def get_student(request: HtmxHttpRequest, models, exam_info: dict):
     return models.Student.objects.filter(user=request.user, **exam_info).first()
+
+
+def get_answer_analysis(qs_problem, qs_answer_count, student):
+    data_answers = []
+    for qs_p in qs_problem:
+        idx = qs_p.number - 1
+        qs_ac = qs_answer_count[idx]
+
+        ans_official = qs_p.answer
+        ans_student = student.answer_student[idx]
+
+        qs_p.ans_official = ans_official
+        qs_p.ans_official_circle = qs_p.get_answer_display()
+        qs_p.ans_student = ans_student
+        qs_p.ans_student_circle = answer_choice()[ans_student]
+
+        ans_official_list = [int(ans) for ans in str(ans_official)]
+        qs_p.rate_correct = sum(getattr(qs_ac, f'rate_{ans}') for ans in ans_official_list)
+        qs_p.rate_selection = getattr(qs_ac, f'rate_{ans_student}')
+        qs_p.result = ans_student in ans_official_list
+
+        data_answers.append(qs_p)
+    return data_answers
+
+
+def get_dict_stat_chart(exam, student=None):
+    statistics = exam.statistics
+    stat_chart = {
+        'avg_score': [statistics['avg']],
+        'max_score': [statistics['max']],
+        'top_score_10': [statistics['t10']],
+        'top_score_20': [statistics['t20']],
+    }
+    if student:
+        stat_chart['my_score'] = [student.score]
+    return stat_chart
+
+
+def frequency_table_by_bin(scores, bin_size=10, target_score=None):
+    freq = defaultdict(int)
+
+    for score in scores:
+        if score == 100:
+            freq['100'] += 1
+        else:
+            bin_start = int((score // bin_size) * bin_size)
+            bin_end = bin_start + bin_size
+            bin_label = f'{bin_start}~{bin_end}'
+            freq[bin_label] += 1
+
+    # bin_start 기준으로 정렬
+    sorted_freq = dict(sorted(freq.items(), key=lambda x: int(x[0].split('~')[0])))
+
+    # 특정 점수의 구간 구하기
+    target_bin = None
+    if target_score is not None:
+        if target_score == 100:
+            target_bin = '100'
+        else:
+            bin_start = int((target_score // bin_size) * bin_size)
+            bin_end = bin_start + bin_size
+            target_bin = f'{bin_start}~{bin_end}'
+
+    return sorted_freq, target_bin
+
+
+def get_dict_stat_frequency(scores, student=None) -> dict:
+    if student:
+        sorted_freq, target_bin = frequency_table_by_bin(scores, target_score=student.score)
+    else:
+        sorted_freq, target_bin = frequency_table_by_bin(scores)
+
+    score_label = []
+    score_data = []
+    score_color = []
+    for key, val in sorted_freq.items():
+        score_label.append(key)
+        score_data.append(val)
+        color = 'rgba(255, 99, 132, 0.5)' if key == target_bin else 'rgba(54, 162, 235, 0.5)'
+        score_color.append(color)
+
+    return {'score_data': score_data, 'score_label': score_label, 'score_color': score_color}
 
 
 def get_statistics(score_list: list, score: float) -> dict:
@@ -337,8 +419,16 @@ def update_student_model_for_rank(models, exam, exam_info):
     return message
 
 
-def get_score_points(models, exam_info):
-    score_points_list = list(models.Student.objects.filter(
-        score__isnull=False, **exam_info).values_list('score', flat=True))
-    score_points_list.sort()
-    return Counter(score_points_list)
+def get_loop_list(qs_problem):
+    problem_count = len(qs_problem)
+    loop_list = []
+    quotient = problem_count // 10
+    counter = [10] * quotient
+    remainder = problem_count % 10
+    if remainder:
+        counter.append(remainder)
+    loop_min = 0
+    for loop_idx in range(quotient):
+        loop_list.append({'counter': counter[loop_idx], 'min': loop_min})
+        loop_min += 10
+    return loop_list

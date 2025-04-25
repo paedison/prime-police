@@ -3,6 +3,7 @@ from collections import defaultdict
 
 from django.db.models import F, Window
 from django.db.models.functions import Rank
+from django.urls import reverse_lazy
 
 from .staff_utils import bulk_create_or_update
 from .. import models
@@ -40,13 +41,16 @@ def get_score_unit(sub):
     return police_score_unit.get(sub, 1.5)
 
 
-def get_answer_tab() -> list:
+def get_answer_tab(exam) -> list:
     subject_vars = get_subject_vars()
     subject_vars.pop('총점')
     answer_tab = []
-    for sub, (subject, _, idx) in subject_vars.items():
+    for sub, (subject, fld, idx) in subject_vars.items():
         loop_list = get_loop_list()
-        answer_tab.append({'id': str(idx), 'title': subject, 'loop_list': loop_list})
+        answer_tab.append({
+            'id': str(idx), 'title': subject, 'loop_list': loop_list,
+            'url_answer_input': reverse_lazy('infinite:answer-input', args=[exam.pk, fld])
+        })
     return answer_tab
 
 

@@ -129,14 +129,16 @@ def answer_detail_view(request: utils.HtmxHttpRequest, pk: int, models, config):
 
     page_obj_student, page_range_student = get_context_for_student_catalog()
     page_obj_problem, page_range_problem = get_context_for_problem_statistics()
-    score_points = utils.get_score_points(models, exam_info)
-    score_colors = ['white' for _ in score_points.keys()]
+
+    stat_chart = utils.get_dict_stat_chart(exam)
+    scores = models.Student.objects.filter(score__isnull=False, **exam_info).values_list('score', flat=True)
+    stat_frequency = utils.get_dict_stat_frequency(scores)
 
     context = utils.update_context_data(
         config=config, exam=exam,
         page_obj_student=page_obj_student, page_range_student=page_range_student,
         page_obj_problem=page_obj_problem, page_range_problem=page_range_problem,
-        score_points=score_points, score_colors=score_colors,
+        stat_chart=stat_chart, stat_frequency=stat_frequency,
         icon_menu=icon_set.ICON_MENU['daily'], icon_question=icon_set.ICON_QUESTION,
         icon_nav=icon_set.ICON_NAV, icon_board=icon_set.ICON_BOARD,
     )

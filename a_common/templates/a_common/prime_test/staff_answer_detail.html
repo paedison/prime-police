@@ -3,10 +3,9 @@
 {% block main %}
     {% include 'a_common/prime_test/page_title.html' %}
 
-    <section class="section htmx-fade-in htmx-fade-out"
-             hx-target="#main" hx-swap="innerHTML swap:0.25s">
+    <section class="section" aria-label="시험 통계">
         <div class="row">
-            <div class="col-12" aria-label="시험 통계">
+            <div class="col-12" hx-target="#main" hx-swap="innerHTML swap:0.25s">
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         {{ exam.full_reference }} 시험 통계
@@ -33,12 +32,14 @@
                 </div>
             </div>
         </div>
+    </section>
 
+    <section class="section" aria-label="성적 일람표">
         <div class="row">
-            <div class="col-12" aria-label="성적 일람표">
+            <div class="col-12">
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        {{ exam.full_reference }} 성적 일람표
+                        성적 일람표
                     </div>
                     <div class="card-body htmx-fade-in htmx-fade-out">
                         {% partial student_catalog %}
@@ -46,12 +47,14 @@
                 </div>
             </div>
         </div>
+    </section>
 
+    <section class="section" aria-label="문항 분석표">
         <div class="row">
-            <div class="col-12" aria-label="문항 분석표">
+            <div class="col-12">
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        {{ exam.full_reference }} 문항 분석표
+                        문항 분석표
                     </div>
                     <div class="card-body htmx-fade-in htmx-fade-out">
                         {% partial problem_statistics %}

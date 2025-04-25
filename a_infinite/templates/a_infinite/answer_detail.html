@@ -4,17 +4,17 @@
 {% block main %}
     {% include 'a_common/prime_test/page_title.html' %}
 
-    <section class="section" hx-target="#main" hx-swap="innerHTML swap:0.25s">
+    <section class="section" aria-label="페이지 제목">
         <div class="row">
-            <div class="col-12">
+            <div class="col-12" hx-target="#main" hx-swap="innerHTML swap:0.25s">
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title mb-0 text-center">
                             <div class="d-flex">
                                 <div class="btn-group ms-auto">
-                                    <a class="btn btn-outline-secondary" title="목록"
+                                    <a class="btn btn-outline-secondary" title="시험 목록으로"
                                        href="{{ exam.get_answer_list_url }}" hx-boost="true">
-                                        목록
+                                        시험 목록으로
                                     </a>
                                 </div>
                             </div>
@@ -26,6 +26,7 @@
         </div>
     </section>
 
+{% if not all_confirmed %}
     <section class="section" aria-label="답안 제출 현황">
         <div class="row">
             <div class="col-12" hx-target="#main" hx-swap="innerHTML swap:0.25s">
@@ -46,13 +47,14 @@
             </div>
         </div>
     </section>
+{% endif %}
 
 {% if current_time > exam.exam_finished_at %}
-    <section class="section" aria-label="성적 결과">
+    <section class="section" aria-label="과목별 성적">
         <div class="row">
             <div class="col-12" hx-target="#main" hx-swap="innerHTML swap:0.25s">
                 <div id="sheetScoreAll" class="card htmx-fade-in htmx-fade-out">
-                    <div class="card-header">성적 결과</div>
+                    <div class="card-header">과목별 성적</div>
 
                     <div class="card-body">
                         {% if all_confirmed %}
