@@ -8,20 +8,20 @@
                 <th class="text-primary text-nowrap" rowspan="2">공식<br/>정답</th>
                 <th class="text-primary text-nowrap" rowspan="2">예상<br/>정답</th>
                 <th class="text-primary text-nowrap" colspan="2">정답률(%)</th>
-                <th class="text-primary text-nowrap" colspan="5">[전체] 답안 선택 현황</th>
-                <th class="text-primary text-nowrap" colspan="5">[상위권] 답안 선택 현황</th>
-                <th class="text-primary text-nowrap" colspan="5">[중위권] 답안 선택 현황</th>
-                <th class="text-primary text-nowrap td-right-no-border" colspan="5">[하위권] 답안 선택 현황</th>
+                {% for _ in '전상중하' %}
+                    {% cycle '전체' '상위권' '중위권' '하위권' as th_rank_type silent %}
+                    <th class="text-primary text-nowrap{% if forloop.last %} td-right-no-border{% endif %}" colspan="4">
+                        [{{ th_rank_type }}] 답안 분포 현황
+                    </th>
+                {% endfor %}
             </tr>
             <tr class="text-center table-warning align-middle">
                 <th class="text-primary text-nowrap">전체[상/중/하]</th>
                 <th class="text-primary text-nowrap">변별도</th>
-                {% for _ in '1234' %}
-                    <th class="text-primary td-right-no-border">①</th>
-                    <th class="text-primary td-left-no-border td-right-no-border">②</th>
-                    <th class="text-primary td-left-no-border td-right-no-border">③</th>
-                    <th class="text-primary td-left-no-border td-right-no-border">④</th>
-                    <th class="text-primary td-left-no-border td-right-no-border">⑤</th>
+                {% for _ in '전상중하' %}
+                    {% for answer_num in '①②③④' %}
+                        <th class="text-primary text-nowrap{% if not forloop.first %} td-left-no-border{% endif %} td-right-no-border">{{ answer_num }}</th>
+                    {% endfor %}
                 {% endfor %}
             </tr>
         </thead>
@@ -43,34 +43,20 @@
                     </td>
                     <td>{{ obj.rate_gap|floatformat:1 }}</td>
 
-                    {% for _ in '1234' %}
+                    {% for _ in '전상중하' %}
                         {% cycle obj.count_1 obj.count_1_top obj.count_1_mid obj.count_1_low as count_1 silent %}
                         {% cycle obj.count_2 obj.count_2_top obj.count_2_mid obj.count_2_low as count_2 silent %}
                         {% cycle obj.count_3 obj.count_3_top obj.count_3_mid obj.count_3_low as count_3 silent %}
                         {% cycle obj.count_4 obj.count_4_top obj.count_4_mid obj.count_4_low as count_4 silent %}
-                        {% cycle obj.count_5 obj.count_5_top obj.count_5_mid obj.count_5_low as count_5 silent %}
                         {% cycle obj.count_sum obj.count_sum_top obj.count_sum_mid obj.count_sum_low as count_sum silent %}
 
-                        <td class="td-right-no-border">
-                            {{ count_1|default:'' }}<br/>
-                            <span class="text-primary">{{ count_1|percentageby:count_sum|floatformat:1 }}</span>
-                        </td>
-                        <td class="td-left-no-border td-right-no-border">
-                            {{ count_2|default:'' }}<br/>
-                            <span class="text-primary">{{ count_2|percentageby:count_sum|floatformat:1 }}</span>
-                        </td>
-                        <td class="td-left-no-border td-right-no-border">
-                            {{ count_3|default:'' }}<br/>
-                            <span class="text-primary">{{ count_3|percentageby:count_sum|floatformat:1 }}</span>
-                        </td>
-                        <td class="td-left-no-border td-right-no-border">
-                            {{ count_4|default:'' }}<br/>
-                            <span class="text-primary">{{ count_4|percentageby:count_sum|floatformat:1 }}</span>
-                        </td>
-                        <td class="td-left-no-border td-right-no-border">
-                            {{ count_5|default:'' }}<br/>
-                            <span class="text-primary">{{ count_5|percentageby:count_sum|floatformat:1 }}</span>
-                        </td>
+                        {% for _ in '1234' %}
+                            {% cycle count_1 count_2 count_3 count_4 as cnt silent %}
+                            <td class="{% if not forloop.first %}td-left-no-border {% endif %}td-right-no-border">
+                                <span class="text-primary fw-bold">{{ cnt|percentageby:count_sum|default:''|floatformat:1 }}</span><br/>
+                                {{ cnt|default:'' }}
+                            </td>
+                        {% endfor %}
                     {% endfor %}
                 </tr>
             {% empty %}

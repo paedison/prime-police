@@ -54,10 +54,8 @@
                             {% cycle obj.rank_sum obj.rank_0 obj.rank_1 obj.rank_2 obj.rank_3 obj.rank_4 as rank silent %}
                             <td class="text-nowrap td-right-no-border">{{ score|default:''|floatformat:1 }}</td>
                             <td class="text-nowrap td-left-no-border td-right-no-border">
-                                <span class="text-primary">{{ rank|default_if_none:'' }}</span>
-                                {% if rank and obj.rank_num %}
-                                    <br/>{{ rank|divide:obj.rank_num|percentage|floatformat:1 }}
-                                {% endif %}
+                                <span class="text-primary fw-bold">{{ rank|percentageby:obj.rank_num|default:''|floatformat:1 }}</span>
+                                <br/>{{ rank|default:'' }}
                             </td>
                         {% endfor %}
                     {% endpartialdef table_body %}

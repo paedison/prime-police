@@ -133,8 +133,8 @@ def get_answer_rate(models, problem, exam_info):
 
 def get_exam_info(instance):
     return {
-        'semester': semester_default(), 'circle': instance.circle,
-        'subject': instance.subject, 'round': instance.round
+        'semester': semester_default(), 'circle': getattr(instance, 'circle'),
+        'subject': getattr(instance, 'subject'), 'round': getattr(instance, 'round')
     }
 
 
