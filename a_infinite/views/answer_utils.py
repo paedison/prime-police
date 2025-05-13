@@ -231,9 +231,7 @@ def get_dict_stat_frequency(student) -> dict:
     return {'score_data': score_data, 'score_label': score_label, 'score_color': score_color}
 
 
-def get_data_answers(student):
-    qs_student_answer = models.Answer.objects.infinite_qs_answer_by_student_with_predict_result(student)
-
+def get_data_answers(qs_student_answer):
     subject_vars = get_subject_vars()
     subject_vars.pop('총점')
     data_answers = [[] for _ in subject_vars]
@@ -260,21 +258,23 @@ def get_data_answers(student):
         qs_sa.rate_accuracy = qs_sa.problem.answer_count.get_answer_predict_rate()
 
         qs_sa.rate_correct = qs_sa.problem.answer_count.get_answer_rate(ans_official)
-        qs_sa.rate_correct_top = qs_sa.problem.answer_count_top_rank.get_answer_rate(ans_official)
-        qs_sa.rate_correct_mid = qs_sa.problem.answer_count_mid_rank.get_answer_rate(ans_official)
-        qs_sa.rate_correct_low = qs_sa.problem.answer_count_low_rank.get_answer_rate(ans_official)
-        if qs_sa.rate_correct_top is not None and qs_sa.rate_correct_low is not None:
-            qs_sa.rate_gap = qs_sa.rate_correct_top - qs_sa.rate_correct_low
-        else:
-            qs_sa.rate_gap = 0
+        qs_sa.rate_correct_top = get_answer_rate_by_rank_type(qs_sa.problem, 'top', ans_official)
+        qs_sa.rate_correct_mid = get_answer_rate_by_rank_type(qs_sa.problem, 'mid', ans_official)
+        qs_sa.rate_correct_low = get_answer_rate_by_rank_type(qs_sa.problem, 'low', ans_official)
 
         qs_sa.rate_selection = qs_sa.problem.answer_count.get_answer_rate(ans_student)
-        qs_sa.rate_selection_top = qs_sa.problem.answer_count_top_rank.get_answer_rate(ans_student)
-        qs_sa.rate_selection_mid = qs_sa.problem.answer_count_mid_rank.get_answer_rate(ans_student)
-        qs_sa.rate_selection_low = qs_sa.problem.answer_count_low_rank.get_answer_rate(ans_student)
+        qs_sa.rate_selection_top = get_answer_rate_by_rank_type(qs_sa.problem, 'top', ans_student)
+        qs_sa.rate_selection_mid = get_answer_rate_by_rank_type(qs_sa.problem, 'mid', ans_student)
+        qs_sa.rate_selection_low = get_answer_rate_by_rank_type(qs_sa.problem, 'low', ans_student)
 
         data_answers[idx].append(qs_sa)
     return data_answers
+
+
+def get_answer_rate_by_rank_type(problem, rank_type: str, ans_official):
+    attr_name = f'answer_count_{rank_type}_rank'
+    if hasattr(problem, attr_name):
+        return getattr(problem, attr_name).get_answer_rate(ans_official)
 
 
 def create_confirmed_answers(student, sub, answer_data):

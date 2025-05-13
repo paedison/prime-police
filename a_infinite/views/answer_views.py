@@ -83,6 +83,7 @@ def detail_view(request: HtmxHttpRequest, pk: int, student=None, is_for_print=Fa
         models.Rank.objects.create(student=student)
         student = models.Student.objects.infinite_student_with_answer_count(user=request.user, exam=exam)
 
+    qs_student_answer = models.Answer.objects.infinite_qs_answer_by_student_with_predict_result(student)
     is_confirmed_data = answer_utils.get_is_confirmed_data(student)
     stat_data_total = answer_utils.get_dict_stat_data(request, student, is_confirmed_data)
 
@@ -101,7 +102,7 @@ def detail_view(request: HtmxHttpRequest, pk: int, student=None, is_for_print=Fa
 
         # sheet_answer: 답안 확인
         is_confirmed_data=is_confirmed_data,
-        data_answers=answer_utils.get_data_answers(student),
+        data_answers=answer_utils.get_data_answers(qs_student_answer),
 
         # chart: 성적 분포 차트
         stat_chart=answer_utils.get_dict_stat_chart(stat_data_total),

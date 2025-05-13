@@ -106,16 +106,16 @@ def get_data_answers(qs_answer_count, subject_vars):
         qs_ac.field = field
 
         qs_ac.rate_correct = qs_ac.get_answer_rate(ans_official)
-        qs_ac.rate_correct_top = get_rate_correct(qs_ac.problem, 'top', ans_official)
-        qs_ac.rate_correct_mid = get_rate_correct(qs_ac.problem, 'mid', ans_official)
-        qs_ac.rate_correct_low = get_rate_correct(qs_ac.problem, 'low', ans_official)
+        qs_ac.rate_correct_top = get_answer_rate_by_rank_type(qs_ac.problem, 'top', ans_official)
+        qs_ac.rate_correct_mid = get_answer_rate_by_rank_type(qs_ac.problem, 'mid', ans_official)
+        qs_ac.rate_correct_low = get_answer_rate_by_rank_type(qs_ac.problem, 'low', ans_official)
         if qs_ac.rate_correct_top is not None and qs_ac.rate_correct_low is not None:
             qs_ac.rate_gap = qs_ac.rate_correct_top - qs_ac.rate_correct_low
 
     return qs_answer_count
 
 
-def get_rate_correct(problem, rank_type: str, ans_official):
+def get_answer_rate_by_rank_type(problem, rank_type: str, ans_official):
     attr_name = f'answer_count_{rank_type}_rank'
     if hasattr(problem, attr_name):
         return getattr(problem, attr_name).get_answer_rate(ans_official)
