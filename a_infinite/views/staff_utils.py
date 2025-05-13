@@ -106,15 +106,18 @@ def get_data_answers(qs_answer_count, subject_vars):
         qs_ac.field = field
 
         qs_ac.rate_correct = qs_ac.get_answer_rate(ans_official)
-        qs_ac.rate_correct_top = qs_ac.problem.answer_count_top_rank.get_answer_rate(ans_official)
-        qs_ac.rate_correct_mid = qs_ac.problem.answer_count_mid_rank.get_answer_rate(ans_official)
-        qs_ac.rate_correct_low = qs_ac.problem.answer_count_low_rank.get_answer_rate(ans_official)
-        try:
+        qs_ac.rate_correct_top = get_rate_correct(qs_ac.problem, 'top', ans_official)
+        qs_ac.rate_correct_mid = get_rate_correct(qs_ac.problem, 'mid', ans_official)
+        qs_ac.rate_correct_low = get_rate_correct(qs_ac.problem, 'low', ans_official)
+        if qs_ac.rate_correct_top is not None and qs_ac.rate_correct_low is not None:
             qs_ac.rate_gap = qs_ac.rate_correct_top - qs_ac.rate_correct_low
-        except TypeError:
-            qs_ac.rate_gap = None
 
     return qs_answer_count
+
+
+def get_rate_correct(problem, rank_type: str, ans_official):
+    if hasattr(problem, rank_type):
+        return getattr(problem, 'answer_count_top_rank').get_answer_rate(ans_official)
 
 
 def update_problem_model_for_answer_official(exam, form, file) -> tuple:
