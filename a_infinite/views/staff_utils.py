@@ -116,8 +116,9 @@ def get_data_answers(qs_answer_count, subject_vars):
 
 
 def get_rate_correct(problem, rank_type: str, ans_official):
-    if hasattr(problem, rank_type):
-        return getattr(problem, rank_type).get_answer_rate(ans_official)
+    attr_name = f'answer_count_{rank_type}_rank'
+    if hasattr(problem, attr_name):
+        return getattr(problem, attr_name).get_answer_rate(ans_official)
 
 
 def update_problem_model_for_answer_official(exam, form, file) -> tuple:
