@@ -1,0 +1,46 @@
+{% if exam.is_not_page_opened %}
+    <div class="alert alert-danger alert-dismissible fade show mb-0" role="alert">
+        <i class="fa-solid fa-circle-exclamation"></i>
+            모의고사 성적은 {{ exam.page_opened_at|date:'n/d(D) H:i' }}부터 확인 가능합니다.
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+{% else %}
+    <div class="alert alert-danger alert-dismissible fade show mb-0" role="alert">
+        <i class="fa-solid fa-circle-exclamation"></i>
+            수험정보를 입력해주세요.
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <form hx-target="#main" hx-swap="innerHTML swap:0.25s" hx-post="">
+        {% csrf_token %}
+        {% if no_student %}
+            <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                수험정보를 다시 확인해주세요.
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endif %}
+
+        <div class="form-floating mt-3">
+            {{ form.serial }}
+            {{ form.serial.label_tag }}
+        </div>
+        {{ form.errors.serial }}
+
+        <div class="form-floating mt-3">
+            {{ form.name }}
+            {{ form.name.label_tag }}
+        </div>
+
+        <div class="input-group mt-3">
+            <div class="form-floating">
+                {{ form.password }}
+                {{ form.password.label_tag }}
+            </div>
+            <button class="btn btn-outline-secondary prevent_double_click" type="submit">
+                입력
+            </button>
+        </div>
+        {{ form.errors.name }}
+    </form>
+{% endif %}

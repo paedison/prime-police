@@ -8,8 +8,8 @@ from django.db.models import F
 from django.http import HttpRequest
 from django_htmx.middleware import HtmxDetails
 
-from .constants import icon_set
-from .prime_test.model_settings import subject_choice, semester_default, answer_choice
+from a_common.constants import icon_set
+from a_common.prime_test.model_settings import subject_choice, semester_default, answer_choice
 
 
 class HtmxHttpRequest(HttpRequest):
@@ -27,6 +27,27 @@ def detect_encoding(file_path):
     with open(file_path, 'rb') as f:
         first_bytes = f.read(3)
     return 'utf-8-sig' if first_bytes == b'\xef\xbb\xbf' else 'utf-8'
+
+
+def get_paginator_data(target_data, page_number, per_page=10, on_each_side=3, on_ends=1):
+    if target_data:
+        paginator = Paginator(target_data, per_page)
+        page_obj = paginator.get_page(page_number)
+        page_range = paginator.get_elided_page_range(number=page_number, on_each_side=on_each_side, on_ends=on_ends)
+        return page_obj, page_range
+    return None, None
+
+
+def get_paginator_context(queryset, page_number=1, per_page=10, on_each_side=3, on_ends=1, **kwargs):
+    try:
+        page_obj, page_range = get_paginator_data(queryset, page_number, per_page, on_each_side, on_ends)
+        if kwargs:
+            for obj in page_obj:
+                for key, value in kwargs.items():
+                    setattr(obj, key, value.get(obj.id))
+        return {'page_obj': page_obj, 'page_range': page_range}
+    except TypeError:
+        return None
 
 
 def get_page_obj_and_range(page_number, page_data, per_page=10):

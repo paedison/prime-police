@@ -1,0 +1,91 @@
+{% extends '_base.html' %}
+{% load static %}
+
+{% block main %}
+    {% include 'a_common/prime_test/page_title.html' %}
+
+    <section class="section" aria-label="페이지 제목">
+        <div class="row">
+            <div class="col-12" hx-target="#main" hx-swap="innerHTML swap:0.25s">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title mb-0 text-center">
+                            <div class="d-flex">
+                                <div class="btn-group ms-auto">
+                                    <a class="btn btn-outline-secondary" title="시험 목록으로"
+                                       href="{{ exam.get_answer_list_url }}" hx-boost="true">
+                                        시험 목록으로
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="fs-1 fw-bolder my-4">{{ exam.full_reference }} 성적표</div>
+                        </h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" aria-label="과목별 성적">
+        <div class="row">
+            <div class="col-12" hx-target="#main" hx-swap="innerHTML swap:0.25s">
+                <div id="sheetScoreAll" class="card htmx-fade-in htmx-fade-out">
+                    <div class="card-header">과목별 성적</div>
+
+                    <div class="card-body">
+                        {% include 'a_mock/snippets/result_detail_sheet_score_table.html' %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" aria-label="성적 분포 차트">
+        <div class="row" hx-target="#main" hx-swap="innerHTML swap:0.25s">
+            <div class="col-12">
+                <div id="sheetChart" class="card htmx-fade-in htmx-fade-out">
+                    <div class="card-header">성적 분포 차트</div>
+                    <div class="card-body">
+                        {% include 'a_mock/snippets/result_detail_chart.html' %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section" aria-label="정답 확인">
+        <div class="row">
+            <div class="col-12" hx-target="#main" hx-swap="innerHTML swap:0.25s">
+                <div id="sheetAnswerSubmit" class="card htmx-fade-in htmx-fade-out">
+                    <div class="card-header">정답 확인</div>
+
+                    <div class="card-body">
+                        <nav>
+                            <div class="nav nav-tabs nav-tabs-colored" id="scoreAnswerSubmitTab" role="tablist">
+                                {% for answers in answer_context.values %}
+                                    {% #nav_tab prefix='Answer' id=answers.id %}{{ answers.title }}{% /nav_tab %}
+                                {% endfor %}
+                            </div>
+                        </nav>
+
+                        <div class="tab-content" id="scoreAnswerSubmitContent">
+                            {% for answers in answer_context.values %}
+                                {% #nav_content prefix='Answer' id=answers.id %}
+                                    {% include 'a_mock/snippets/result_detail_sheet_answer.html' %}
+                                {% /nav_content %}
+                            {% endfor %}
+                        </div>
+
+                        <div>
+                            <span class="badge bg-success"><i class="fa-regular fa-circle-check"></i> 참고</span><br/>
+                            <ol class="text-success small fw-bold m-0">
+                                <li>정답률 = 정답 선택 응시생 수 / 답안 제출 완료 응시생 수</li>
+                                <li>선택률 = 동일 답안 선택 응시생 수 / 답안 제출 완료 응시생 수</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

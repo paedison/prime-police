@@ -7,8 +7,7 @@
         {% if perms.a_daily or user.is_staff %}{% partial menu_daily %}{% endif %}
         {% if perms.a_weekly or user.is_staff %}{% partial menu_weekly %}{% endif %}
         {% if perms.a_infinite or user.is_staff %}{% partial menu_infinite %}{% endif %}
-{#        {% partial menu_test_exam %}#}
-{#        {% partial menu_score %}#}
+        {% if request.user.is_staff %}{% partial menu_mock %}{% endif %}
     </ul>
     {% partial sidebar_toggle %}
 </aside>
@@ -19,7 +18,7 @@
             <i class="fa-solid fa-fw fa-bullhorn"></i> 공지사항
         </a>
     </li>
-{% endpartialdef menu_notice %}
+{% endpartialdef %}
 
 {% partialdef menu_dashboard %}
     <li class="nav-item">
@@ -27,7 +26,7 @@
             <i class="fa-solid fa-fw fa-list"></i> 대시보드
         </a>
     </li>
-{% endpartialdef menu_dashboard %}
+{% endpartialdef %}
 
 {% partialdef menu_official %}
     <li class="nav-item">
@@ -35,7 +34,7 @@
             <i class="fa-solid fa-fw fa-layer-group"></i> 기출문제
         </a>
     </li>
-{% endpartialdef menu_official %}
+{% endpartialdef %}
 
 {% partialdef menu_daily %}
     <li class="nav-item" role="menuitem" aria-label="데일리테스트">
@@ -67,7 +66,7 @@
             </li>
         </ul>
     </li>
-{% endpartialdef menu_daily %}
+{% endpartialdef %}
 
 {% partialdef menu_weekly %}
     <li class="nav-item" role="menuitem" aria-label="주간모의고사">
@@ -99,7 +98,7 @@
             </li>
         </ul>
     </li>
-{% endpartialdef menu_weekly %}
+{% endpartialdef %}
 
 {% partialdef menu_infinite %}
     <li class="nav-item" role="menuitem" aria-label="무한반">
@@ -131,15 +130,33 @@
             </li>
         </ul>
     </li>
-{% endpartialdef menu_infinite %}
+{% endpartialdef %}
 
-{% partialdef menu_test_exam %}
-    <li class="nav-item">
-        <a class="nav-link collapsed" data-menu="test_exam" href="{% url 'official:base' %}">
+{% partialdef menu_mock %}
+    <li class="nav-item" role="menuitem" aria-label="전국모의고사">
+        <a class="nav-link collapsed" href="#mockNavContent" data-menu="mock"
+           data-bs-toggle="collapse" aria-expanded="false" aria-controls="mockNavContent">
             <i class="fa-solid fa-fw fa-inbox"></i> 전국모의고사
+            <i class="fa-solid fa-fw fa-chevron-down ms-auto"></i>
         </a>
+        <ul id="mockNavContent" class="nav-content collapse" data-bs-parent="#sidebar">
+            {% if user.is_staff %}
+                <li>
+                    <a class="aside-nav-icon" data-menu-parent="mock" data-menu-self="staff"
+                       href="{% url 'mock:staff-list' %}">
+                        <i class="fa-regular fa-fw fa-square"></i> 관리자 메뉴
+                    </a>
+                </li>
+            {% endif %}
+            <li>
+                <a class="aside-nav-icon" data-menu-parent="mock" data-menu-self="result"
+                   href="{% url 'mock:index' %}">
+                    <i class="fa-regular fa-fw fa-square"></i> 성적 확인
+                </a>
+            </li>
+        </ul>
     </li>
-{% endpartialdef menu_test_exam %}
+{% endpartialdef %}
 
 {% partialdef menu_lecture %}
     <li class="nav-item">
@@ -147,10 +164,10 @@
             <i class="fa-solid fa-fw fa-pen-to-square"></i> 온라인강의
         </a>
     </li>
-{% endpartialdef menu_lecture %}
+{% endpartialdef %}
 
 {% partialdef sidebar_toggle %}
     <div class="d-none d-md-block text-center">
         <button id="sidebarToggle" class="rounded-circle border-0"></button>
     </div>
-{% endpartialdef sidebar_toggle %}
+{% endpartialdef %}

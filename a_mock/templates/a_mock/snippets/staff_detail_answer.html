@@ -1,0 +1,67 @@
+{% load humanize %}
+
+<article class="table-responsive">
+    <table class="table table-bordered table-striped align-middle m-0">
+        <thead>
+            <tr class="text-center table-warning align-middle">
+                <th class="text-primary text-nowrap td-left-no-border" rowspan="2">문제<br/>번호</th>
+                <th class="text-primary text-nowrap" rowspan="2">공식<br/>정답</th>
+                <th class="text-primary text-nowrap" colspan="2">정답률(%)</th>
+                {% for _ in '전상중하' %}
+                    {% cycle '전체' '상위권' '중위권' '하위권' as th_rank_type silent %}
+                    <th class="text-primary text-nowrap{% if forloop.last %} td-right-no-border{% endif %}" colspan="4">
+                        [{{ th_rank_type }}] 답안 분포 현황
+                    </th>
+                {% endfor %}
+            </tr>
+            <tr class="text-center table-warning align-middle">
+                <th class="text-primary text-nowrap">전체[상/중/하]</th>
+                <th class="text-primary text-nowrap">변별도</th>
+                {% for _ in '전상중하' %}
+                    {% for answer_num in '①②③④' %}
+                        <th class="text-primary text-nowrap{% if not forloop.first %} td-left-no-border{% endif %} td-right-no-border">{{ answer_num }}</th>
+                    {% endfor %}
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for obj in answer_data.page_obj %}
+                <tr class="text-center">
+                    <th class="td-left-no-border">{{ obj.no }}</th>
+                    <th class="text-success">{{ obj.ans_official_circle }}</th>
+                    <td class="text-nowrap">
+                        {% if obj.rate_correct %}
+                            <span class="fw-bold text-primary">{{ obj.rate_correct|floatformat:1 }}</span><br/>[
+                            {{ obj.rate_correct_top|floatformat:1|default:'-' }} /
+                            {{ obj.rate_correct_mid|floatformat:1|default:'-' }} /
+                            {{ obj.rate_correct_low|floatformat:1|default:'-' }} ]
+                        {% endif %}
+                    </td>
+                    <td>{{ obj.rate_gap|floatformat:1 }}</td>
+
+                    {% for _ in '전상중하' %}
+                        {% cycle obj.count_1 obj.count_1_top obj.count_1_mid obj.count_1_low as count_1 silent %}
+                        {% cycle obj.count_2 obj.count_2_top obj.count_2_mid obj.count_2_low as count_2 silent %}
+                        {% cycle obj.count_3 obj.count_3_top obj.count_3_mid obj.count_3_low as count_3 silent %}
+                        {% cycle obj.count_4 obj.count_4_top obj.count_4_mid obj.count_4_low as count_4 silent %}
+                        {% cycle obj.count_sum obj.count_sum_top obj.count_sum_mid obj.count_sum_low as count_sum silent %}
+
+                        {% for _ in '1234' %}
+                            {% cycle count_1 count_2 count_3 count_4 as cnt silent %}
+                            <td class="{% if not forloop.first %}td-left-no-border {% endif %}td-right-no-border">
+                                <span class="text-primary fw-bold">{{ cnt|percentageby:count_sum|default:''|floatformat:1 }}</span><br/>
+                                {{ cnt|default:'' }}
+                            </td>
+                        {% endfor %}
+                    {% endfor %}
+                </tr>
+            {% empty %}
+                <tr class="text-center">
+                    <td class="text-nowrap" colspan="40">자료가 없습니다.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</article>
+
+{% include 'a_infinite/snippets/pagination.html' with page_obj=answer_data.page_obj page_range=answer_data.page_range header='answer_list' %}

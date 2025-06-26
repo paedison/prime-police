@@ -1,0 +1,56 @@
+{% extends '_base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block head_title %}무한반_{{ exam.get_round_display }}_성적통계{% endblock head_title %}
+
+{% block html_body %}
+<body class="bg-white">
+    {{ info|json_script:'info' }}
+    <h2 class="fw-bold text-center mb-4">무한반 {{ exam.get_round_display }} 성적통계</h2>
+
+    <div class="mb-2">
+        <table class="table table-sm table-bordered align-middle">
+            <thead>
+                <tr class="text-center align-middle">
+                    <th>과목</th>
+                    <th>응시생 수</th>
+                    <th>최고 점수</th>
+                    <th>상위 10%</th>
+                    <th>상위 25%</th>
+                    <th>상위 50%</th>
+                    <th>평균 점수</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for obj in data_statistics %}
+                    {% for _ in '012345' %}
+                        {% cycle obj.sum obj.subject_0 obj.subject_1 obj.subject_2 obj.subject_3 obj.subject_4 as data_stat silent %}
+                        <tr class="text-center small">
+                            <td>{{ data_stat.subject }}</td>
+                            <td>{{ data_stat.participants|intcomma }}</td>
+                            <td>{{ data_stat.max|floatformat:1 }}</td>
+                            <td>{{ data_stat.t10|floatformat:1 }}</td>
+                            <td>{{ data_stat.t25|floatformat:1 }}</td>
+                            <td>{{ data_stat.t50|floatformat:1 }}</td>
+                            <td>{{ data_stat.avg|floatformat:1 }}</td>
+                        </tr>
+                    {% endfor %}
+                {% empty %}
+                    <tr class="text-center">
+                        <td class="text-nowrap p-2" colspan="22">자료가 없습니다.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        window.onload = function () {
+            setTimeout(function () {
+                window.print();
+            }, 1000);
+        };
+    </script>
+</body>
+{% endblock html_body %}

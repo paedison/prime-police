@@ -1,0 +1,200 @@
+<article class="table-responsive">
+    <table class="table align-middle">
+        <tbody>
+            {% for loop in answers.loop_list %}
+                {% partial answer_table_tr %}
+            {% endfor %}
+        </tbody>
+    </table>
+</article>
+
+{% partialdef answer_table_tr %}
+    <tr class="text-center table-warning" aria-label="문제 번호">
+        <th class="text-nowrap" colspan="2">문제 번호</th>
+        {% for _ in 'x'|ljust:loop.counter %}
+            <th>{{ forloop.counter|add:loop.min }}</th>
+        {% endfor %}
+    </tr>
+
+    <tr class="text-center" aria-label="정답">
+        <th class="text-nowrap" colspan="2">정답</th>
+        {% for answer in answers.page_obj %}
+            {% with answer_data=answer.ans_official_circle %}{% partial answer_official %}{% endwith %}
+        {% endfor %}
+    </tr>
+
+    <tr class="text-center" aria-label="전체 정답률">
+        <th class="text-nowrap px-0" rowspan="4">
+            {% with range_text_1='정답률<br/>(%)' range_text_2='정답률(%)' %}{% partial range_text %}{% endwith %}
+        </th>
+        <th class="text-nowrap px-0 td-no-border">전체</th>
+        {% for answer in answers.page_obj %}
+            {% with answer_rate=answer.rate_correct %}{% partial answer_rate_line_official %}{% endwith %}
+        {% endfor %}
+    </tr>
+
+    <tr class="text-center" aria-label="상위권 정답률">
+        <th class="text-nowrap px-0 td-no-border">
+            {% with range_text_1='상' range_text_2='상위권' %}{% partial range_text %}{% endwith %}
+        </th>
+        {% for answer in answers.page_obj %}
+            {% with answer_rate=answer.rate_correct_top %}{% partial answer_rate_line_official %}{% endwith %}
+        {% endfor %}
+    </tr>
+
+    <tr class="text-center" aria-label="중위권 정답률">
+        <th class="text-nowrap px-0 td-no-border">
+            {% with range_text_1='중' range_text_2='중위권' %}{% partial range_text %}{% endwith %}
+        </th>
+        {% for answer in answers.page_obj %}
+            {% with answer_rate=answer.rate_correct_mid %}{% partial answer_rate_line_official %}{% endwith %}
+        {% endfor %}
+    </tr>
+
+    <tr class="text-center" aria-label="하위권 정답률">
+        <th class="text-nowrap px-0">
+            {% with range_text_1='하' range_text_2='하위권' %}{% partial range_text %}{% endwith %}
+        </th>
+        {% for answer in answers.page_obj %}
+            {% with answer_rate=answer.rate_correct_low %}{% partial answer_rate_line_official %}{% endwith %}
+        {% endfor %}
+    </tr>
+
+    <tr class="text-center" aria-label="선택 답안">
+        <th class="text-nowrap" colspan="2">선택 답안</th>
+        {% for answer in answers.page_obj %}
+            {% if forloop.counter > loop.min and forloop.counter <= loop.min|add:loop.counter %}
+                <td data-number="{{ answer.no }}">
+                    <button class="btn btn-circle btn-sm fs-6 mx-1 my-2
+                            btn-{% if answer.result %}success{% else %}danger{% endif %}">
+                        {% if answer.ans_student > 0 and answer.ans_student < 6 %}
+                            {{ answer.ans_student }}
+                        {% endif %}
+                    </button>
+                </td>
+            {% endif %}
+        {% endfor %}
+    </tr>
+
+    <tr class="text-center" aria-label="전체 선택률">
+        <th class="text-nowrap px-0" rowspan="4">
+            {% with range_text_1='선택률<br/>(%)' range_text_2='선택률(%)' %}{% partial range_text %}{% endwith %}
+        </th>
+        <th class="text-nowrap px-0 td-no-border">전체</th>
+        {% for answer in answers.page_obj %}
+            {% with answer_rate=answer.rate_selection %}{% partial answer_rate_line_student %}{% endwith %}
+        {% endfor %}
+    </tr>
+
+    <tr class="text-center" aria-label="상위권 선택률">
+        <th class="text-nowrap px-0 td-no-border">
+            {% with range_text_1='상' range_text_2='상위권' %}{% partial range_text %}{% endwith %}
+        </th>
+        {% for answer in answers.page_obj %}
+            {% with answer_rate=answer.rate_selection_top %}{% partial answer_rate_line_student %}{% endwith %}
+        {% endfor %}
+    </tr>
+
+    <tr class="text-center" aria-label="중위권 선택률">
+        <th class="text-nowrap px-0 td-no-border">
+            {% with range_text_1='중' range_text_2='중위권' %}{% partial range_text %}{% endwith %}
+        </th>
+        {% for answer in answers.page_obj %}
+            {% with answer_rate=answer.rate_selection_mid %}{% partial answer_rate_line_student %}{% endwith %}
+        {% endfor %}
+    </tr>
+
+    <tr class="text-center" aria-label="하위권 선택률">
+        <th class="text-nowrap px-0">
+            {% with range_text_1='하' range_text_2='하위권' %}{% partial range_text %}{% endwith %}
+        </th>
+        {% for answer in answers.page_obj %}
+            {% with answer_rate=answer.rate_selection_low %}{% partial answer_rate_line_student %}{% endwith %}
+        {% endfor %}
+    </tr>
+{% endpartialdef answer_table_tr %}
+
+{% partialdef range_text %}
+    <span class="d-md-none">{{ range_text_1 }}</span>
+    <span class="d-none d-md-inline">{{ range_text_2 }}</span>
+{% endpartialdef range_text %}
+
+{% partialdef answer_rate_line_official %}
+    {% if forloop.counter > loop.min and forloop.counter <= loop.min|add:loop.counter %}
+        <td data-number="{{ answer.no }}">
+            <span class="fw-bold text-success">
+                {{ answer_rate|floatformat:0 }}
+            </span>
+        </td>
+    {% endif %}
+{% endpartialdef %}
+
+{% partialdef answer_rate_line_student %}
+    {% if forloop.counter > loop.min and forloop.counter <= loop.min|add:loop.counter %}
+        <td data-number="{{ answer.no }}">
+            <span class="fw-bold
+                  text-{% if answer.result %}success{% else %}danger{% endif %}">
+                {{ answer_rate|floatformat:0 }}
+            </span>
+        </td>
+    {% endif %}
+{% endpartialdef %}
+
+{% partialdef answer_rate_line_empty %}
+    <td class="td-no-border bg-success" colspan="10">
+        <span class="fw-bold text-white">통계 처리중입니다.</span>
+    </td>
+{% endpartialdef %}
+
+{#{% partialdef answer_table_tr %}#}
+{#    <tr class="text-center table-warning">#}
+{#        <th class="text-nowrap">문제 번호</th>#}
+{#        {% for _ in 'x'|ljust:loop.counter %}#}
+{#            <th>{{ forloop.counter|add:loop.min }}</th>#}
+{#        {% endfor %}#}
+{#    </tr>#}
+{##}
+{#    <tr class="text-center">#}
+{#        <th class="text-nowrap">공식 정답</th>#}
+{#        {% for answer in answers.page_obj %}#}
+{#            {% with answer_data=answer.ans_official_circle %}{% partial answer_official %}{% endwith %}#}
+{#        {% endfor %}#}
+{#    </tr>#}
+{#    <tr class="text-center">#}
+{#        <th class="text-nowrap">정답률(%)</th>#}
+{#        {% for answer in answers.page_obj %}#}
+{#            {% with answer_data=answer.rate_correct|floatformat:0 %}{% partial answer_official %}{% endwith %}#}
+{#        {% endfor %}#}
+{#    </tr>#}
+{##}
+{#    <tr class="text-center">#}
+{#        <th class="text-nowrap">선택 답안</th>#}
+{#        {% for answer in answers.page_obj %}#}
+{#            {% with answer_data=answer.ans_student_circle %}{% partial answer_selection %}{% endwith %}#}
+{#        {% endfor %}#}
+{#    </tr>#}
+{#    <tr class="text-center">#}
+{#        <th class="text-nowrap">선택률(%)</th>#}
+{#        {% for answer in answers.page_obj %}#}
+{#            {% with answer_data=answer.rate_selection|floatformat:0 %}{% partial answer_selection %}{% endwith %}#}
+{#        {% endfor %}#}
+{#    </tr>#}
+{#{% endpartialdef %}#}
+
+{% partialdef answer_official %}
+    {% if forloop.counter > loop.min and forloop.counter <= loop.min|add:loop.counter %}
+        <td class="fw-bold text-success">{{ answer_data }}</td>
+    {% endif %}
+{% endpartialdef %}
+
+{% partialdef answer_selection %}
+    {% if forloop.counter > loop.min and forloop.counter <= loop.min|add:loop.counter %}
+        <td class="fw-bold">
+            {% if answer.result %}
+                <span class="text-success">{{ answer_data }}</span>
+            {% else %}
+                <span class="text-danger">{{ answer_data }}</span>
+            {% endif %}
+        </td>
+    {% endif %}
+{% endpartialdef %}

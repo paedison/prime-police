@@ -1,0 +1,72 @@
+{% load humanize %}
+
+<article class="table-responsive htmx-fade-in htmx-fade-out">
+    <table class="table table-bordered table-striped align-middle m-0">
+        <thead>
+            <tr class="text-center table-warning align-middle">
+                <th class="text-primary text-nowrap td-left-no-border" rowspan="2">ID</th>
+                {% partialdef table_head_1 inline=True %}
+                    <th class="text-primary text-nowrap" rowspan="2">등수</th>
+                    <th class="text-primary text-nowrap" rowspan="2">이름</th>
+                    <th class="text-primary text-nowrap" rowspan="2">성적 확인</th>
+
+                    <th class="text-primary text-nowrap" colspan="2">총점</th>
+                    <th class="text-primary text-nowrap" colspan="2">형사법</th>
+                    <th class="text-primary text-nowrap" colspan="2">헌법</th>
+                    <th class="text-primary text-nowrap" colspan="2">경찰학</th>
+                    <th class="text-primary text-nowrap" colspan="2">범죄학</th>
+                    <th class="text-primary text-nowrap td-right-no-border" colspan="2">민법총칙</th>
+                {% endpartialdef table_head_1 %}
+            </tr>
+
+            {% partialdef table_head_2 inline=True %}
+                <tr class="text-center table-warning align-middle">
+                    {% for _ in '012345' %}
+                        <th class="text-primary text-nowrap td-right-no-border">점수</th>
+                        <th class="text-primary text-nowrap td-left-no-border td-right-no-border">등수</th>
+                    {% endfor %}
+                </tr>
+            {% endpartialdef table_head_2 %}
+        </thead>
+        <tbody>
+            {% for obj in catalog_context.page_obj %}
+                <tr class="text-center">
+                    <td class="text-nowrap td-left-no-border">{{ obj.id }}</td>
+                    {% partialdef table_body inline=True %}
+                        <td class="text-nowrap">{{ obj.rank_sum }}</td>
+                        <td class="text-nowrap">{{ obj.name }}</td>
+
+                        {% partialdef detail_student inline %}
+                            <td class="text-nowrap">
+                                <div class="btn-group">
+                                    <a target="result" class="btn btn-sm btn-outline-primary"
+                                       href="{{ obj.get_staff_detail_student_url }}">화면
+                                    </a>
+                                    <a target="result_print" class="btn btn-sm btn-outline-primary"
+                                       href="{{ obj.get_staff_detail_student_print_url }}">인쇄
+                                    </a>
+                                </div>
+                            </td>
+                        {% endpartialdef %}
+
+                        {% for _ in '012345' %}
+                            {% cycle obj.score_sum obj.score_0 obj.score_1 obj.score_2 obj.score_3 obj.score_4 as score silent %}
+                            {% cycle obj.rank_sum obj.rank_0 obj.rank_1 obj.rank_2 obj.rank_3 obj.rank_4 as rank silent %}
+                            <td class="text-nowrap td-right-no-border">{{ score|default:''|floatformat:1 }}</td>
+                            <td class="text-nowrap td-left-no-border td-right-no-border">
+                                <span class="text-primary fw-bold">{{ rank|percentageby:obj.rank_num|default:''|floatformat:1 }}</span>
+                                <br/>{{ rank|default:'' }}
+                            </td>
+                        {% endfor %}
+                    {% endpartialdef table_body %}
+                </tr>
+            {% empty %}
+                <tr class="text-center">
+                    <td class="text-nowrap" colspan="34">자료가 없습니다.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</article>
+
+{% include 'a_infinite/snippets/pagination.html' with page_obj=catalog_context.obj page_range=catalog_context.page_range header='catalog_list' %}
