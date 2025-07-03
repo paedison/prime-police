@@ -7,7 +7,7 @@
         {% if perms.a_daily or user.is_staff %}{% partial menu_daily %}{% endif %}
         {% if perms.a_weekly or user.is_staff %}{% partial menu_weekly %}{% endif %}
         {% if perms.a_infinite or user.is_staff %}{% partial menu_infinite %}{% endif %}
-        {% if request.user.is_staff %}{% partial menu_mock %}{% endif %}
+        {% partial menu_mock %}
     </ul>
     {% partial sidebar_toggle %}
 </aside>
