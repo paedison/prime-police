@@ -163,7 +163,7 @@ class AdminCreateData:
         list_create = []
         for subject, answer_data in df.items():
             for number, answer in zip(answer_data.index, answer_data.values):
-                problem_info = {'exam': exam, 'subject': subject, 'number': number}
+                problem_info = {'exam': exam, 'subject': subject[:2], 'number': number}
                 try:
                     problem = models.Problem.objects.get(**problem_info)
                     if problem.answer != answer:
