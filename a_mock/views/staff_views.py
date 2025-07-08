@@ -62,10 +62,10 @@ def detail_view(request: HtmxHttpRequest, pk: int):
         context = update_context_data(context, **detail_data.get_admin_statistics_context())
         return render(request, 'a_mock/snippets/staff_detail_statistics.html', context)
     if detail_data.view_type == 'catalog_list':
-        context = update_context_data(context, **detail_data.get_admin_statistics_context())
+        context = update_context_data(context, **detail_data.get_admin_catalog_context())
         return render(request, 'a_mock/snippets/staff_detail_catalog.html', context)
     if detail_data.view_type == 'student_search':
-        context = update_context_data(context, **detail_data.get_admin_statistics_context(True))
+        context = update_context_data(context, **detail_data.get_admin_catalog_context(True))
         return render(request, 'a_mock/snippets/staff_detail_catalog.html', context)
     if detail_data.view_type == 'answer_list':
         answer_data = detail_data.get_admin_answer_context(True)['answer_context'][detail_data.exam_subject]
