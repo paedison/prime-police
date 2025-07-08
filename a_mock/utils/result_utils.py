@@ -198,10 +198,11 @@ class ResultDetailData:
             else:
                 line.rate_gap = 0
 
-            line.rate_selection = line.problem.answer_count.get_answer_rate(ans_student)
-            line.rate_selection_top = line.problem.answer_count_top_rank.get_answer_rate(ans_student)
-            line.rate_selection_mid = line.problem.answer_count_mid_rank.get_answer_rate(ans_student)
-            line.rate_selection_low = line.problem.answer_count_low_rank.get_answer_rate(ans_student)
+            if 1 <= ans_student <= 4:
+                line.rate_selection = line.problem.answer_count.get_answer_rate(ans_student)
+                line.rate_selection_top = line.problem.answer_count_top_rank.get_answer_rate(ans_student)
+                line.rate_selection_mid = line.problem.answer_count_mid_rank.get_answer_rate(ans_student)
+                line.rate_selection_low = line.problem.answer_count_low_rank.get_answer_rate(ans_student)
 
             answer_context[sub]['page_obj'].append(line)
         return {'answer_context': answer_context}
