@@ -4,9 +4,11 @@ from a_official import models
 
 def run():
     list_update = []
+    qs_exam = models.Exam.objects.all()
+    exam_dict = {qs_e.year: qs_e for qs_e in qs_exam}
     qs_problem = models.Problem.objects.all()
     for qs_p in qs_problem:
-        exam = models.Exam.objects.filter(year=qs_p.year).first()
+        exam = exam_dict.get(qs_p.year)
         if exam and qs_p.exam_id != exam.id:
             qs_p.exam_id = exam.id
             list_update.append(qs_p)
