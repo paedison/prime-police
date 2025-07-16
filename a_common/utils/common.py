@@ -1,11 +1,14 @@
 import traceback
 from collections import Counter, defaultdict
+from datetime import time, datetime
 
 import django
+from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.db import transaction
 from django.db.models import F
 from django.http import HttpRequest
+from django.utils.timezone import make_aware
 from django_htmx.middleware import HtmxDetails
 
 from a_common.constants import icon_set
@@ -453,3 +456,10 @@ def get_loop_list(qs_problem):
         loop_list.append({'counter': counter[loop_idx], 'min': loop_min})
         loop_min += 10
     return loop_list
+
+
+def get_local_time(target_date, target_time=time(9, 0)):
+    if not target_date:
+        raise ValidationError("Date is required for timezone conversion.")
+    target_datetime = datetime.combine(target_date, target_time)
+    return make_aware(target_datetime)

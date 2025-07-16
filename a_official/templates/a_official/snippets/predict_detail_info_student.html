@@ -1,0 +1,59 @@
+{% partialdef no_input %}
+    <div class="badge rounded-pill bg-warning text-dark mx-1 align-content-center">미입력</div>
+{% endpartialdef no_input %}
+
+{% partialdef info_snippet %}
+    <tr>
+        <th class="px-0">{{ info_title }}</th>
+        <td>
+            {% partialdef info_snippet_content inline %}
+                <div class="d-flex align-content-center justify-content-sm-center">
+                    {% if info_text_1 and info_text_2 %}
+                        {{ info_text_1 }} / {{ info_text_2 }}
+                    {% elif not info_text_1 and not info_text_2 %}
+                        {% partial no_input %}
+                    {% else %}
+                        {% if info_text_1 %}{{ info_text_1 }}{% else %}{% partial no_input %}{% endif %} /
+                        {% if info_text_2 %}{{ info_text_2 }}{% else %}{% partial no_input %}{% endif %}
+                    {% endif %}
+                </div>
+            {% endpartialdef info_snippet_content %}
+        </td>
+    </tr>
+{% endpartialdef info_snippet %}
+
+<table class="table d-sm-none">
+    <tbody>
+        <tr>
+            <th class="px-0">수험번호</th>
+            <td>{{ student.serial }}</td>
+        </tr>
+        <tr>
+            <th class="px-0">이름</th>
+            <td>{{ student.name }}</td>
+        </tr>
+        <tr>
+            <th class="px-0">분야</th>
+            <td>일반</td>
+        </tr>
+        <tr>
+            <th class="px-0">선택과목</th>
+            <td>{{ student.get_selection_display }}</td>
+        </tr>
+    </tbody>
+</table>
+
+<table class="table d-none d-sm-table m-0">
+    <tr class="text-center">
+        <th>수험번호</th>
+        <th>이름</th>
+        <th>분야</th>
+        <th>선택과목</th>
+    </tr>
+    <tr class="text-center">
+        <td class="td-no-border">{{ student.serial }}</td>
+        <td class="td-no-border">{{ student.name }}</td>
+        <td class="td-no-border">일반</td>
+        <td class="td-no-border">{{ student.get_selection_display }}</td>
+    </tr>
+</table>

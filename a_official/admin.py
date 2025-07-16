@@ -4,6 +4,16 @@ from unfold.admin import ModelAdmin
 from . import models
 
 
+@admin.register(models.Exam)
+class ExamAdmin(ModelAdmin):
+    list_display = list_display_links = ['id', 'year', 'exam', 'is_active']
+    list_filter = ['year', 'exam', 'is_active']
+    ordering = ['-id']
+    show_facets = admin.ShowFacets.ALWAYS
+    save_on_top = True
+    show_full_result_count = True
+
+
 @admin.register(models.Problem)
 class ProblemAdmin(ModelAdmin):
     list_display = list_display_links = ['id', 'year', 'subject', 'number', 'answer', 'question']

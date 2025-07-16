@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='problem',
             name='year',
-            field=models.IntegerField(choices=a_official.models.year_choice, default=a_official.models.default_year, verbose_name='연도'),
+            field=models.IntegerField(choices=a_official.models.choices.year_choice, default=a_official.models.choices.default_year, verbose_name='연도'),
         ),
     ]

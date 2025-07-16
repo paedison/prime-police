@@ -23,6 +23,7 @@ ICON_MENU = {
     'notice': '<i class="fa-solid fa-fw fa-bullhorn"></i>',
     'dashboard': '<i class="fa-solid fa-fw fa-list"></i>',
     'official': '<i class="fa-solid fa-fw fa-layer-group"></i>',
+    'official_staff': '<i class="fa-solid fa-fw fa-layer-group"></i>',
     'daily': '<i class="fa-solid fa-fw fa-inbox"></i>',
     'weekly': '<i class="fa-solid fa-fw fa-inbox"></i>',
     'infinite': '<i class="fa-solid fa-fw fa-inbox"></i>',

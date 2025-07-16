@@ -3,6 +3,7 @@
         {% partial menu_notice %}
 {#        {% partial menu_dashboard %}#}
 {#        {% partial menu_lecture %}#}
+        {% if user.is_staff %}{% partial menu_official_staff %}{% endif %}
         {% partial menu_official %}
         {% if perms.a_daily or user.is_staff %}{% partial menu_daily %}{% endif %}
         {% if perms.a_weekly or user.is_staff %}{% partial menu_weekly %}{% endif %}
@@ -28,11 +29,51 @@
     </li>
 {% endpartialdef %}
 
-{% partialdef menu_official %}
-    <li class="nav-item">
-        <a class="nav-link collapsed" data-menu="official" href="{% url 'official:base' %}">
-            <i class="fa-solid fa-fw fa-layer-group"></i> 기출문제
+{% partialdef menu_official_staff %}
+    <li class="nav-item" role="menuitem" aria-label="경위공채 관리자">
+        <a class="nav-link collapsed" href="#officialAdminNavContent" data-menu="official_staff"
+           data-bs-toggle="collapse" aria-expanded="false" aria-controls="officialAdminNavContent">
+            <i class="fa-solid fa-fw fa-inbox"></i> 경위공채 관리자
+            <i class="fa-solid fa-fw fa-chevron-down ms-auto"></i>
         </a>
+        <ul id="officialAdminNavContent" class="nav-content collapse" data-bs-parent="#sidebar">
+            <li>
+                <a class="aside-nav-icon" data-menu-parent="official_staff" data-menu-self="problem"
+                   href="{% url 'official:staff-official-list' %}">
+                    <i class="fa-regular fa-fw fa-square"></i> 기출 문제
+                </a>
+            </li>
+            <li>
+                <a class="aside-nav-icon" data-menu-parent="official_staff" data-menu-self="predict"
+                   href="{% url 'official:staff-predict-list' %}">
+                    <i class="fa-regular fa-fw fa-square"></i> 합격 예측
+                </a>
+            </li>
+        </ul>
+    </li>
+{% endpartialdef %}
+
+{% partialdef menu_official %}
+    <li class="nav-item" role="menuitem" aria-label="경위공채">
+        <a class="nav-link collapsed" href="#officialNavContent" data-menu="official"
+           data-bs-toggle="collapse" aria-expanded="false" aria-controls="officialNavContent">
+            <i class="fa-solid fa-fw fa-inbox"></i> 경위공채
+            <i class="fa-solid fa-fw fa-chevron-down ms-auto"></i>
+        </a>
+        <ul id="officialNavContent" class="nav-content collapse" data-bs-parent="#sidebar">
+            <li>
+                <a class="aside-nav-icon" data-menu-parent="official" data-menu-self="problem"
+                   href="{% url 'official:base' %}">
+                    <i class="fa-regular fa-fw fa-square"></i> 기출 문제
+                </a>
+            </li>
+            <li>
+                <a class="aside-nav-icon" data-menu-parent="official" data-menu-self="predict"
+                   href="{% url 'official:predict-list' %}">
+                    <i class="fa-regular fa-fw fa-square"></i> 합격 예측
+                </a>
+            </li>
+        </ul>
     </li>
 {% endpartialdef %}
 

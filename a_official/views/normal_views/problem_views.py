@@ -8,15 +8,24 @@ from django.views.decorators.http import require_POST
 
 from a_common.constants import icon_set
 from a_common.utils import HtmxHttpRequest, update_context_data
-from . import models, utils, forms, filters
+from a_official import models, utils, forms, filters
 
 
 class ProblemConfiguration:
-    menu = 'official'
-    submenu = 'problem'
-    info = {'menu': menu}
-    menu_title = {'kor': '기출문제', 'eng': menu.capitalize()}
-    url_admin = reverse_lazy(f'admin:a_official_problem_changelist')
+    menu = menu_eng = 'official'
+    menu_kor = '경위공채'
+    submenu = submenu_eng = 'problem'
+    submenu_kor = '기출문제'
+
+    info = {'menu': menu, 'menu_self': submenu}
+    icon_menu = icon_set.ICON_MENU[menu_eng]
+    menu_title = {'kor': menu_kor, 'eng': menu.capitalize()}
+    submenu_title = {'kor': submenu_kor, 'eng': submenu.capitalize()}
+
+    url_admin = reverse_lazy(f'admin:a_official_exam_changelist')
+    url_admin_exam_list = reverse_lazy('admin:a_official_exam_changelist')
+    url_admin_problem_list = reverse_lazy('admin:a_official_problem_changelist')
+
     url_list = reverse_lazy(f'official:base')
 
 

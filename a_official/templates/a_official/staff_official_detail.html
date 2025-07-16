@@ -1,0 +1,8 @@
+{% extends 'a_official/_official_staff_base.html' %}
+{% load static %}
+{% load crispy_forms_field %}
+
+{% block main_content %}
+    {% include 'a_official/snippets/staff_detail_official_answer.html' %}
+    {% include 'a_official/snippets/staff_detail_official_problem.html' %}
+{% endblock main_content %}

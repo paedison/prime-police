@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from ckeditor.fields import RichTextField
 from ckeditor_uploader.fields import RichTextUploadingField
 from django.db import models
@@ -9,35 +7,74 @@ from taggit.models import TaggedItemBase, TagBase
 
 from a_common.constants import icon_set
 from a_common.models import User
-from a_common.prime_test.model_settings import number_choice, answer_choice, rating_choice, get_remarks
+from a_common.prime_test.model_settings import get_remarks
+from a_official.models import choices
+from a_official.models.queryset import official_queryset as queryset
 
 
-def default_year():
-    return datetime.now().year + 1
+class Exam(models.Model):
+    objects = queryset.ExamQuerySet.as_manager()
+    year = models.IntegerField(choices=choices.year_choice, default=choices.default_year, verbose_name='연도')
+    exam = models.CharField(max_length=2, choices=choices.exam_choice, default='경위', verbose_name='시험')
+    is_active = models.BooleanField(default=False, verbose_name='활성')
 
+    def __str__(self):
+        return self.reference
 
-def year_choice() -> list:
-    choice = [(year, f'{year}년') for year in range(2023, datetime.now().year + 2)]
-    choice.reverse()
-    return choice
+    @property
+    def reference(self):
+        return f'{self.year}{self.exam}'
 
+    @property
+    def full_reference(self):
+        return f'{self.get_year_display()} {self.get_exam_display()}'
 
-def exam_choice() -> dict:
-    return {'경위': '경위공채'}
+    def get_staff_predict_detail_url(self):
+        return reverse_lazy('official:staff-predict-detail', args=[self.id])
 
+    def get_staff_predict_update_url(self):
+        return reverse_lazy('official:staff-predict-update', args=[self.id])
 
-def subject_choice() -> dict:
-    return {
-        '형사': '형사법', '헌법': '헌법', '경찰': '경찰학', '범죄': '범죄학',
-        '민법': '민법총칙', '행법': '행정법', '행학': '행정학',
-    }
+    def get_staff_predict_statistics_print_url(self):
+        return reverse_lazy('official:staff-predict-statistics-print', args=[self.id])
 
+    def get_staff_predict_catalog_print_url(self):
+        return reverse_lazy('official:staff-predict-catalog-print', args=[self.id])
 
-def subject_fields() -> dict:
-    return {
-        '형사': 'hyeongsa', '헌법': 'heonbeob', '경찰': 'gyeongchal', '범죄': 'beomjoe',
-        '민법': 'minbeob', '행법': 'haengbeob', '행학': 'haenghag',
-    }
+    def get_staff_predict_answer_print_url(self):
+        return reverse_lazy('official:staff-predict-answer-print', args=[self.id])
+
+    def get_staff_predict_statistics_excel_url(self):
+        return reverse_lazy('official:staff-predict-statistics-excel', args=[self.id])
+
+    def get_staff_predict_prime_id_excel_url(self):
+        return reverse_lazy('official:staff-predict-prime_id-excel', args=[self.id])
+
+    def get_staff_predict_catalog_excel_url(self):
+        return reverse_lazy('official:staff-predict-catalog-excel', args=[self.id])
+
+    def get_staff_predict_answer_excel_url(self):
+        return reverse_lazy('official:staff-predict-answer-excel', args=[self.id])
+
+    @staticmethod
+    def get_predict_list_url():
+        return reverse_lazy('official:predict-list')
+
+    def get_predict_detail_url(self):
+        return reverse_lazy('official:predict-detail', args=[self.id])
+
+    @staticmethod
+    def get_predict_register_url():
+        return reverse_lazy('official:predict-register')
+
+    def get_predict_answer_input_url(self, subject_field):
+        return reverse_lazy('official:predict-answer-input', args=[self.id, subject_field])
+
+    def get_predict_answer_confirm_url(self, subject_field):
+        return reverse_lazy('official:predict-answer-confirm', args=[self.id, subject_field])
+
+    def get_predict_modal_url(self):
+        return reverse_lazy('official:predict-modal', args=[self.id])
 
 
 class ProblemTag(TagBase):
@@ -79,11 +116,13 @@ class ProblemTaggedItem(TaggedItemBase):
 
 
 class Problem(models.Model):
-    year = models.IntegerField(choices=year_choice, default=default_year, verbose_name='연도')
-    exam = models.CharField(max_length=2, choices=exam_choice, default='경위', verbose_name='시험')
-    subject = models.CharField(max_length=2, choices=subject_choice, default='형사', verbose_name='과목')
-    number = models.IntegerField(choices=number_choice, default=1, verbose_name='문제 번호')
-    answer = models.IntegerField(choices=answer_choice, default=1, verbose_name='정답')
+    objects = queryset.ProblemQuerySet.as_manager()
+    exam = models.ForeignKey(Exam, on_delete=models.CASCADE, related_name='problems', verbose_name='시험')
+    year = models.IntegerField(choices=choices.year_choice, default=choices.default_year, verbose_name='연도')
+    exam_name = models.CharField(max_length=2, choices=choices.exam_choice, default='경위', verbose_name='시험 이름')
+    subject = models.CharField(max_length=2, choices=choices.subject_choice, default='형사', verbose_name='과목')
+    number = models.IntegerField(choices=choices.number_choice, default=1, verbose_name='문제 번호')
+    answer = models.IntegerField(choices=choices.answer_choice, default=1, verbose_name='정답')
     question = models.TextField(verbose_name='발문')
     data = RichTextUploadingField(config_name='problem', verbose_name='문제 내용')
 
@@ -99,7 +138,7 @@ class Problem(models.Model):
 
     class Meta:
         verbose_name = verbose_name_plural = "01_문제"
-        unique_together = ['year', 'exam', 'subject', 'number']
+        unique_together = ['year', 'exam_name', 'subject', 'number']
         ordering = ['-year', 'id']
 
     def __str__(self):
@@ -109,9 +148,9 @@ class Problem(models.Model):
     def exam_code(self):
         return f'{self.year}{self.subject}'
 
-    @property
-    def exam_name(self):
-        return f'{self.get_year_display()} {self.get_subject_display()}'
+    # @property
+    # def exam_name(self):
+    #     return f'{self.get_year_display()} {self.get_subject_display()}'
 
     @property
     def reference(self):
@@ -127,7 +166,7 @@ class Problem(models.Model):
 
     @property
     def subject_field(self):
-        return subject_fields()[self.subject]
+        return choices.subject_fields()[self.subject]
 
     @property
     def icon(self):
@@ -220,7 +259,7 @@ class ProblemLike(models.Model):
 class ProblemRate(models.Model):
     problem = models.ForeignKey(Problem, on_delete=models.CASCADE, related_name='rates')
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='official_rates')
-    rating = models.IntegerField(choices=rating_choice, default=1)
+    rating = models.IntegerField(choices=choices.rating_choice, default=1)
     created_at = models.DateTimeField(auto_now_add=True)
     remarks = models.TextField(null=True, blank=True)
 
@@ -250,7 +289,7 @@ class ProblemRate(models.Model):
 class ProblemSolve(models.Model):
     problem = models.ForeignKey(Problem, on_delete=models.CASCADE, related_name='solves')
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='official_solves')
-    answer = models.IntegerField(choices=answer_choice, default=1)
+    answer = models.IntegerField(choices=choices.answer_choice, default=1)
     is_correct = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     remarks = models.TextField(null=True, blank=True)

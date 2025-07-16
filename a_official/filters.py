@@ -33,18 +33,41 @@ CHOICES_TAG = (
 )
 
 
+class ExamFilter(django_filters.FilterSet):
+    year = django_filters.ChoiceFilter(
+        field_name='year',
+        label='',
+        empty_label='[전체 연도]',
+        choices=models.choices.year_choice,
+    )
+    is_active = django_filters.ChoiceFilter(
+        field_name='is_active',
+        label='',
+        empty_label='[활성 상태]',
+        choices={'True': '활성', 'False': '비활성'},
+    )
+
+    class Meta:
+        model = models.Exam
+        fields = ['year']
+
+    @property
+    def qs(self):
+        return super().qs.select_related('predict_exam').prefetch_related('problems').order_by('-id')
+
+
 class AnonymousOfficialFilter(django_filters.FilterSet):
     year = django_filters.ChoiceFilter(
         field_name='year',
         label='',
         empty_label='[전체 연도]',
-        choices=models.year_choice,
+        choices=models.choices.year_choice,
     )
     subject = django_filters.ChoiceFilter(
         field_name='subject',
         label='',
         empty_label='[전체 과목]',
-        choices=models.subject_choice,
+        choices=models.choices.subject_choice,
     )
 
     class Meta:
