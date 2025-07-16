@@ -297,5 +297,5 @@ def test_detail_page_score_after_answer_official_opened(
         response = logged_client.get(student_answer_fixture['urls']['detail'])
         context = response.context[0]
         assert 'stat_data' in context
-        assert 'score' in context['stat_data'][subject]
-        assert score == context['stat_data'][subject]['score']
+        assert 'score_result' in context['stat_data'][subject]
+        assert score == context['stat_data'][subject]['score_result']

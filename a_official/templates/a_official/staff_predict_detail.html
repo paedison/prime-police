@@ -59,8 +59,8 @@
                                        href="{{ config.url_list }}" hx-get="{{ config.url_list }}">
                                         목록
                                     </a>
-                                    {% include 'a_official/snippets/staff_detail_button_export.html' with button_name='엑셀 내려받기' export_url=exam.get_admin_predict_statistics_excel_url %}
-                                    {% include 'a_official/snippets/staff_detail_button_export.html' with button_name='인쇄' export_url=exam.get_admin_predict_statistics_print_url %}
+                                    {% include 'a_official/snippets/staff_detail_button_export.html' with button_name='엑셀 내려받기' export_url=exam.get_staff_predict_statistics_excel_url %}
+                                    {% include 'a_official/snippets/staff_detail_button_export.html' with button_name='인쇄' export_url=exam.get_staff_predict_statistics_print_url %}
                                 </div>
                             </div>
                         </div>
@@ -89,9 +89,8 @@
                         <div class="row justify-content-md-end g-3 mb-3">
                             <div class="col-md-6 col-lg-5 col-xxl-4 order-md-1 d-flex">
                                 <div class="btn-group flex-fill">
-                                    {% include 'a_official/snippets/staff_detail_button_export.html' with button_name='엑셀 내려받기' export_url=exam.get_admin_predict_catalog_excel_url %}
-                                    {% include 'a_official/snippets/staff_detail_button_export.html' with button_name='프라임ID' export_url=exam.get_admin_predict_prime_id_excel_url %}
-                                    {% include 'a_official/snippets/staff_detail_button_export.html' with button_name='인쇄' export_url=exam.get_admin_predict_catalog_print_url %}
+                                    {% include 'a_official/snippets/staff_detail_button_export.html' with button_name='엑셀 내려받기' export_url=exam.get_staff_predict_catalog_excel_url %}
+                                    {% include 'a_official/snippets/staff_detail_button_export.html' with button_name='인쇄' export_url=exam.get_staff_predict_catalog_print_url %}
                                 </div>
                             </div>
                             <div class="col-md-6 col-lg-7 col-xxl-8 order-md-0 d-flex">
@@ -105,7 +104,7 @@
                         <div class="mt-3">
                             <span class="badge bg-success"><i class="fa-regular fa-circle-check"></i> 참고</span><br/>
                             <ol class="text-success small fw-bold m-0">
-                                <li>등수 칸에서 윗줄은 퍼센트 등수를, 아랫줄은 등수를 의미합니다.</li>
+                                <li>등수 칸에서 윗줄은 등수를, 아랫줄은 퍼센트 등수를 의미합니다.</li>
                                 <li>해당 자료가 없거나 0일 경우 빈 칸으로 표시됩니다.</li>
                             </ol>
                         </div>
@@ -124,8 +123,8 @@
                         <div class="row justify-content-md-end g-3 mb-3">
                             <div class="col-md-6 col-lg-5 col-xxl-4 order-md-1 d-flex">
                                 <div class="btn-group flex-fill">
-                                    {% include 'a_official/snippets/staff_detail_button_export.html' with button_name='엑셀 내려받기' export_url=exam.get_admin_predict_answer_excel_url %}
-                                    {% include 'a_official/snippets/staff_detail_button_export.html' with button_name='인쇄' export_url=exam.get_admin_predict_answer_print_url %}
+                                    {% include 'a_official/snippets/staff_detail_button_export.html' with button_name='엑셀 내려받기' export_url=exam.get_staff_predict_answer_excel_url %}
+                                    {% include 'a_official/snippets/staff_detail_button_export.html' with button_name='인쇄' export_url=exam.get_staff_predict_answer_print_url %}
                                 </div>
                             </div>
                         </div>

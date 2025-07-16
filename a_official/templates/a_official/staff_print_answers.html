@@ -2,14 +2,13 @@
 {% load static %}
 {% load humanize %}
 
-{% block head_title %}{{ leet.year }}년도_{{ leet.get_exam_display }}_문항분석표{% endblock head_title %}
-{#{% block page_image %}<meta property="og:image" content="{% static 'image/prime/2024/exam/message-1.jpg' %}"/>{% endblock %}#}
+{% block head_title %}{{ exam.year }}년도_{{ exam.get_exam_display }}_문항분석표{% endblock head_title %}
 {% block google_adsense %}{% endblock %}
 
 {% block html_body %}
 <body class="bg-white">
     {{ info|json_script:'info' }}
-    <h2 class="fw-bold text-center mb-4">{{ leet.year }}년도 {{ leet.get_exam_display }} 문항분석표</h2>
+    <h2 class="fw-bold text-center mb-4">{{ exam.year }}년도 {{ exam.get_exam_display }} 문항분석표</h2>
     <div class="mb-2">
         <table class="table table-sm table-bordered small align-middle">
             <thead>

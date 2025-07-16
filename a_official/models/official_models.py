@@ -47,9 +47,6 @@ class Exam(models.Model):
     def get_staff_predict_statistics_excel_url(self):
         return reverse_lazy('official:staff-predict-statistics-excel', args=[self.id])
 
-    def get_staff_predict_prime_id_excel_url(self):
-        return reverse_lazy('official:staff-predict-prime_id-excel', args=[self.id])
-
     def get_staff_predict_catalog_excel_url(self):
         return reverse_lazy('official:staff-predict-catalog-excel', args=[self.id])
 

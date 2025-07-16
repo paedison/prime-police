@@ -26,7 +26,6 @@ staff_predict_patterns = [
     path('print/answer/<int:pk>/', staff_views.predict_answer_print, name='staff-predict-answer-print'),
 
     path('excel/statistics/<int:pk>/', staff_views.predict_statistics_excel, name='staff-predict-statistics-excel'),
-    path('excel/prime_id/<int:pk>/', staff_views.predict_prime_id_excel, name='staff-predict-prime_id-excel'),
     path('excel/catalog/<int:pk>/', staff_views.predict_catalog_excel, name='staff-predict-catalog-excel'),
     path('excel/answer/<int:pk>/', staff_views.predict_answer_excel, name='staff-predict-answer-excel'),
 ]

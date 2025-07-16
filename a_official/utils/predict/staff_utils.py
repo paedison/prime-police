@@ -19,7 +19,7 @@ from a_common.utils import HtmxHttpRequest, get_paginator_context
 from a_common.utils.export_excel_methods import *
 from a_common.utils.modify_models_methods import *
 from a_official import models, forms
-from a_official.utils.common_utils import RequestData, ModelData, ExamData, get_stat_from_scores
+from a_official.utils.common_utils import RequestData, ModelData, SubjectVariants, get_stat_from_scores
 
 _model = ModelData()
 
@@ -53,14 +53,10 @@ class AdminDetailContext:
 
     def __post_init__(self):
         self._exam = self._context['exam']
-        self._subject_vars_dict = self._context['subject_vars_dict']
         self._qs_problem = _model.problem.objects.filtered_problem_by_exam(self._exam)
 
-        self.answer = AdminDetailAnswerContext(_context=self._context)
-
     def get_problem_context(self):
-        page_number = self._context['page_number']
-        return {'problem_context': get_paginator_context(self._qs_problem, page_number)}
+        return {'problem_context': get_paginator_context(self._qs_problem, self._context['page_number'])}
 
     def get_answer_predict_context(self):
         qs_answer_count = _model.ac_all.objects.filtered_by_exam_and_subject(self._exam)
@@ -70,7 +66,7 @@ class AdminDetailContext:
         return {'answer_official_context': self.get_answer_dict(self._qs_problem)}
 
     def get_answer_dict(self, queryset: QuerySet) -> dict:
-        subject_vars = self._subject_vars_dict['base']
+        subject_vars = self._context['subject_vars_dict']['base']
         query_dict = defaultdict(list)
         for query in queryset.order_by('id'):
             query_dict[query.subject].append(query)
@@ -556,99 +552,63 @@ class AdminExportExcelData:
     _exam: models.Exam
 
     def __post_init__(self):
-        exam_data = ExamData(_exam=self._exam)
+        self._subject_variants = SubjectVariants(_selection='')
+        self._subject_vars_sum = self._subject_variants.subject_vars_sum
+        self._subject_vars_sum_first = self._subject_variants.subject_vars_sum_first
 
-        self._subject_vars = exam_data.subject_vars
-        self._subject_vars_avg = exam_data.subject_vars_sum
-        self._sub_list = [sub for sub in self._subject_vars]
+    def get_admin_statistics_context(self) -> dict:
+        exam = self._exam
+        qs_statistics = _model.statistics.objects.select_related('exam').filter(exam=exam).first()
+        statistics_context = {}
+        for sub, (subject, fld, field_idx, problem_count, _) in self._subject_vars_sum_first.items():
+            statistics_context[sub] = getattr(qs_statistics, fld)
+            statistics_context[sub]['sub'] = sub
+            statistics_context[sub]['field'] = fld
+            statistics_context[sub]['subject'] = subject
+
+        return statistics_context
 
     def get_statistics_response(self) -> HttpResponse:
-        qs_statistics = models.PredictStatistics.objects.filter(exam=self._exam).order_by('id')
-        df = pd.DataFrame.from_records(qs_statistics.values())
+        statistics_context = self.get_admin_statistics_context()
+        df = pd.DataFrame(statistics_context)
+        df = df.T
+
+        df.drop(columns=['sub', 'field'], inplace=True)
+        df.columns = ['과목', '총 인원', '최고', '상위10%', '상위25%', '상위50%', '평균']
+        df = df.reset_index(drop=True)
+        df = df.set_index('과목')
 
         filename = f'{self._exam.full_reference}_성적통계.xlsx'
-        drop_columns = ['id', 'exam_id']
-        column_label = [('직렬', '')]
-
-        subject_vars = self._subject_vars_avg
-        subject_vars_total = subject_vars.copy()
-        for sub, (subject, fld, idx, problem_count) in subject_vars.items():
-            subject_vars_total[f'[필터링]{sub}'] = (f'[필터링]{subject}', f'filtered_{fld}', idx, problem_count)
-
-        for (subject, fld, _, _) in subject_vars_total.values():
-            drop_columns.append(fld)
-            column_label.extend([
-                (subject, '총 인원'), (subject, '최고'), (subject, '상위10%'), (subject, '상위20%'), (subject, '평균'),
-            ])
-            df_subject = pd.json_normalize(df[fld])
-            df = pd.concat([df, df_subject], axis=1)
-
-        df.drop(columns=drop_columns, inplace=True)
-        df.columns = pd.MultiIndex.from_tuples(column_label)
-
-        return get_response_for_excel_file(df, filename)
-
-    def get_prime_id_response(self) -> HttpResponse:
-        qs_student = models.PredictStudent.objects.filter(exam=self._exam).values(
-            'id', 'created_at', 'name', 'prime_id').order_by('id')
-        df = pd.DataFrame.from_records(qs_student)
-        df['created_at'] = df['created_at'].dt.tz_convert('Asia/Seoul').dt.tz_localize(None)
-
-        filename = f'{self._exam.full_reference}_참여자명단.xlsx'
-        column_label = [('ID', ''), ('등록일시', ''), ('이름', ''), ('프라임법학원 ID', '')]
-        df.columns = pd.MultiIndex.from_tuples(column_label)
         return get_response_for_excel_file(df, filename)
 
     def get_catalog_response(self) -> HttpResponse:
-        total_student_list = models.PredictStudent.objects.filtered_student_by_exam(self._exam)
-        filtered_student_list = total_student_list.filter(is_filtered=True)
+        student_list = models.PredictStudent.objects.filtered_student_by_exam(self._exam)
         filename = f'{self._exam.full_reference}_성적일람표.xlsx'
+        df = self.get_catalog_df_for_excel(student_list)
+        return get_response_for_excel_file(df, filename)
 
-        df1 = self.get_catalog_df_for_excel(total_student_list)
-        df2 = self.get_catalog_df_for_excel(filtered_student_list, True)
-
-        excel_data = io.BytesIO()
-        with pd.ExcelWriter(excel_data, engine='openpyxl') as writer:
-            df1.to_excel(writer, sheet_name='전체')
-            df2.to_excel(writer, sheet_name='필터링')
-
-        return get_response_for_excel_file(df1, filename, excel_data)
-
-    def get_catalog_df_for_excel(self, student_list: QuerySet, is_filtered=False) -> pd.DataFrame:
+    def get_catalog_df_for_excel(self, student_list: QuerySet) -> pd.DataFrame:
         column_list = [
-            'id', 'exam_id', 'category_id', 'user_id',
-            'name', 'serial', 'password', 'is_filtered', 'prime_id', 'unit', 'department',
-            'created_at', 'latest_answer_time', 'answer_count',
-            'score_sum', 'rank_tot_num', 'rank_dep_num', 'filtered_rank_tot_num', 'filtered_rank_dep_num',
+            'id', 'exam_id', 'user_id',
+            'name', 'serial', 'password',
+            'created_at', 'latest_answer_time', 'answer_count', 'participants',
         ]
-        for sub_type in ['0', '1', '2', '3', 'avg']:
+        for sub_type in ['sum', '0', '1', '2', '3', '4', '5', '6']:
             column_list.append(f'score_{sub_type}')
-            for stat_type in ['rank', 'filtered_rank']:
-                for dep_type in ['tot', 'dep']:
-                    column_list.append(f'{stat_type}_{dep_type}_{sub_type}')
+            column_list.append(f'rank_{sub_type}')
         df = pd.DataFrame.from_records(student_list.values(*column_list))
         df['created_at'] = df['created_at'].dt.tz_convert('Asia/Seoul').dt.tz_localize(None)
         df['latest_answer_time'] = df['latest_answer_time'].dt.tz_convert('Asia/Seoul').dt.tz_localize(None)
 
-        field_list = ['num', '0', '1', '2', '3', 'avg']
-        if is_filtered:
-            for key in field_list:
-                df[f'rank_tot_{key}'] = df[f'filtered_rank_tot_{key}']
-                df[f'rank_dep_{key}'] = df[f'filtered_rank_dep_{key}']
-
         drop_columns = []
-        for key in field_list:
-            drop_columns.extend([f'filtered_rank_tot_{key}', f'filtered_rank_dep_{key}'])
-
         column_label = [
-            ('DB정보', 'ID'), ('DB정보', 'PSAT ID'), ('DB정보', '카테고리 ID'), ('DB정보', '사용자 ID'),
+            ('DB정보', 'ID'), ('DB정보', '시험ID'), ('DB정보', '사용자 ID'),
             ('수험정보', '이름'), ('수험정보', '수험번호'), ('수험정보', '비밀번호'),
-            ('수험정보', '필터링 여부'), ('수험정보', '프라임 ID'), ('수험정보', '모집단위'), ('수험정보', '직렬'),
-            ('답안정보', '등록일시'), ('답안정보', '최종답안 등록일시'), ('답안정보', '제출 답안수'),
-            ('성적정보', 'PSAT 총점'), ('성적정보', '전체 총 인원'), ('성적정보', '직렬 총 인원'),
+            ('답안정보', '등록일시'), ('답안정보', '최종답안 등록일시'), ('답안정보', '제출 답안수'), ('답안정보', '총 인원'),
         ]
-        for sub in self._subject_vars_avg:
-            column_label.extend([(sub, '점수'), (sub, '전체 등수'), (sub, '직렬 등수')])
+        for (subject, _, _, _, _) in self._subject_vars_sum_first.values():
+            column_label.extend([(subject, '점수')])
+            column_label.extend([(subject, '등수')])
 
         df.drop(columns=drop_columns, inplace=True)
         df.columns = pd.MultiIndex.from_tuples(column_label)
@@ -658,25 +618,16 @@ class AdminExportExcelData:
     def get_answer_response(self) -> HttpResponse:
         qs_answer_count = models.PredictAnswerCount.objects.filtered_by_exam_and_subject(self._exam)
         filename = f'{self._exam.full_reference}_문항분석표.xlsx'
-
-        df1 = self.get_answer_df_for_excel(qs_answer_count)
-        df2 = self.get_answer_df_for_excel(qs_answer_count, True)
-
-        excel_data = io.BytesIO()
-        with pd.ExcelWriter(excel_data, engine='openpyxl') as writer:
-            df1.to_excel(writer, sheet_name='전체')
-            df2.to_excel(writer, sheet_name='필터링')
-
-        return get_response_for_excel_file(df1, filename, excel_data)
+        df = self.get_answer_df_for_excel(qs_answer_count)
+        return get_response_for_excel_file(df, filename)
 
     @staticmethod
     def get_answer_df_for_excel(
-            qs_answer_count: QuerySet[models.PredictAnswerCount], is_filtered=False) -> pd.DataFrame:
-        prefix = 'filtered_' if is_filtered else ''
+            qs_answer_count: QuerySet[models.PredictAnswerCount]) -> pd.DataFrame:
         column_list = ['id', 'problem_id', 'subject', 'number', 'ans_official', 'ans_predict']
         for rank_type in ['all', 'top', 'mid', 'low']:
-            for num in ['1', '2', '3', '4', '5', 'sum']:
-                column_list.append(f'{prefix}count_{num}_{rank_type}')
+            for num in ['1', '2', '3', '4', 'sum']:
+                column_list.append(f'count_{num}_{rank_type}')
 
         column_label = [
             ('DB정보', 'ID'), ('DB정보', '문제 ID'),
@@ -684,10 +635,8 @@ class AdminExportExcelData:
         ]
         for rank_type in ['전체', '상위권', '중위권', '하위권']:
             column_label.extend([
-                (rank_type, '①'), (rank_type, '②'), (rank_type, '③'),
-                (rank_type, '④'), (rank_type, '⑤'), (rank_type, '합계'),
+                (rank_type, '①'), (rank_type, '②'), (rank_type, '③'), (rank_type, '④'), (rank_type, '합계'),
             ])
-
         df = pd.DataFrame.from_records(qs_answer_count.values(*column_list))
         df.columns = pd.MultiIndex.from_tuples(column_label)
         return df

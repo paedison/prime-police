@@ -7,7 +7,7 @@
                 <th class="text-primary text-nowrap td-left-no-border" rowspan="2">ID</th>
                 {% partialdef table_head_1 inline=True %}
                     <th class="text-primary text-nowrap" rowspan="2">등수</th>
-                    <th class="text-primary text-nowrap" rowspan="2">이름</th>
+                    <th class="text-primary text-nowrap" rowspan="2">이름<hr class="m-0"/>수험번호</th>
                     <th class="text-primary text-nowrap" rowspan="2">선택과목</th>
                     <th class="text-primary text-nowrap" rowspan="2">성적 확인</th>
 
@@ -19,7 +19,7 @@
                     <th class="text-primary text-nowrap" colspan="2">민법총칙</th>
                     <th class="text-primary text-nowrap" colspan="2">행정법</th>
                     <th class="text-primary text-nowrap td-right-no-border" colspan="2">행정학</th>
-                {% endpartialdef table_head_1 %}
+                {% endpartialdef %}
             </tr>
 
             {% partialdef table_head_2 inline=True %}
@@ -29,7 +29,7 @@
                         <th class="text-primary text-nowrap td-left-no-border td-right-no-border">등수</th>
                     {% endfor %}
                 </tr>
-            {% endpartialdef table_head_2 %}
+            {% endpartialdef %}
         </thead>
         <tbody>
             {% for obj in catalog_context.page_obj %}
@@ -37,7 +37,7 @@
                     <td class="text-nowrap td-left-no-border">{{ obj.id }}</td>
                     {% partialdef table_body inline=True %}
                         <td class="text-nowrap">{{ obj.rank_sum }}</td>
-                        <td class="text-nowrap">{{ obj.name }}</td>
+                        <td class="text-nowrap">{{ obj.name }}<hr class="m-0"/>{{ obj.serial }}</td>
                         <td class="text-nowrap">{{ obj.get_selection_display }}</td>
 
                         {% partialdef detail_student inline %}
@@ -58,11 +58,11 @@
                             {% cycle obj.rank_sum obj.rank_0 obj.rank_1 obj.rank_2 obj.rank_3 obj.rank_4 obj.rank_5 obj.rank_6 as rank silent %}
                             <td class="text-nowrap td-right-no-border">{{ score|default:''|floatformat:1 }}</td>
                             <td class="text-nowrap td-left-no-border td-right-no-border">
+                                {{ rank|default:'' }}<br/>
                                 <span class="text-primary fw-bold">{{ rank|percentageby:obj.participants|default:''|floatformat:1 }}</span>
-                                <br/>{{ rank|default:'' }}
                             </td>
                         {% endfor %}
-                    {% endpartialdef table_body %}
+                    {% endpartialdef %}
                 </tr>
             {% empty %}
                 <tr class="text-center">

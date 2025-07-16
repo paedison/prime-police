@@ -35,7 +35,6 @@ def official_test_urls(official_test_exam, official_subject_vars):
         'staff_print_answer': reverse('official:staff-predict-answer-print', args=[official_test_exam.id]),
 
         'staff_excel_statistics': reverse('official:staff-predict-statistics-excel', args=[official_test_exam.id]),
-        'staff_excel_prime_id': reverse('official:staff-predict-prime_id-excel', args=[official_test_exam.id]),
         'staff_excel_catalog': reverse('official:staff-predict-catalog-excel', args=[official_test_exam.id]),
         'staff_excel_answer': reverse('official:staff-predict-answer-excel', args=[official_test_exam.id]),
     }

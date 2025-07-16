@@ -166,8 +166,10 @@ def predict_student_detail_view(request: HtmxHttpRequest, pk: int):
 @staff_required
 def predict_statistics_print(request: HtmxHttpRequest, pk: int):
     exam = get_object_or_404(models.Exam, pk=pk)
-    detail_data = AdminDetailContext(_request=request, _exam=exam)
-    context = update_context_data(exam=exam, **detail_data.get_admin_statistics_context(200))
+    subject_variants = SubjectVariants(_selection='')
+    context = update_context_data(exam=exam, subject_vars_dict=subject_variants.subject_vars_dict)
+    statistics_context = AdminDetailStatisticsContext(_context=context)
+    context = update_context_data(exam=exam, **statistics_context.get_admin_statistics_context())
     return render(request, 'a_official/staff_print_statistics.html', context)
 
 
@@ -182,8 +184,15 @@ def predict_catalog_print(request: HtmxHttpRequest, pk: int):
 @staff_required
 def predict_answer_print(request: HtmxHttpRequest, pk: int):
     exam = get_object_or_404(models.Exam, pk=pk)
-    detail_data = AdminDetailContext(_request=request, _exam=exam)
-    context = update_context_data(exam=exam, **detail_data.answer.get_admin_answer_context(per_page=1000))
+    request_data = RequestData(_request=request)
+    subject_variants = SubjectVariants(_selection='')
+    context = update_context_data(
+        exam=exam,
+        page_number=request_data.page_number,
+        subject_vars_dict=subject_variants.subject_vars_dict
+    )
+    answer_context = AdminDetailAnswerContext(_context=context)
+    context = update_context_data(exam=exam, **answer_context.get_admin_answer_context(per_page=1000))
     return render(request, 'a_official/staff_print_answers.html', context)
 
 
@@ -191,12 +200,6 @@ def predict_answer_print(request: HtmxHttpRequest, pk: int):
 def predict_statistics_excel(_: HtmxHttpRequest, pk: int):
     exam = get_object_or_404(models.Exam, pk=pk)
     return AdminExportExcelData(_exam=exam).get_statistics_response()
-
-
-@staff_required
-def predict_prime_id_excel(_: HtmxHttpRequest, pk: int):
-    exam = get_object_or_404(models.Exam, pk=pk)
-    return AdminExportExcelData(_exam=exam).get_prime_id_response()
 
 
 @staff_required
