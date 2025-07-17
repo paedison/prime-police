@@ -103,8 +103,8 @@ class PredictStudent(abstract_models.Student):
     def student_info(self):
         return f'{self.exam.reference}-{self.serial}-{self.name}'
 
-    def get_admin_detail_student_url(self):
-        return reverse_lazy('official:admin-detail-student', args=['predict', self.id])
+    def get_staff_detail_student_url(self):
+        return reverse_lazy('official:staff-predict-student-detail', args=[self.id])
 
 
 class PredictAnswer(abstract_models.Answer):

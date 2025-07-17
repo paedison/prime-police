@@ -449,6 +449,7 @@ class NormalRegisterData:
             name=form.cleaned_data['name'],
             password=form.cleaned_data['password'],
             selection=form.cleaned_data['selection'],
+            phone_number=form.cleaned_data['phone_number']
         )
 
         if is_created:

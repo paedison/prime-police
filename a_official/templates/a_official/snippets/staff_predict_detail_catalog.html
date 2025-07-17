@@ -8,8 +8,8 @@
                 {% partialdef table_head_1 inline=True %}
                     <th class="text-primary text-nowrap" rowspan="2">등수</th>
                     <th class="text-primary text-nowrap" rowspan="2">이름<hr class="m-0"/>수험번호</th>
-                    <th class="text-primary text-nowrap" rowspan="2">선택과목</th>
-                    <th class="text-primary text-nowrap" rowspan="2">성적 확인</th>
+                    <th class="text-primary text-nowrap" rowspan="2">선택과목<hr class="m-0"/>핸드폰 번호</th>
+                    <th class="text-primary text-nowrap" rowspan="2">성적<br/>확인</th>
 
                     <th class="text-primary text-nowrap" colspan="2">총점</th>
                     <th class="text-primary text-nowrap" colspan="2">형사법</th>
@@ -36,18 +36,17 @@
                 <tr class="text-center">
                     <td class="text-nowrap td-left-no-border">{{ obj.id }}</td>
                     {% partialdef table_body inline=True %}
-                        <td class="text-nowrap">{{ obj.rank_sum }}</td>
+                        <td class="text-nowrap">{{ obj.rank_sum|default:"" }}</td>
                         <td class="text-nowrap">{{ obj.name }}<hr class="m-0"/>{{ obj.serial }}</td>
-                        <td class="text-nowrap">{{ obj.get_selection_display }}</td>
+                        <td class="text-nowrap">
+                            {{ obj.get_selection_display }}<hr class="m-0"/>{{ obj.phone_number|default:"&nbsp;" }}
+                        </td>
 
                         {% partialdef detail_student inline %}
                             <td class="text-nowrap">
                                 <div class="btn-group">
                                     <a target="result" class="btn btn-sm btn-outline-primary"
-                                       href="{{ obj.get_staff_detail_student_url }}">화면
-                                    </a>
-                                    <a target="result_print" class="btn btn-sm btn-outline-primary"
-                                       href="{{ obj.get_staff_detail_student_print_url }}">인쇄
+                                       href="{{ obj.get_staff_detail_student_url }}">확인
                                     </a>
                                 </div>
                             </td>

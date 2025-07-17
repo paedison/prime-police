@@ -160,7 +160,7 @@ def predict_student_detail_view(request: HtmxHttpRequest, pk: int):
     if student:
         student = models.PredictStudent.objects.exam_student_with_answer_count(student.user, student.exam)
         return predict_views.predict_detail_view(request, student.exam.id, student=student)
-    return redirect('exam:admin-predict-list')
+    return redirect('official:staff-predict-list')
 
 
 @staff_required
