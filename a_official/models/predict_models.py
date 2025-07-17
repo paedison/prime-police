@@ -78,7 +78,7 @@ class PredictStatistics(abstract_models.Statistics):
 
 phone_validator = RegexValidator(
     regex=r'^010-\d{4}-\d{4}$',
-    message="전화번호는 '010-1234-5678' 형식으로 저장됩니다."
+    message="'010-1234-5678' 형식으로 입력해주세요."
 )
 
 

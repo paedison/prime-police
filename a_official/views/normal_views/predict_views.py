@@ -42,7 +42,6 @@ def predict_list_view(request: HtmxHttpRequest):
     return render(request, 'a_official/predict_list.html', context)
 
 
-@login_not_required
 def predict_detail_view(request: HtmxHttpRequest, pk: int, student=None):
     current_time = timezone.now()
     config = ViewConfiguration()
@@ -101,17 +100,18 @@ def predict_detail_view(request: HtmxHttpRequest, pk: int, student=None):
     return render(request, 'a_official/predict_detail.html', context)
 
 
-@login_not_required
 def predict_register_view(request: HtmxHttpRequest):
     config = ViewConfiguration()
     form_class = forms.PredictStudentForm
     form = form_class()
-    context = update_context_data(config=config)
+    exam = models.Exam.objects.filter(year=2026).first()
+    context = update_context_data(config=config, exam=exam)
 
+    exam_data = ExamData(_exam=exam)
     redirect_data = NormalRedirect(_request=request, _context=context)
     register_data = NormalRegisterData(_request=request, _context=context, _form=form)
 
-    if register_data.is_not_for_predict:
+    if exam_data.get_is_not_for_predict():
         return redirect_data.redirect_to_no_predict_exam()
     if register_data.has_student:
         return redirect_data.redirect_to_has_student()
@@ -164,7 +164,6 @@ def prepare_exam_context(request: HtmxHttpRequest, pk: int, subject_field: str):
     }, None
 
 
-@login_not_required
 def predict_answer_input_view(request: HtmxHttpRequest, pk: int, subject_field: str):
     result, redirect_response = prepare_exam_context(request, pk, subject_field)
     if redirect_response:
@@ -190,7 +189,6 @@ def predict_answer_input_view(request: HtmxHttpRequest, pk: int, subject_field: 
     return render(request, 'a_official/predict_answer_input.html', context)
 
 
-@login_not_required
 def predict_answer_confirm_view(request: HtmxHttpRequest, pk: int, subject_field: str):
     result, redirect_response = prepare_exam_context(request, pk, subject_field)
     if redirect_response:
@@ -212,36 +210,3 @@ def predict_answer_confirm_view(request: HtmxHttpRequest, pk: int, subject_field
         url_answer_confirm=result['exam'].get_predict_answer_confirm_url(subject_field),
     )
     return render(request, 'a_official/snippets/modal_answer_confirmed.html', context)
-#
-#
-# def predict_answer_confirm_view(request: HtmxHttpRequest, pk: int, subject_field: str):
-#     result, redirect_response = prepare_exam_context(request, pk, subject_field)
-#     if redirect_response:
-#         return redirect_response
-#
-#     temporary_answer_data = TemporaryAnswerData(_request=request, _context=result['context'])
-#     config = ViewConfiguration()
-#     context = update_context_data(config=config)
-#
-#     exam = models.Exam.objects.filter(pk=pk).first()
-#     redirect_data = NormalRedirect(_request=request, _context=context)
-#     answer_data = NormalAnswerConfirmData(_request=request, _exam=exam, _subject_field=subject_field)
-#
-#     if answer_data.is_not_for_predict:
-#         return redirect_data.redirect_to_no_predict_exam()
-#     if answer_data.no_student:
-#         return redirect_data.redirect_to_no_student()
-#
-#     config.url_detail = exam.get_predict_detail_url()
-#     if config.current_time < exam.predict_exam.exam_started_at:
-#         context = update_context_data(context, message='시험 시작 전입니다.', next_url=config.url_detail)
-#         return render(request, 'a_official/redirect.html', context)
-#
-#     answer_data = NormalAnswerConfirmData(_request=request, _exam=exam, _subject_field=subject_field)
-#     if request.method == 'POST':
-#         return answer_data.process_post_request_to_answer_confirm()
-#
-#     context = update_context_data(
-#         url_answer_confirm=exam.get_predict_answer_confirm_url(subject_field),
-#         header=answer_data.get_header(), verifying=True)
-#     return render(request, 'a_official/snippets/modal_answer_confirmed.html', context)

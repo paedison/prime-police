@@ -149,17 +149,5 @@ class PredictStudentForm(forms.ModelForm):
             'serial': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '수험번호'}),
             'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '이름'}),
             'password': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '비밀번호'}),
+            'phone_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '비밀번호'}),
         }
-
-    def clean_phone_number(self):
-        raw = self.cleaned_data['phone_number']
-        return normalize_phone_number(raw)
-
-
-def normalize_phone_number(raw: str) -> str:
-    digits = re.sub(r'\D', '', raw)  # 숫자만 남기기
-    if len(digits) == 11 and digits.startswith('010'):
-        return f"{digits[:3]}-{digits[3:7]}-{digits[7:]}"
-    elif len(digits) == 10 and digits.startswith('10'):
-        return f"010-{digits[2:6]}-{digits[6:]}"  # '10' → '010' 보정
-    raise ValueError("올바른 휴대폰 번호 형식이 아닙니다.")

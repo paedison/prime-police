@@ -423,10 +423,7 @@ class NormalRegisterData:
     _form: forms.PredictStudentForm
 
     def __post_init__(self):
-        self._exam = _model.exam.objects.filter(year=2026).first()
-        self._exam_data = ExamData(_exam=self._exam)
-
-        self.is_not_for_predict = self._exam_data.is_not_for_predict
+        self._exam = self._context['exam']
         self.has_student = _model.student.objects.filter(user=self._request.user, exam=self._exam).exists()
         self.title = f'{self._exam.get_year_display()} 합격예측 수험정보 등록'
 
