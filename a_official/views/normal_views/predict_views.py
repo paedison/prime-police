@@ -34,12 +34,15 @@ def predict_list_view(request: HtmxHttpRequest):
     config = ViewConfiguration()
     list_data = NormalListData(_request=request)
     context = update_context_data(
-        current_time=timezone.now(), config=config,
-        **list_data.get_exams_context(), **list_data.get_login_url_context(),
+        current_time=timezone.now(),
+        config=config,
+        **list_data.get_exams_context(),
+        **list_data.get_login_url_context(),
     )
     return render(request, 'a_official/predict_list.html', context)
 
 
+@login_not_required
 def predict_detail_view(request: HtmxHttpRequest, pk: int, student=None):
     current_time = timezone.now()
     config = ViewConfiguration()
@@ -98,6 +101,7 @@ def predict_detail_view(request: HtmxHttpRequest, pk: int, student=None):
     return render(request, 'a_official/predict_detail.html', context)
 
 
+@login_not_required
 def predict_register_view(request: HtmxHttpRequest):
     config = ViewConfiguration()
     form_class = forms.PredictStudentForm
@@ -160,6 +164,7 @@ def prepare_exam_context(request: HtmxHttpRequest, pk: int, subject_field: str):
     }, None
 
 
+@login_not_required
 def predict_answer_input_view(request: HtmxHttpRequest, pk: int, subject_field: str):
     result, redirect_response = prepare_exam_context(request, pk, subject_field)
     if redirect_response:
@@ -185,6 +190,7 @@ def predict_answer_input_view(request: HtmxHttpRequest, pk: int, subject_field: 
     return render(request, 'a_official/predict_answer_input.html', context)
 
 
+@login_not_required
 def predict_answer_confirm_view(request: HtmxHttpRequest, pk: int, subject_field: str):
     result, redirect_response = prepare_exam_context(request, pk, subject_field)
     if redirect_response:

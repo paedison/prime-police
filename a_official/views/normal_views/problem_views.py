@@ -41,9 +41,9 @@ def problem_list_view(request: HtmxHttpRequest):
     sub_title = utils.get_sub_title(exam_year, exam_subject)
 
     if request.user.is_authenticated:
-        filterset = filters.OfficialFilter(data=request.GET, request=request)
+        filterset = filters.OfficialProblemFilter(data=request.GET, request=request)
     else:
-        filterset = filters.AnonymousOfficialFilter(data=request.GET, request=request)
+        filterset = filters.AnonymousOfficialProblemFilter(data=request.GET, request=request)
 
     custom_data = utils.get_custom_data(request.user)
     page_obj, page_range = utils.get_page_obj_and_range(page, filterset.qs)

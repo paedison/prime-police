@@ -208,7 +208,6 @@ class NormalDetailData:
     _context: dict
 
     def __post_init__(self):
-        self._exam = self._context['exam']
         self._student = self._context['student']
         self._subject_vars_dict = self._context['subject_vars_dict']
         self._subject_vars = self._subject_vars_dict['base']

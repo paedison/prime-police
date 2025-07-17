@@ -1,3 +1,4 @@
+from django.core.validators import RegexValidator
 from django.db import models
 from django.urls import reverse_lazy
 from django.utils import timezone
@@ -75,12 +76,19 @@ class PredictStatistics(abstract_models.Statistics):
         return f'{self.exam.reference} 통계'
 
 
+phone_validator = RegexValidator(
+    regex=r'^010-\d{4}-\d{4}$',
+    message="전화번호는 '010-1234-5678' 형식으로 저장됩니다."
+)
+
+
 class PredictStudent(abstract_models.Student):
     objects = queryset.PredictStudentQuerySet.as_manager()
     exam = models.ForeignKey(Exam, on_delete=models.CASCADE, related_name='predict_students', verbose_name='시험')
     user = models.ForeignKey(
-        User, on_delete=models.SET_NULL, null=True, blank=True, related_name='official_predict_students'
-    )
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name='official_predict_students')
+    phone_number = models.CharField(
+        max_length=13, validators=[phone_validator], null=True, blank=True, verbose_name='휴대폰 번호')
     answer_count = {'형사': 0, '헌법': 0, '경찰': 0, '범죄': 0, '민법': 0, '행법': 0, '행학': 0}
 
     class Meta:

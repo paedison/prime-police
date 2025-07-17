@@ -29,7 +29,7 @@ class AdminListData:
         self.sub_title = request_data.get_sub_title()
         self.view_type = request_data.view_type
         self.page_number = request_data.page_number
-        self.filterset = filters.ExamFilter(data=self._request.GET, request=self._request)
+        self.filterset = filters.OfficialExamFilter(data=self._request.GET, request=self._request)
 
     def get_exam_context(self):
         exam_context = get_paginator_context(self.filterset.qs, self.page_number)

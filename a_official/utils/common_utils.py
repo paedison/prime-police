@@ -24,8 +24,8 @@ class RequestData:
         self.student_name = self._request.GET.get('student_name', '')
 
     def get_filterset(self):
-        problem_filter = filters.OfficialFilter if self._request.user.is_authenticated \
-            else filters.AnonymousOfficialFilter
+        problem_filter = filters.OfficialProblemFilter if self._request.user.is_authenticated \
+            else filters.AnonymousOfficialProblemFilter
         return problem_filter(data=self._request.GET, request=self._request)
 
     def get_sub_title(self, end_string='기출문제') -> str:

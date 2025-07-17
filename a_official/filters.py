@@ -33,7 +33,7 @@ CHOICES_TAG = (
 )
 
 
-class ExamFilter(django_filters.FilterSet):
+class OfficialExamFilter(django_filters.FilterSet):
     year = django_filters.ChoiceFilter(
         field_name='year',
         label='',
@@ -56,7 +56,7 @@ class ExamFilter(django_filters.FilterSet):
         return super().qs.select_related('predict_exam').prefetch_related('problems').order_by('-id')
 
 
-class AnonymousOfficialFilter(django_filters.FilterSet):
+class AnonymousOfficialProblemFilter(django_filters.FilterSet):
     year = django_filters.ChoiceFilter(
         field_name='year',
         label='',
@@ -77,16 +77,16 @@ class AnonymousOfficialFilter(django_filters.FilterSet):
     @property
     def qs(self):
         keyword = self.request.GET.get('keyword', '') or self.request.POST.get('keyword', '')
-        queryset = super().qs.prefetch_related(
+        queryset = super().qs.select_related('exam').prefetch_related(
             'like_users', 'rate_users', 'solve_users', 'memo_users',
             'likes', 'rates', 'solves', 'memos', 'tagged_problems', 'collected_problems',
-        )
+        ).filter(exam__is_active=True)
         if keyword:
             return queryset.filter(data__icontains=keyword)
         return queryset
 
 
-class OfficialFilter(AnonymousOfficialFilter):
+class OfficialProblemFilter(AnonymousOfficialProblemFilter):
     likes = django_filters.ChoiceFilter(
         label='',
         empty_label='[즐겨찾기]',
