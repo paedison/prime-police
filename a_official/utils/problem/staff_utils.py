@@ -1,6 +1,6 @@
 __all__ = [
-    'AdminListData', 'AdminDetailData',
-    'AdminCreateData', 'AdminUpdateData',
+    'AdminListContext', 'AdminDetailContext',
+    'AdminCreateContext', 'AdminUpdateContext',
     'get_custom_data', 'get_custom_icons',
 ]
 
@@ -10,25 +10,24 @@ from dataclasses import dataclass
 
 import pandas as pd
 from PIL import Image
-from django.urls import reverse
 
 from a_common.constants import icon_set
 from a_common.models import User
 from a_common.utils import get_paginator_context, HtmxHttpRequest
 from a_common.utils.modify_models_methods import with_bulk_create_or_update, append_list_create
 from a_official import models, filters, forms
-from a_official.utils.common_utils import RequestData, ExamData, ModelData
+from a_official.utils.common_utils import *
 
 
 @dataclass(kw_only=True)
-class AdminListData:
+class AdminListContext:
     _request: HtmxHttpRequest
 
     def __post_init__(self):
-        request_data = RequestData(_request=self._request)
-        self.sub_title = request_data.get_sub_title()
-        self.view_type = request_data.view_type
-        self.page_number = request_data.page_number
+        request_context = RequestContext(_request=self._request)
+        self.sub_title = request_context.get_sub_title()
+        self.view_type = request_context.view_type
+        self.page_number = request_context.page_number
         self.filterset = filters.OfficialExamFilter(data=self._request.GET, request=self._request)
 
     def get_exam_context(self):
@@ -39,18 +38,18 @@ class AdminListData:
 
 
 @dataclass(kw_only=True)
-class AdminDetailData:
+class AdminDetailContext:
     _request: HtmxHttpRequest
     _exam: models.Exam
 
     def __post_init__(self):
-        request_data = RequestData(_request=self._request)
-        leet_data = ExamData(_exam=self._exam)
+        request_context = RequestContext(_request=self._request)
+        exam_context = ExamContext(_exam=self._exam)
         self._model = ModelData()
-        self.view_type = request_data.view_type
-        self.page_number = request_data.page_number
+        self.view_type = request_context.view_type
+        self.page_number = request_context.page_number
         self.qs_problem = self._model.problem.objects.filtered_problem_by_leet(self._exam)
-        self.subject_vars = leet_data.subject_vars
+        self.subject_vars = exam_context.subject_vars
 
     def get_problem_context(self):
         return get_paginator_context(self.qs_problem, self.page_number)
@@ -66,7 +65,7 @@ class AdminDetailData:
 
 
 @dataclass(kw_only=True)
-class AdminCreateData:
+class AdminCreateContext:
     form: forms.ExamForm
 
     def __post_init__(self):
@@ -87,7 +86,7 @@ class AdminCreateData:
 
 
 @dataclass(kw_only=True)
-class AdminUpdateData:
+class AdminUpdateContext:
     _request: HtmxHttpRequest
     _exam: models.Exam
 

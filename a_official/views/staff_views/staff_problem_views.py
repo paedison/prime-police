@@ -32,14 +32,14 @@ class ViewConfiguration:
 @staff_required
 def problem_list_view(request: HtmxHttpRequest):
     config = ViewConfiguration()
-    list_data = AdminListData(_request=request)
+    list_ctx = AdminListContext(_request=request)
     context = update_context_data(
         config=config,
-        sub_title=list_data.sub_title,
-        exam_form=list_data.filterset.form,
-        exam_context=list_data.get_exam_context()
+        sub_title=list_ctx.sub_title,
+        exam_form=list_ctx.filterset.form,
+        exam_context=list_ctx.get_exam_context(),
     )
-    if list_data.view_type == 'exam_list':
+    if list_ctx.view_type == 'exam_list':
         return render(request, f'a_official/staff_official_list.html#exam_list', context)  # noqa
     return render(request, 'a_official/staff_official_list.html', context)
 
@@ -48,13 +48,13 @@ def problem_list_view(request: HtmxHttpRequest):
 def problem_detail_view(request: HtmxHttpRequest, pk: int):
     config = ViewConfiguration()
     exam = get_object_or_404(models.Exam, pk=pk)
-    detail_data = AdminDetailData(_request=request, _exam=exam)
-    context = update_context_data(config=config, psat=exam, problem_context=detail_data.get_problem_context())
+    detail_ctx = AdminDetailContext(_request=request, _exam=exam)
+    context = update_context_data(config=config, psat=exam, problem_context=detail_ctx.get_problem_context())
 
-    if detail_data.view_type == 'problem_list':
+    if detail_ctx.view_type == 'problem_list':
         return render(request, 'a_official/problem_list_content.html', context)
 
-    context = update_context_data(context, answer_official_context=detail_data.get_answer_official_context())
+    context = update_context_data(context, answer_official_context=detail_ctx.get_answer_official_context())
     return render(request, 'a_official/staff_official_detail.html', context)
 
 
@@ -67,8 +67,7 @@ def official_exam_create_view(request: HtmxHttpRequest):
     if request.method == 'POST':
         form = forms.ExamForm(request.POST, request.FILES)
         if form.is_valid():
-            create_data = AdminCreateData(form=form)
-            create_data.process_post_request()
+            AdminCreateContext(form=form).process_post_request()
             return redirect(config.url_list)
         else:
             context = update_context_data(context, form=form)
@@ -102,8 +101,7 @@ def official_update_view(request: HtmxHttpRequest):
         if form.is_valid():
             year = form.cleaned_data['year']
             exam = get_object_or_404(models.Exam, year=year)
-            update_data = AdminUpdateData(_request=request, _exam=exam)
-            update_data.process_post_request()
+            AdminUpdateContext(_request=request, _exam=exam).process_post_request()
             return redirect(config.url_list)
         else:
             context = update_context_data(context, form=form)

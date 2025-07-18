@@ -1,10 +1,10 @@
 __all__ = [
-    'AdminListContext', 'AdminDetailContext',
+    'AdminListContext', 'AdminDetailProblemContext',
     'AdminDetailStatisticsContext', 'AdminDetailCatalogContext', 'AdminDetailAnswerContext',
-    'AdminCreateData',
+    'AdminCreateContext',
     'AdminUpdateAnswerOfficialContext', 'AdminUpdateScoreContext',
     'AdminUpdateRankContext', 'AdminUpdateStatisticsContext', 'AdminUpdateAnswerCountContext',
-    'AdminExportExcelData',
+    'AdminExportExcelContext',
 ]
 
 from collections import defaultdict
@@ -13,19 +13,20 @@ from dataclasses import dataclass
 import numpy as np
 import pandas as pd
 from django.db.models import Count, F, QuerySet
+from django.shortcuts import redirect
 from scipy.stats import rankdata
 
 from a_common.utils import HtmxHttpRequest, get_paginator_context
 from a_common.utils.export_excel_methods import *
 from a_common.utils.modify_models_methods import *
 from a_official import models, forms
-from a_official.utils.common_utils import RequestData, ModelData, SubjectVariants, get_stat_from_scores
+from a_official.utils.common_utils import *
 
 _model = ModelData()
 
 UPDATE_MESSAGES = {
     'raw_score': get_update_messages('원점수'),
-    'score': get_update_messages('표준점수'),
+    'score': get_update_messages('점수'),
     'rank': get_update_messages('등수'),
     'statistics': get_update_messages('통계'),
     'answer_count': get_update_messages('문항분석표'),
@@ -37,9 +38,9 @@ class AdminListContext:
     _request: HtmxHttpRequest
 
     def __post_init__(self):
-        request_data = RequestData(_request=self._request)
-        self.view_type = request_data.view_type
-        self.page_number = request_data.page_number
+        request_context = RequestContext(_request=self._request)
+        self.view_type = request_context.view_type
+        self.page_number = request_context.page_number
 
     def get_predict_exam_context(self):
         predict_exam_list = models.PredictExam.objects.select_related('exam')
@@ -47,23 +48,18 @@ class AdminListContext:
 
 
 @dataclass(kw_only=True)
-class AdminDetailContext:
+class AdminDetailProblemContext:
     _request: HtmxHttpRequest
     _context: dict
 
-    def __post_init__(self):
-        self._exam = self._context['exam']
-        self._qs_problem = _model.problem.objects.filtered_problem_by_exam(self._exam)
-
     def get_problem_context(self):
-        return {'problem_context': get_paginator_context(self._qs_problem, self._context['page_number'])}
+        return get_paginator_context(self._context['qs_problem'], self._context['page_number'])
 
     def get_answer_predict_context(self):
-        qs_answer_count = _model.ac_all.objects.filtered_by_exam_and_subject(self._exam)
-        return {'answer_predict_context': self.get_answer_dict(qs_answer_count)}
+        return self.get_answer_dict(self._context['qs_answer_count'])
 
     def get_answer_official_context(self):
-        return {'answer_official_context': self.get_answer_dict(self._qs_problem)}
+        return self.get_answer_dict(self._context['qs_problem'])
 
     def get_answer_dict(self, queryset: QuerySet) -> dict:
         subject_vars = self._context['subject_vars_dict']['base']
@@ -80,7 +76,7 @@ class AdminDetailContext:
 class AdminDetailStatisticsContext:
     _context: dict
 
-    def get_admin_statistics_context(self) -> dict:
+    def get_statistics_context(self) -> dict:
         exam = self._context['exam']
         subject_vars_sum_first = self._context['subject_vars_dict']['sum_first']
         qs_statistics = _model.statistics.objects.select_related('exam').filter(exam=exam).first()
@@ -91,14 +87,14 @@ class AdminDetailStatisticsContext:
             statistics_context[sub]['field'] = fld
             statistics_context[sub]['subject'] = subject
 
-        return {'statistics_context': statistics_context}
+        return statistics_context
 
 
 @dataclass(kw_only=True)
 class AdminDetailCatalogContext:
     _context: dict
 
-    def get_admin_catalog_context(self, for_search=False) -> dict:
+    def get_catalog_context(self, for_search=False) -> dict:
         exam = self._context['exam']
         page_number = self._context['page_number']
         student_name = self._context['student_name']
@@ -113,7 +109,7 @@ class AdminDetailCatalogContext:
                 self.update_page_obj(obj)
 
         catalog_context.update({'id': '0', 'title': '전체', 'prefix': 'Catalog', 'header': 'catalog_list'})
-        return {'catalog_context': catalog_context}
+        return catalog_context
 
     def update_page_obj(self, obj):
         rank_model = _model.rank
@@ -146,7 +142,7 @@ class AdminDetailCatalogContext:
 class AdminDetailAnswerContext:
     _context: dict
 
-    def get_admin_answer_context(self, for_pagination=False, per_page=10) -> dict:
+    def get_answer_context(self, for_pagination=False, per_page=10) -> dict:
         subject_vars = self._context['subject_vars_dict']['base']
         sub_list = [sub for sub in subject_vars]
         qs_answer_count_group = {sub: [] for sub in subject_vars}
@@ -173,7 +169,7 @@ class AdminDetailAnswerContext:
                 })
                 answer_context[sub] = context
 
-        return {'answer_context': answer_context}
+        return answer_context
 
     def get_answer_data(self, qs_answer_count: QuerySet) -> QuerySet:
         subject_vars = self._context['subject_vars_dict']['base']
@@ -206,17 +202,18 @@ class AdminDetailAnswerContext:
 
 
 @dataclass(kw_only=True)
-class AdminCreateData:
-    _form: forms.PredictExamForm
+class AdminCreateContext:
+    _context: dict
 
     def __post_init__(self):
-        year = self._form.cleaned_data['year']
-        self._exam = _model.exam.objects.get(year=year)
+        self._form = self._context['form']
+        self._exam = _model.exam.objects.get(year=self._form.cleaned_data['year'])
 
     def process_post_request(self):
         self.create_predict_exam_model_instance()
         _model.statistics.objects.get_or_create(exam=self._exam)
         self.create_answer_count_model_instances()
+        return redirect(self._context['config'].url_list)
 
     def create_predict_exam_model_instance(self):
         predict_exam, _ = _model.predict_exam.objects.get_or_create(exam=self._exam)
@@ -241,10 +238,11 @@ class AdminCreateData:
 @dataclass(kw_only=True)
 class AdminUpdateAnswerOfficialContext:
     _request: HtmxHttpRequest
-    _exam: models.Exam
+    _context: dict
 
     def update_problem_model_for_answer_official(self) -> tuple[bool | None, str]:
         problem_model = _model.problem
+        exam = self._context['exam']
         message_dict = {
             None: '에러가 발생했습니다.',
             True: '정답을 업데이트했습니다.',
@@ -264,12 +262,12 @@ class AdminUpdateAnswerOfficialContext:
                 for number, answer in rows.items():
                     if answer:
                         try:
-                            problem = problem_model.objects.get(exam=self._exam, subject=subject[0:2], number=number)
+                            problem = problem_model.objects.get(exam=exam, subject=subject[0:2], number=number)
                             if problem.answer != answer:
                                 problem.answer = answer
                                 list_update.append(problem)
                         except problem_model.DoesNotExist:
-                            problem = problem_model(exam=self._exam, subject=subject, number=number, answer=answer)
+                            problem = problem_model(exam=exam, subject=subject, number=number, answer=answer)
                             list_create.append(problem)
                         except ValueError as error:
                             print(error)
@@ -291,12 +289,15 @@ class AdminUpdateScoreContext:
 
     @with_bulk_create_or_update()
     def update_score_model(self):
+        exam = self._context['exam']
         subject_vars = self._context['subject_vars_dict']['base']
-        qs_student = _model.student.objects.filter(exam=self._context['exam']).order_by('id')
+        subject_fields_sum = self._context['subject_fields_dict']['sum_first']
+
         score_model = _model.score
         answer_model = _model.answer
-        list_create, list_update = [], []
 
+        list_create, list_update = [], []
+        qs_student = _model.student.objects.filter(exam=exam).order_by('id')
         for qs_s in qs_student:
             original_score_instance, _ = score_model.objects.get_or_create(student=qs_s)
 
@@ -325,9 +326,7 @@ class AdminUpdateScoreContext:
                 original_score_instance.sum = score_sum
                 list_update.append(original_score_instance)
 
-        update_fields = [
-            'subject_0', 'subject_1', 'subject_2', 'subject_3', 'subject_4', 'subject_5', 'subject_6', 'sum']
-        return score_model, list_create, list_update, update_fields
+        return score_model, list_create, list_update, subject_fields_sum
 
 
 @dataclass(kw_only=True)
@@ -342,14 +341,14 @@ class AdminUpdateRankContext:
     def update_rank_model(self):
         exam = self._context['exam']
         subject_fields_sum = self._context['subject_fields_dict']['sum_first']
+
         rank_model = _model.rank
         qs_rank = rank_model.objects.filter(student__exam=exam)
         qs_rank_dict = {qs_r.student: qs_r for qs_r in qs_rank}
-        qs_student = _model.student.objects.filtered_student_by_exam(exam)
 
         list_create, list_update = [], []
-        subject_fields_sum = [f'{fld}' for fld in subject_fields_sum]
 
+        qs_student = _model.student.objects.filtered_student_by_exam(exam)
         score_np_data_dict = self.get_score_np_data_dict_for_rank(qs_student)
         for qs_s in qs_student:
             rank_obj_exists = True
@@ -367,14 +366,13 @@ class AdminUpdateRankContext:
                 need_to_append = False
                 for fld in subject_fields_sum:
                     score = getattr(qs_s.score, fld)
-                    if np.size(score_np_data_dict[fld]):
+                    if hasattr(rank_obj, fld) and np.size(score_np_data_dict[fld]) and score:
                         idx = np.where(score_np_data_dict[fld] == score)[0][0]
                         new_rank = int(ranks[fld][idx])
-                        if hasattr(rank_obj, fld):
-                            if getattr(rank_obj, fld) != new_rank or getattr(rank_obj, 'participants') != participants:
-                                need_to_append = True
-                                setattr(rank_obj, fld, new_rank)
-                                setattr(rank_obj, 'participants', participants)
+                        if getattr(rank_obj, fld) != new_rank or getattr(rank_obj, 'participants') != participants:
+                            need_to_append = True
+                            setattr(rank_obj, fld, new_rank)
+                            setattr(rank_obj, 'participants', participants)
                 if need_to_append:
                     target_list.append(rank_obj)
 
@@ -406,10 +404,8 @@ class AdminUpdateRankContext:
     def get_score_np_data_dict_for_rank(self, qs_student) -> dict[str: np.array]:
         subject_fields_sum = self._context['subject_fields_dict']['sum_first']
 
-        score_dict = {}
+        score_dict = {fld: [] for fld in subject_fields_sum}
         for field in subject_fields_sum:
-            if field not in score_dict:
-                score_dict[field] = []
             for qs_s in qs_student:
                 score = getattr(qs_s.score, field)
                 if score is not None:
@@ -428,7 +424,6 @@ class AdminUpdateStatisticsContext:
 
     def __post_init__(self):
         self._exam = self._context['exam']
-        self._subject_vars_sum = self._context['subject_vars_dict']['sum_first']
         self._subject_fields_sum = self._context['subject_fields_dict']['sum_first']
 
     @with_update_message(UPDATE_MESSAGES['statistics'])
@@ -454,24 +449,31 @@ class AdminUpdateStatisticsContext:
         return statistics_model, list_create, list_update, self._subject_fields_sum
 
     def get_data_statistics(self) -> dict:
+        subject_vars_sum = self._context['subject_vars_dict']['sum_first']
         qs_score = (
             _model.score.objects.filter(student__exam=self._exam).order_by('student')
             .values(*self._subject_fields_sum)
         )
-        score_df = pd.DataFrame(qs_score)
-        participants_sum = min([score_df[score_df[f'subject_{fld_idx}'] >= 0].shape[0] for fld_idx in range(4)])
+
+        df = pd.DataFrame(qs_score)
+        df_dict = {fld: df[df[fld] != 0][[fld]].dropna() for fld in self._subject_fields_sum}
+
+        participants_sum = min(
+            participants for fld_idx in range(7)
+            if (participants := df_dict[f'subject_{fld_idx}'].shape[0])
+        )
 
         data_statistics = {}
-        for sub, (subject, fld, _, problem_count, _) in self._subject_vars_sum.items():
-            participants = participants_sum if fld == 'sum' else score_df[score_df[fld] >= 0].shape[0]
+        for sub, (subject, fld, _, problem_count, _) in subject_vars_sum.items():
+            df_fld = df_dict[fld]
+            participants = participants_sum if fld == 'sum' else df_fld.shape[0]
 
+            scores_stat = dict(max=0, t10=0, t25=0, t50=0, avg=0)
             if participants:
-                score_np = score_df[[fld]].to_numpy()
+                score_np = df_fld.to_numpy()
                 if score_np.size > 0:
                     scores_stat = get_stat_from_scores(score_np)
-                    data_statistics[fld] = dict(sub=sub, subject=subject, participants=participants, **scores_stat)
-            else:
-                data_statistics[fld] = dict(sub=sub, subject=subject, participants=0, max=0, t10=0,t25=0, t50=0, avg=0)
+            data_statistics[fld] = dict(sub=sub, subject=subject, participants=participants, **scores_stat)
 
         return data_statistics
 
@@ -482,12 +484,7 @@ class AdminUpdateAnswerCountContext:
 
     @with_update_message(UPDATE_MESSAGES['answer_count'])
     def update_answer_counts(self):
-        return [
-            self.update_answer_count_model(_model.ac_all),
-            self.update_answer_count_model(_model.ac_top),
-            self.update_answer_count_model(_model.ac_mid),
-            self.update_answer_count_model(_model.ac_low),
-        ]
+        return [self.update_answer_count_model(model) for model in _model.ac_model_set.values()]
 
     @with_bulk_create_or_update()
     def update_answer_count_model(self, ac_model):
@@ -523,13 +520,13 @@ class AdminUpdateAnswerCountContext:
 
         count_fields = ['count_0', 'count_1', 'count_2', 'count_3', 'count_4', 'count_multiple']
         for problem_id, answer_distribution in answer_distribution_dict.items():
-            answers = {f'count_multiple': 0}
+            answers = {'count_multiple': 0}
             for ans, cnt in answer_distribution.items():
                 if ans <= 4:
                     answers[f'count_{ans}'] = cnt
                 else:
-                    answers[f'count_multiple'] = cnt
-            answers[f'count_sum'] = sum(answers[fld] for fld in count_fields)
+                    answers['count_multiple'] = cnt
+            answers['count_sum'] = sum(answers[fld] for fld in count_fields)
 
             try:
                 instance = ac_model.objects.get(problem_id=problem_id)
@@ -540,15 +537,13 @@ class AdminUpdateAnswerCountContext:
                     list_update.append(instance)
             except ac_model.DoesNotExist:
                 list_create.append(ac_model(problem_id=problem_id, **answers))
-        update_fields = [
-            'problem_id', f'count_0', 'count_1', 'count_2', 'count_3', 'count_4',
-            'count_multiple', 'count_sum',
-        ]
+
+        update_fields = count_fields + ['count_sum']
         return ac_model, list_create, list_update, update_fields
 
 
 @dataclass(kw_only=True)
-class AdminExportExcelData:
+class AdminExportExcelContext:
     _exam: models.Exam
 
     def __post_init__(self):

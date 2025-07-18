@@ -1,17 +1,45 @@
+__all__ = [
+    'RequestContext', 'ModelData', 'SubjectVariants', 'ExamContext', 'RedirectContext',
+    'get_stat_from_scores',
+    'get_prev_next_obj', 'get_page_obj_and_range', 'get_sub_title', 'get_prev_next_prob',
+    'get_list_data', 'get_custom_data',
+]
+
 from dataclasses import dataclass
 from datetime import timedelta
 
 import numpy as np
 from django.core.paginator import Paginator
+from django.shortcuts import render
 from django.utils import timezone
 
 from a_common.models import User
-from a_common.utils import HtmxHttpRequest
+from a_common.utils import HtmxHttpRequest, update_context_data
 from a_official import filters, models
 
 
 @dataclass(kw_only=True)
-class RequestData:
+class ModelData:
+    def __post_init__(self):
+        self.exam = models.Exam
+        self.problem = models.Problem
+
+        self.predict_exam = models.PredictExam
+        self.statistics = models.PredictStatistics
+        self.student = models.PredictStudent
+        self.answer = models.PredictAnswer
+        self.score = models.PredictScore
+
+        self.rank = models.PredictRank
+        self.ac_all = models.PredictAnswerCount
+        self.ac_top = models.PredictAnswerCountTopRank
+        self.ac_mid = models.PredictAnswerCountMidRank
+        self.ac_low = models.PredictAnswerCountLowRank
+        self.ac_model_set = {'all': self.ac_all, 'top': self.ac_top, 'mid': self.ac_mid, 'low': self.ac_low}
+
+
+@dataclass(kw_only=True)
+class RequestContext:
     _request: HtmxHttpRequest
 
     def __post_init__(self):
@@ -47,27 +75,7 @@ class RequestData:
 
 
 @dataclass(kw_only=True)
-class ModelData:
-    def __post_init__(self):
-        self.exam = models.Exam
-        self.problem = models.Problem
-
-        self.predict_exam = models.PredictExam
-        self.statistics = models.PredictStatistics
-        self.student = models.PredictStudent
-        self.answer = models.PredictAnswer
-        self.score = models.PredictScore
-
-        self.rank = models.PredictRank
-        self.ac_all = models.PredictAnswerCount
-        self.ac_top = models.PredictAnswerCountTopRank
-        self.ac_mid = models.PredictAnswerCountMidRank
-        self.ac_low = models.PredictAnswerCountLowRank
-        self.ac_model_set = {'all': self.ac_all, 'top': self.ac_top, 'mid': self.ac_mid, 'low': self.ac_low}
-
-
-@dataclass(kw_only=True)
-class ExamData:
+class ExamContext:
     _exam: models.Exam
 
     def __post_init__(self):
@@ -75,20 +83,7 @@ class ExamData:
         self.subject_fields, self.subject_fields_sum, self.subject_fields_sum_first = self.get_subject_fields_all()
         self.sub_list = [sub for sub in self.subject_vars]
 
-        has_predict = self.get_has_predict()
-        self.predict_exam = self._exam.predict_exam if has_predict else None
-        self.time_schedule = self.get_time_schedule() if has_predict else {}
-        self.is_not_for_predict = self.get_is_not_for_predict()
-        self.before_exam_start = self.get_before_exam_start()
-
-    def get_exam(self):
-        return self._exam
-
-    def get_has_predict(self):
-        if hasattr(self._exam, 'predict_exam'):
-            return all([self._exam, self._exam.predict_exam.is_active])
-
-    def get_is_not_for_predict(self):
+    def is_not_for_predict(self):
         return any([
             not self._exam,
             not hasattr(self._exam, 'predict_exam'),
@@ -96,11 +91,7 @@ class ExamData:
         ])
 
     def get_before_exam_start(self):
-        current_time = timezone.now()
-        before_exam_start = True
-        if not self.is_not_for_predict:
-            before_exam_start = current_time < self._exam.predict_exam.exam_started_at
-        return before_exam_start
+        return timezone.now() < self._exam.predict_exam.exam_started_at
 
     @staticmethod
     def get_subject_vars_all():
@@ -125,10 +116,11 @@ class ExamData:
         return subject_fields, subject_fields_sum, subject_fields_sum_first
 
     def get_time_schedule(self) -> dict:
-        start_time = self.predict_exam.exam_started_at  # 시험 시작
+        predict_exam = self._exam.predict_exam
+        start_time = predict_exam.exam_started_at  # 시험 시작
         exam_1_end_time = start_time + timedelta(minutes=80)  # 1교시 종료
         exam_2_start_time = exam_1_end_time + timedelta(minutes=30)  # 2교시 시작
-        finish_time = self.predict_exam.exam_finished_at  # 시험 종료
+        finish_time = predict_exam.exam_finished_at  # 시험 종료
         return {
             '형사': (start_time, exam_1_end_time),
             '헌법': (start_time, exam_1_end_time),
@@ -202,6 +194,42 @@ class SubjectVariants:
             'sum_last': self.subject_fields_sum,
             'sum_first': self.subject_fields_sum_first
         }
+
+
+@dataclass(kw_only=True)
+class RedirectContext:
+    _request: HtmxHttpRequest
+    _context: dict
+
+    def redirect_to_no_predict_exam(self):
+        next_url = self._context['config'].url_list
+        context = update_context_data(
+            self._context, message='합격 예측 대상 시험이 아닙니다.', next_url=next_url)
+        return render(self._request, 'a_official/redirect.html', context)
+
+    def redirect_to_has_student(self):
+        next_url = self._context['config'].url_list
+        context = update_context_data(
+            self._context, message='등록된 수험정보가 존재합니다.', next_url=next_url)
+        return render(self._request, 'a_official/redirect.html', context)
+
+    def redirect_to_no_student(self):
+        next_url = self._context['config'].url_list
+        context = update_context_data(
+            self._context, message='등록된 수험정보가 없습니다.', next_url=next_url)
+        return render(self._request, 'a_official/redirect.html', context)
+
+    def redirect_to_before_exam_start(self):
+        next_url = self._context['config'].url_detail
+        context = update_context_data(
+            self._context, message='시험 시작 전입니다.', next_url=next_url)
+        return render(self._request, 'a_official/redirect.html', context)
+
+    def redirect_to_already_submitted(self):
+        next_url = self._context['config'].url_detail
+        context = update_context_data(
+            self._context, message='이미 답안을 제출하셨습니다.', next_url=next_url)
+        return render(self._request, 'a_official/redirect.html', context)
 
 
 def get_prev_next_obj(pk, custom_data) -> tuple:

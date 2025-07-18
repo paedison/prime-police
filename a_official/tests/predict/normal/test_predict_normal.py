@@ -140,10 +140,10 @@ def test_answer_input_page_success(logged_client: Client, student_fixture: dict)
             student_fixture['urls'][f'answer_input_{field_idx}'],
             data={'number': number, 'answer': answer},
         )
-        assert 'answer_data_set' in response.client.cookies
+        assert 'total_answer_set' in response.client.cookies
 
-        answer_data_set = json.loads(response.client.cookies.get('answer_data_set').value)
-        assert answer_data_set[subject_fld][number - 1] == answer
+        total_answer_set = json.loads(response.client.cookies.get('total_answer_set').value)
+        assert total_answer_set[subject_fld][number - 1] == answer
 
 
 # Test Answer Confirm Page
@@ -179,8 +179,8 @@ def test_answer_confirm_page_after_exam_1_end(logged_client: Client, student_fix
     student = student_fixture['student']
 
     with freeze_time(time_schedule[f'after_exam_1_end']):
-        answer_data_set = {subject_fld: [random.randint(1, 4) for _ in range(problem_count)]}
-        logged_client.cookies['answer_data_set'] = json.dumps(answer_data_set)
+        total_answer_set = {subject_fld: [random.randint(1, 4) for _ in range(problem_count)]}
+        logged_client.cookies['total_answer_set'] = json.dumps(total_answer_set)
 
         response = logged_client.post(student_fixture['urls'][f'answer_confirm_{field_idx}'])
         assert response.status_code == 200
