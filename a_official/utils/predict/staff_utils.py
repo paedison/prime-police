@@ -593,7 +593,10 @@ class AdminExportExcelContext:
             column_list.append(f'rank_{sub_type}')
         df = pd.DataFrame.from_records(student_list.values(*column_list))
         df['created_at'] = df['created_at'].dt.tz_convert('Asia/Seoul').dt.tz_localize(None)
-        df['latest_answer_time'] = df['latest_answer_time'].dt.tz_convert('Asia/Seoul').dt.tz_localize(None)
+        df['latest_answer_time'] = pd.to_datetime(df['latest_answer_time'], errors='coerce')
+        df['latest_answer_time'] = df['latest_answer_time'].apply(
+            lambda x: x.tz_localize('UTC').tz_convert('Asia/Seoul').tz_localize(None) if pd.notnull(x) else pd.NaT
+        )
 
         drop_columns = []
         column_label = [
