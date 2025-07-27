@@ -585,7 +585,7 @@ class AdminExportExcelContext:
     def get_catalog_df_for_excel(self, student_list: QuerySet) -> pd.DataFrame:
         column_list = [
             'id', 'exam_id', 'user_id',
-            'name', 'serial', 'password',
+            'name', 'serial', 'password', 'phone_number',
             'created_at', 'latest_answer_time', 'answer_count', 'participants',
         ]
         for sub_type in ['sum', '0', '1', '2', '3', '4', '5', '6']:
@@ -594,14 +594,12 @@ class AdminExportExcelContext:
         df = pd.DataFrame.from_records(student_list.values(*column_list))
         df['created_at'] = df['created_at'].dt.tz_convert('Asia/Seoul').dt.tz_localize(None)
         df['latest_answer_time'] = pd.to_datetime(df['latest_answer_time'], errors='coerce')
-        df['latest_answer_time'] = df['latest_answer_time'].apply(
-            lambda x: x.tz_localize('UTC').tz_convert('Asia/Seoul').tz_localize(None) if pd.notnull(x) else pd.NaT
-        )
+        df['latest_answer_time'] = df['latest_answer_time'].dt.tz_convert('Asia/Seoul').dt.tz_localize(None)
 
         drop_columns = []
         column_label = [
             ('DB정보', 'ID'), ('DB정보', '시험ID'), ('DB정보', '사용자 ID'),
-            ('수험정보', '이름'), ('수험정보', '수험번호'), ('수험정보', '비밀번호'),
+            ('수험정보', '이름'), ('수험정보', '수험번호'), ('수험정보', '비밀번호'), ('수험정보', '핸드폰번호'),
             ('답안정보', '등록일시'), ('답안정보', '최종답안 등록일시'), ('답안정보', '제출 답안수'), ('답안정보', '총 인원'),
         ]
         for (subject, _, _, _, _) in self._subject_vars_sum_first.values():
