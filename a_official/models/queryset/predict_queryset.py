@@ -68,11 +68,16 @@ class PredictStudentQuerySet(models.QuerySet):
     def filtered_student_by_exam(self, exam):
         return (
             self.annotate_score_and_rank()
-            .select_related('exam', 'score', 'rank').filter(exam=exam).order_by('rank__sum')
+            .select_related('exam', 'score', 'rank').filter(exam=exam)
             .annotate(
+                has_rank_sum=models.Case(
+                    models.When(rank__sum__isnull=False, then=models.Value(0)),
+                    default=models.Value(1),
+                    output_field=models.IntegerField(),
+                ),
                 latest_answer_time=models.Max('answers__created_at'),
                 answer_count=models.Count('answers'),
-            )
+            ).order_by('has_rank_sum', 'rank__sum')
         )
 
     def exam_student_with_answer_count(self, user, exam):
