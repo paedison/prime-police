@@ -25,7 +25,7 @@ from a_common.models import User
 
 
 def semester_default():
-    return 75
+    return 76
 
 
 def answer_default():
@@ -128,7 +128,7 @@ class BaseProblemTaggedItem(TaggedItemBase):
 
 
 class BaseProblem(models.Model):
-    semester = models.IntegerField(choices=semester_choice, default=semester_default(), verbose_name='기수')
+    semester = models.IntegerField(choices=semester_choice, default=semester_default, verbose_name='기수')
     circle = models.IntegerField(choices=circle_choice, default=1, verbose_name='순환')
     subject = models.CharField(max_length=2, choices=subject_choice, default='형사', verbose_name='과목')
     round = models.IntegerField(choices=round_choice, default=1, verbose_name='회차')
