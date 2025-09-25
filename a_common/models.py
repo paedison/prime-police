@@ -29,6 +29,10 @@ class User(auth_models.AbstractBaseUser, auth_models.PermissionsMixin):
     email = models.EmailField(max_length=255, unique=True, verbose_name='이메일')
     name = models.CharField(max_length=10, default='', verbose_name='이름')
     prime_id = models.CharField(max_length=20, default='', verbose_name='프라임법학원 아이디')
+    serial = models.CharField(
+        max_length=8, default='', verbose_name='응시번호',
+        help_text='핸드폰 번호에서 010을 제외한 나머지 8자리를 입력해주세요',
+    )
     joined_at = models.DateTimeField(default=timezone.now, verbose_name='가입일')
     is_active = models.BooleanField(
         help_text='이 사용자가 활성화되어 있는지를 나타냅니다. 계정을 삭제하는 대신 이 옵션을 해제하세요.',

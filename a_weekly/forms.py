@@ -44,3 +44,34 @@ class ExamForm(forms.ModelForm):
             'round': forms.Select(attrs={'class': 'form-select'}),
             'opened_at': forms.DateTimeInput(attrs={'class': 'form-control'}),
         }
+
+
+class OfflineAnswerInputForm(forms.Form):
+    semester = forms.ChoiceField(
+        choices=models.semester_choice(),
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        label='기수',
+        required=True,
+    )
+    circle = forms.ChoiceField(
+        choices=models.circle_choice(),
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        label='순환',
+        required=True,
+    )
+    subject = forms.ChoiceField(
+        choices=models.subject_choice(),
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        label='과목',
+        required=True,
+    )
+    round = forms.ChoiceField(
+        choices=models.round_choice(),
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        label='회차',
+        required=True,
+    )
+    answer_file = forms.FileField(
+        label='답안 파일',
+        widget=forms.FileInput(attrs={'class': 'form-control'})
+    )

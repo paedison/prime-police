@@ -46,6 +46,29 @@
     <section class="section htmx-fade-in htmx-fade-out"
              hx-target="#main" hx-swap="innerHTML swap:0.25s show:window:top">
         <div class="row">
+            <div class="col-12" aria-label="{{ config.menu_title.kor }} 오프라인 답안">
+                <div class="card">
+                    <div class="card-header">{{ config.menu_title.kor }} 오프라인 답안</div>
+
+                    <div class="card-body htmx-fade-in htmx-fade-out">
+                        <div class="row flex-column flex-md-row-reverse">
+                            <div id="examFilter"
+                                 class="col-12 col-md-4 accordion htmx-fade-in htmx-fade-out">
+                            </div>
+
+                            <div id="examContent" class="col-12 col-md-8 htmx-fade-in htmx-fade-out">
+                                <button class="btn btn-primary" hx-get="{{ config.url_offline_answer_input  }}">답안 자료 추가</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section htmx-fade-in htmx-fade-out"
+             hx-target="#main" hx-swap="innerHTML swap:0.25s show:window:top">
+        <div class="row">
             <div class="col-12" aria-label="데일리테스트 목록">
                 <div id="examCard" class="card">
                     <div id="examCardHeader" class="card-header">

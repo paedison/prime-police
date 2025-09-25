@@ -15,6 +15,7 @@ class AnswerConfiguration:
     url_admin_problem_list = reverse_lazy('admin:a_weekly_problem_changelist')
     url_list = reverse_lazy('weekly:staff-menu')
     url_exam_create = reverse_lazy('weekly:staff-exam-create')
+    url_offline_answer_input = reverse_lazy('weekly:staff-offline-answer-input')
 
     def __init__(self, staff_answer_detail=False):
         self.staff_answer_detail = staff_answer_detail
@@ -28,6 +29,11 @@ def menu_list_view(request):
 def exam_create_view(request):
     config = AnswerConfiguration()
     return staff_views.exam_create_view(request, models, forms, config)
+
+
+def offline_answer_input_view(request):
+    config = AnswerConfiguration()
+    return staff_views.offline_answer_input_view(request, models, forms, config)
 
 
 def answer_update_view(request, pk: int):

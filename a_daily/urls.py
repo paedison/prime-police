@@ -31,6 +31,7 @@ staff_patterns = [
     path('create/exam/', staff_views.exam_create_view, name='staff-exam-create'),
     path('answer/<int:pk>/', staff_views.answer_detail_view, name='staff-answer-detail'),
     path('answer/update/<int:pk>/', staff_views.answer_update_view, name='staff-answer-update'),
+    path('offline/answer/input/', staff_views.offline_answer_input_view, name='staff-offline-answer-input'),
 ]
 
 urlpatterns = [

@@ -5,9 +5,11 @@ from django.db.models import F
 from django.shortcuts import render, redirect, get_object_or_404
 from django_htmx.http import replace_url
 
+from a_common.models import User
 from .. import utils
 from ..constants import icon_set
 from ..decorators import staff_required
+from ..utils import bulk_create_or_update
 
 
 @staff_required
@@ -44,7 +46,7 @@ def exam_create_view(request: utils.HtmxHttpRequest, models, forms, config):
             exam = form.save()
             exam_info = {
                 'semester': exam.semester, 'circle': exam.circle,
-                'subject': exam. subject, 'round': exam.round,
+                'subject': exam.subject, 'round': exam.round,
             }
             answer_file = request.FILES['answer_file']
             df = pd.read_excel(answer_file, sheet_name='정답', header=0, index_col=0)
@@ -143,3 +145,76 @@ def answer_detail_view(request: utils.HtmxHttpRequest, pk: int, models, config):
         icon_nav=icon_set.ICON_NAV, icon_board=icon_set.ICON_BOARD,
     )
     return render(request, 'a_common/prime_test/staff_answer_detail.html', context)
+
+
+@staff_required
+def offline_answer_input_view(request: utils.HtmxHttpRequest, models, forms, config):
+    if request.method == 'POST':
+        form = forms.OfflineAnswerInputForm(request.POST, request.FILES)
+        if form.is_valid():
+            users = User.objects.values('id', 'serial')
+            user_map = {user['serial']: user['id'] for user in users if user['serial']}
+
+            exam_info = {
+                'semester': form.cleaned_data['semester'],
+                'circle': form.cleaned_data['circle'],
+                'subject': form.cleaned_data['subject'],
+                'round': form.cleaned_data['round'],
+            }
+            print(exam_info)
+
+            answer_file = request.FILES['answer_file']
+            df = pd.read_excel(answer_file, header=0, index_col=0)
+            df = df.infer_objects(copy=False)
+            df.fillna(value=0, inplace=True)
+
+            first_part = [i for i in range(1, 21)]
+            second_part = [i for i in range(21, 41)]
+
+            # 결과 리스트 만들기
+            row_lists = []
+            for index, row in df.iterrows():
+                # 1~20번 열: 결측값은 0으로 채움
+                part1 = [row.get(col, 0) if pd.notnull(row.get(col)) else 0 for col in first_part]
+
+                # 21~40번 열: 결측값은 제외
+                part2 = [row[col] for col in second_part if pd.notnull(row.get(col))]
+
+                # 인덱스 포함한 리스트로 결합
+                combined = [index] + part1 + part2
+                row_lists.append(combined)
+
+            list_update = []
+            list_create = []
+
+            for row in row_lists:
+                serial = str(row[0])
+                answer = row[1:]
+
+                if serial in user_map:
+                    user_id = user_map[serial]
+                    try:
+                        student = models.Student.objects.get(**exam_info)
+                        old_answer = ','.join(map(str, student.answer_student))
+                        new_answer = ','.join(map(str, answer))
+                        if old_answer != new_answer:
+                            student.answer_student = answer
+                            list_update.append(student)
+                    except models.Student.DoesNotExist:
+                        student = models.Student(
+                            **exam_info, user_id=user_id, answer_student=answer, answer_confirmed=True)
+                        list_create.append(student)
+                    except ValueError as error:
+                        print(error)
+            update_fields = ['answer_student']
+            bulk_create_or_update(models.Student, list_create, list_update, update_fields)
+
+            response = redirect('daily:staff-menu')
+            return replace_url(response, config.url_list)
+        else:
+            context = utils.update_context_data(config=config, form=form)
+            return render(request, 'a_common/prime_test/staff_offline_answer_input.html', context)
+
+    form = forms.OfflineAnswerInputForm()
+    context = utils.update_context_data(config=config, form=form)
+    return render(request, 'a_common/prime_test/staff_offline_answer_input.html', context)

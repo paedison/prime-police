@@ -14,10 +14,17 @@ class LoginForm(allauth_forms.LoginForm):
 class SignupForm(allauth_forms.SignupForm):
     name = forms.CharField(
         label='이름', max_length=10, required=True,
-        widget=forms.TextInput(attrs={'placeholder': '이름', 'class': 'form-control'}))
+        widget=forms.TextInput(attrs={'placeholder': '이름', 'class': 'form-control'})
+    )
     prime_id = forms.CharField(
         label='프라임법학원 아이디', max_length=20, required=True,
-        widget=forms.TextInput(attrs={'placeholder': '프라임법학원 아이디', 'class': 'form-control'}))
+        widget=forms.TextInput(attrs={'placeholder': '프라임법학원 아이디', 'class': 'form-control'})
+    )
+    serial = forms.CharField(
+        label='응시번호', max_length=8, required=True,
+        help_text='핸드폰 번호에서 010을 제외한 나머지 8자리를 입력해주세요',
+        widget=forms.TextInput(attrs={'placeholder': '프라임법학원 아이디', 'class': 'form-control'})
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
